@@ -1,0 +1,594 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: 'https://www.mycare-api/api/v1/'
+info:
+  version: 1.0.0
+  title: Blockchain Api
+  description: This is API spec for MyCare v1.0.0
+security:
+  - implicit:
+      - read
+      - write
+tags:
+  - name: TermsAndPolicies
+    description: endpoints to interactwith PoliciesAndTerms smart Contract
+  - name: MyCareContract
+    description: endpoints to interact with Mycare smart contract
+  - name: SharedAccess
+    description: endpoints to interact with SharedAccess smart contract
+paths:
+  '/share/connection/{connectionId}':
+    get:
+      tags:
+        - SharedAccess
+      summary: Get saved consent
+      description: Get saved consent
+      parameters: 
+        - in: path
+          name: connectionId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetConnection'
+  '/share/connection':
+    put:
+      tags:
+        - SharedAccess
+      summary: Update connection attempt with acceptance or rejection
+      description: Update connection attempt with acceptance or rejection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateConnection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateConnection'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+    post:
+      tags:
+        - SharedAccess
+      summary: Save connection attempt to the chain
+      description: Save connection attempt to the chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddConnection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddConnection'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/share/consent_status':
+    get:
+      tags:
+        - SharedAccess
+      summary: Check if consent is revoked or not
+      description: Check if consent is revoked or not
+      parameters: 
+        - in: path
+          name: consentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  revoked:
+                    type: boolean
+                    example: true
+  '/share/revoke_consent':
+    put:
+      tags:
+        - SharedAccess
+      summary: Revoke consent
+      description: Revoke consent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeConsent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RevokeConsent'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/share/consent/{consentId}':
+    get:
+      tags:
+        - SharedAccess
+      summary: Get saved consent
+      description: Get saved consent
+      parameters: 
+        - in: path
+          name: consentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedConsent'
+  '/share/add_consent':
+    post:
+      tags:
+        - SharedAccess
+      summary: Save new consent to the chain
+      description: Save new consent to the chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddConsent'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddConsent'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/t&p/acceptance':
+    get:
+      tags:
+        - TermsAndPolicies
+      summary: Get saved user acceptance of terms and policies
+      description: Get saved user acceptance of terms and policies
+      parameters: 
+        - in: query
+          name: walletAddress
+          schema:
+            type: integer
+            description: account wallet address
+            example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        - in: query
+          name: documentHash
+          schema:
+            type: integer
+            description: terms and policy document hash
+            example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPATAcceptance'
+  '/t&p/add_acceptance':
+    post:
+      tags:
+        - TermsAndPolicies
+      summary: Save user acceptance of terms and policies to the chain
+      description: Save user acceptance of terms and policies to the chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PATAcceptance'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PATAcceptance'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/t&p/document/{documentId}':
+    get:
+      tags:
+        - TermsAndPolicies
+      summary: get saved policy and terms document
+      description: get saved policy and terms document
+      parameters:
+        - in: path
+          required: true
+          name: documentId
+          description: id of document from database
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPATdocument'
+  '/t&p/add_document':
+    post:
+      tags:
+        - TermsAndPolicies
+      summary: Save new policies and terms document to chain
+      description: Save new policies and terms document to chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PATdocument'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PATdocument'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/mycare/add_account':
+    post:
+      tags:
+        - MyCareContract
+      summary: Save new user account to the blockchain
+      description: Save new user account to the blockchain
+      requestBody:
+        description: Required data to save new account
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewAccount'
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Server Error
+  '/mycare/deactivate_account':
+    put:
+      tags:
+        - MyCareContract
+      summary: flag saved user account as inactive
+      description: flag saved user profile as inactive
+      requestBody:
+        description: Required data to save new account
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateAccount'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeactivateAccount'
+      responses:
+        '200':
+          description: OK
+  '/mycare/account':
+    get:
+      tags:
+        - MyCareContract
+      summary: Get account by wallet address or profile hash
+      description: Get account by wallet address or profile hash
+      parameters: 
+        - in: query
+          name: walletAddress
+          required: false
+          schema:
+            type: integer
+            description: account wallet address
+            example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        - in: query
+          name: profileHash
+          required: false
+          schema:
+            type: integer
+            description: account profile hash
+            example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  '/mycare/account_count':
+    get:
+      tags:
+        - MyCareContract
+      summary: Get total number of saved accounts
+      description: Get total number of saved accounts
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCount'
+          
+  '/mycare/document':
+    get:
+      tags:
+        - MyCareContract
+      summary: Get saved document by wallet address and ipfs hash of document
+      description: Get saved document
+      parameters: 
+        - in: query
+          name: walletAddress
+          description: wallet address of document owner
+          schema:
+            type: integer
+            description: account wallet address
+            example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        - in: query
+          name: ipfsHash
+          description: ipfs hash of document
+          schema:
+            type: string
+            example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+  '/mycare/add_document':
+    post:
+      tags:
+        - MyCareContract
+      summary: Add document for a specific user
+      description: Add document for a specific user
+      requestBody:
+        description: Required data to save new account
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewDocument'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewDocument'
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    RevokeConsent:
+      type: object
+      properties:
+        consentId:
+          type: string
+        timestamp:
+          type: number
+          example: 1542808796218
+    GetConnection:
+      type: object
+      properties:
+        created:
+          type: number
+          example: 1542808796218
+        updated:
+          type: number
+          example: 1542808796218
+        from:
+          type: string
+        to:
+          type: string
+        connectionId:
+          type: string
+        accepted:
+          type: boolean
+    UpdateConnection:
+      type: object
+      properties:
+        timestamp:
+          type: number
+          example: 1542808796218
+        accepted:
+          type: boolean
+        connectionId:
+          type: string
+    AddConnection:
+      type: object
+      properties:
+        created:
+          type: number
+          example: 1542808796218
+        from:
+          type: string
+        to:
+          type: string
+        connectionId:
+          type: string
+    SavedConsent:
+      type: object
+      properties:
+        timestamp:
+          type: number
+          example: 1542808796218
+        scope:
+          type: string
+        dataSource:
+          type: string
+        startDate:
+          type: number
+          example: 1542808796218
+        endDate:
+          type: number
+          example: 1542808796218
+        consentId:
+          type: string
+        connectionId:
+          type: string
+        revoked:
+          type: boolean
+          example: false
+    AddConsent:
+      type: object
+      properties:
+        timestamp:
+          type: number
+          example: 1542808796218
+        scope:
+          type: string
+        dataSource:
+          type: string
+        startDate:
+          type: number
+          example: 1542808796218
+        endDate:
+          type: number
+          example: 1542808796218
+        consentId:
+          type: string
+        connectionId:
+          type: string
+    SavedPATAcceptance:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          example: "2018-11-21T13:22:48.069Z"
+        documentHash:
+          type: string
+          description: ipfs hash of document
+    PATAcceptance:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+          example: "0x34ff3cc39ds0d93cabcdaef2ea39c"
+        timestamp:
+          type: string
+          example: "2018-11-21T13:22:48.069Z"
+        documentHash:
+          type: string
+          description: ipfs hash of document
+    SavedPATdocument:
+      type: object
+      properties:
+        timestamp:
+          type: number
+        ipfsHash:
+          type: string
+          description: ipfs hash of document
+    PATdocument:
+      type: object
+      properties:
+        documentId:
+          type: string
+          description: id of document from database
+        ipfsHash:
+          type: string
+          description: ipfs hash of document
+    NewDocument:
+      type: object
+      properties:
+        owner:
+          type: string
+          description: wallet address
+        ipfsHash:
+          type: string
+          description: ipfs hash of document
+        password:
+          type: string
+          description: ipfs password
+    Document:
+      type: object
+      properties:
+        found: 
+          type: boolean
+          example: true
+        password:
+          type: string
+          description: password to retrieve document on ipfs
+          example: "39edj03jieundk39dd39dmdk39endi3ndi3ndi3n3"
+        inserted:
+          type: number
+          description: timestamp of when document was inserted in the chain
+          example: 1542802867055
+    Account:
+      type: object
+      properties:
+        profile:
+          type: string
+          description: profile hash
+          example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+        walletAddress:
+          type: string
+          example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        timestamp:
+          type: string
+          description: timestamp showing when account was created
+          example: "2018-11-21T11:26:34.142Z"
+        active:
+          type: boolean
+          description: flag to indicating is account is deactivated or not
+          example: false
+    AccountCount:
+      type: object
+      properties:
+        count: 
+          type: number
+          example: 345
+    DeactivateAccount:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+          description: account's wallet address
+          example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        timestamp:
+          type: string
+          description: timestamp showing when account was created
+          example: "2018-11-21T11:26:34.142Z"
+    NewAccount:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+          description: accounts's wallet address
+          example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
+        profileHash:
+          type: string
+          description: hash of account's profile
+          example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+        timestamp:
+          type: string
+          description: timestamp showing when account was created
+          example: "2018-11-21T11:26:34.142Z"
