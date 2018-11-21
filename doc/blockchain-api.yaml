@@ -166,7 +166,7 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/t&p/acceptance':
+  '/terms_and_policies/acceptance':
     get:
       tags:
         - TermsAndPolicies
@@ -192,7 +192,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedPATAcceptance'
-  '/t&p/add_acceptance':
+  '/terms_and_policies/add_acceptance':
     post:
       tags:
         - TermsAndPolicies
@@ -214,7 +214,7 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/t&p/document/{documentId}':
+  '/terms_and_policies/document/{documentId}':
     get:
       tags:
         - TermsAndPolicies
@@ -234,7 +234,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedPATdocument'
-  '/t&p/add_document':
+  '/terms_and_policies/add_document':
     post:
       tags:
         - TermsAndPolicies
