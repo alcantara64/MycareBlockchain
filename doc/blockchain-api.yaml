@@ -37,6 +37,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetConnection'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
   '/share/connection':
     put:
       tags:
@@ -80,7 +84,7 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/share/consent_status':
+  '/share/consent_status/{consentId}':
     get:
       tags:
         - SharedAccess
@@ -103,6 +107,10 @@ paths:
                   revoked:
                     type: boolean
                     example: true
+        '400':
+          description: Not found
+        '500':
+          description: Server Error
   '/share/revoke_consent':
     put:
       tags:
@@ -144,6 +152,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedConsent'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
   '/share/add_consent':
     post:
       tags:
@@ -192,6 +204,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedPATAcceptance'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
   '/terms_and_policies/add_acceptance':
     post:
       tags:
@@ -234,6 +250,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedPATdocument'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
   '/terms_and_policies/add_document':
     post:
       tags:
@@ -298,6 +318,10 @@ paths:
       responses:
         '200':
           description: OK
+        '400':
+          description: Not found
+        '500':
+          description: Server Error
   '/mycare/account':
     get:
       tags:
@@ -326,6 +350,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Account'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
   '/mycare/account_count':
     get:
       tags:
@@ -339,53 +367,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AccountCount'
+        '500':
+          description: Server Error
           
-  '/mycare/document':
-    get:
-      tags:
-        - MyCareContract
-      summary: Get saved document by wallet address and ipfs hash of document
-      description: Get saved document
-      parameters: 
-        - in: query
-          name: walletAddress
-          description: wallet address of document owner
-          schema:
-            type: integer
-            description: account wallet address
-            example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
-        - in: query
-          name: ipfsHash
-          description: ipfs hash of document
-          schema:
-            type: string
-            example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Document'
-  '/mycare/add_document':
-    post:
-      tags:
-        - MyCareContract
-      summary: Add document for a specific user
-      description: Add document for a specific user
-      requestBody:
-        description: Required data to save new account
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewDocument'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/NewDocument'
-      responses:
-        '200':
-          description: OK
 components:
   schemas:
     RevokeConsent:
