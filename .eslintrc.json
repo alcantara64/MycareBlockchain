@@ -1,0 +1,9 @@
+{
+    "extends": "airbnb-base",
+    "rules": {
+        "imports/no-dynamic-require": "off",
+        "no-plusplus": "off",
+        "func-names": "off",
+        "prefer-arrow-callback": "off"
+    }
+}

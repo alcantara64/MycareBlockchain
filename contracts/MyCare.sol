@@ -1,4 +1,4 @@
-pragma solidity ^0.5.0;
+pragma solidity ^0.4.24;
 
 contract MyCare {
 
@@ -44,17 +44,6 @@ contract MyCare {
         accountStructs[ownerAddress].active = false;
         accountStructs[ownerAddress].updated = timestamp;
         return true;
-    }
-
-    function TestAccountByProfile( bytes32 profile ) public view returns ( bytes32 p, address owner, bool isEntity ) {
-        address ownerAddress = accountAddressesByProfile[profile];
-        return (accountStructs[ownerAddress].profile, accountStructs[ownerAddress].chainAddress, accountStructs[ownerAddress].isEntity );
-        /*
-            if ( accountStructs[ownerAddress].isEntity && accountStructs[ownerAddress].profile == profile )
-            {
-              return (profile, accountStructs[ownerAddress].profile, accountStructs[ownerAddress].chainAddress, accountStructs[ownerAddress].isEntity );
-            }
-        */
     }
 
     function GetAccountByProfile( bytes32 profile )
@@ -104,9 +93,5 @@ contract MyCare {
 
     function GetAccountCount() public view returns (uint) {
         return accountList.length;
-    }
-
-    function compareStrings (string memory a, string memory b) private pure returns (bool){
-        return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
     }
 }
