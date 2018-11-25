@@ -6,23 +6,35 @@
  * define environment for express server
  */
 const appRoot = require('app-root-path');
+const bodyParser = require('body-parser');
 const express = require('express');
 const morgan = require('morgan');
 const dotenv = require('dotenv-flow').config();
 
 const winston = require(`${appRoot}/config/winston`);
+const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
 
 const port = process.env.PORT || 4000;
 
 if (dotenv.error) {
-  throw dotenv.error;
+    throw dotenv.error;
 }
 
 const router = express.Router();
 
+mycareRoute(router);
+
 const app = express();
 
-app.use(morgan('combined', { stream: winston.stream }));
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+app.use(morgan('combined', {
+    stream: winston.stream
+}));
 
 app.use('/api/v1', router);
 
