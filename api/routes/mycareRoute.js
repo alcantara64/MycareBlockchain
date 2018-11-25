@@ -4,4 +4,7 @@ const mycareController = require(`${appRoot}/api/controllers/mycareController`);
 module.exports = function mycareRoute (router) {
     router.route('/mycare/add_account')
         .post(mycareController.validateAddAccountParams, mycareController.addAccount);
+
+    router.route('/mycare/account')
+        .get(mycareController.getAccount);
 };

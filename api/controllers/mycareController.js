@@ -19,6 +19,34 @@ exports.addAccount = async function (req, res) {
     }
 };
 
+exports.getAccount = async function (req, res) {
+    try {
+        const { walletAddress, profileHash } = req.query;
+
+        if (!walletAddress && !profileHash) {
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'Invalid query parameters, one of walletAddress and profileHash is required'
+            });
+        }
+
+        const param = walletAddress || profileHash;
+
+        const account = await mycareService.GetAccount(param, !!walletAddress);
+
+        if (!account) {
+            return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
+                message: 'Account not found'
+            });
+        }
+
+        return res.status(HTTP_STATUS.OK.CODE).json(account);
+    } catch (err) {
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: err
+        });
+    }
+};
+
 exports.validateAddAccountParams = function (req, res, next) {
     try {
         const expectedParams = ['walletAddress', 'profileHash', 'timestamp'];
@@ -27,7 +55,7 @@ exports.validateAddAccountParams = function (req, res, next) {
             const param = expectedParams[i];
 
             if (!req.body[param]) {
-                return res.status(HTTP_STATUS.OK.CODE).json({
+                return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                     message: `${param} is a required parameter`
                 });
             }
@@ -36,7 +64,7 @@ exports.validateAddAccountParams = function (req, res, next) {
         // validate timestamp is valida datetime string
         const timestampIsValid = moment(req.body.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
-            return res.status(HTTP_STATUS.OK.CODE).json({
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'timestamp is not valid ISO8601 string'
             });
         }

@@ -46,22 +46,22 @@ contract MyCare {
         return true;
     }
 
-    function GetAccountByProfile( bytes32 profile )
+    function GetAccountByProfile( bytes32 _profile )
         public
         view
         returns (
-            bytes32 p,
-            address owner,
+            address walletAddress,
+            bytes32 profile,
             bool isEntity,
             bool active,
             uint created,
             uint updated
         )
     {
-        address ownerAddress = accountAddressesByProfile[profile];
+        address ownerAddress = accountAddressesByProfile[_profile];
         return (
-            accountStructs[ownerAddress].profile,
             accountStructs[ownerAddress].chainAddress,
+            accountStructs[ownerAddress].profile,
             accountStructs[ownerAddress].isEntity,
             accountStructs[ownerAddress].active,
             accountStructs[ownerAddress].created,
@@ -73,7 +73,7 @@ contract MyCare {
         public
         view
         returns (
-            address owner,
+            address walletAddress,
             bytes32 profile,
             bool isEntity,
             bool active,
