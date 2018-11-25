@@ -6,6 +6,7 @@
         "func-names": "off",
         "prefer-arrow-callback": "off",
         "indent": ["error", 4],
-        "semi": ["error", "always"]
+        "semi": ["error", "always"],
+        "space-before-function-paren": "off"
     }
 }

@@ -333,14 +333,14 @@ paths:
           name: walletAddress
           required: false
           schema:
-            type: integer
+            type: string
             description: account wallet address
             example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
         - in: query
           name: profileHash
           required: false
           schema:
-            type: integer
+            type: string
             description: account profile hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
       responses:

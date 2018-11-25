@@ -19,9 +19,29 @@ exports.addAccount = async function (req, res) {
     }
 };
 
+exports.deactivateAccount = async function (req, res) {
+    try {
+        const {
+            walletAddress,
+            timestamp
+        } = req.body;
+
+        const transactionReceipt = await mycareService.DeactivateAccount(walletAddress, timestamp);
+
+        return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
+    } catch (err) {
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: err
+        });
+    }
+};
+
 exports.getAccount = async function (req, res) {
     try {
-        const { walletAddress, profileHash } = req.query;
+        const {
+            walletAddress,
+            profileHash
+        } = req.query;
 
         if (!walletAddress && !profileHash) {
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -47,10 +67,36 @@ exports.getAccount = async function (req, res) {
     }
 };
 
-exports.validateAddAccountParams = function (req, res, next) {
+exports.getAccountsCount = async function (req, res) {
     try {
-        const expectedParams = ['walletAddress', 'profileHash', 'timestamp'];
+        const count = await mycareService.GetAccountCount();
 
+        return res.status(HTTP_STATUS.OK.CODE).json({
+            count
+        });
+    } catch (err) {
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: err
+        });
+    }
+};
+
+// validators
+
+exports.validateDeactivateAccountParams = function (req, res, next) {
+    const expectedParams = ['walletAddress', 'timestamp'];
+
+    validateAccountParams(req, res, next, expectedParams);
+};
+
+exports.validateAddAccountParams = function (req, res, next) {
+    const expectedParams = ['walletAddress', 'profileHash', 'timestamp'];
+
+    validateAccountParams(req, res, next, expectedParams);
+};
+
+function validateAccountParams(req, res, next, expectedParams) {
+    try {
         for (let i = 0; i < expectedParams.length; i++) {
             const param = expectedParams[i];
 
@@ -61,7 +107,7 @@ exports.validateAddAccountParams = function (req, res, next) {
             }
         }
 
-        // validate timestamp is valida datetime string
+        // validate timestamp is valid datetime string
         const timestampIsValid = moment(req.body.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -72,7 +118,7 @@ exports.validateAddAccountParams = function (req, res, next) {
         next();
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: HTTP_STATUS.INTERNAL_SERVER_ERROR
+            message: err
         });
     }
 };

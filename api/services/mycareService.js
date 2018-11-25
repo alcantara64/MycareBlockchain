@@ -14,22 +14,11 @@ exports.AddAccount = async function AddAccount (payload) {
     return contractHelper.sendTransaction(data);
 };
 
-exports.deactivateAccount = function deactivateAccount(ownerAddress, timestamp) {
-    MYCARE.methods.DeactivateAccount(ownerAddress, timestamp)
-        .estimateGas()
-        .then(estimatedGas => {
-            return MYCARE.methods.DeactivateAccount(ownerAddress, timestamp)
-                .send({
-                    from: ACCOUNT_BASE,
-                    gas: estimatedGas,
-                }, (err, result) => {
-                    if (err) {
-                        logger.error(`Account Deactivation failed ${err}`);
-                    } else {
-                        logger.info('Account Deactivation was successfully');
-                    }
-                })
-        });
+exports.DeactivateAccount = function (ownerAddress, _timestamp) {
+    const timestamp = Math.floor((new Date(_timestamp)).getTime() / 1000);
+    let data = api.DeactivateAccount(ownerAddress, timestamp).encodeABI();
+
+    return contractHelper.sendTransaction(data);
 };
 
 exports.GetAccount = async function (param, isWalletAddress = true) {
@@ -51,10 +40,6 @@ exports.GetAccount = async function (param, isWalletAddress = true) {
     return account;
 };
 
-// GDH - these need to be made properly async !
-exports.GetAccountCount = function GetAccountCount() {
-    MYCARE.methods.Count().call().then((f) => {
-        logger.info(`Count: ${f}`);
-        return f;
-    });
+exports.GetAccountCount = function () {
+    return api.GetAccountCount().call();
 };
