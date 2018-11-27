@@ -1,6 +1,6 @@
 const mycare = artifacts.require('MyCare');
 const policiesAndTerms = artifacts.require('PoliciesAndTerms');
-// let sharedAccess = artifacts.require('SharedAccess');
+const sharedAccess = artifacts.require('SharedAccess');
 
 module.exports = function (deployer) {
     deployer.deploy(mycare)
@@ -10,5 +10,5 @@ module.exports = function (deployer) {
         });
 
     deployer.deploy(policiesAndTerms);
-    // deployer.deploy(sharedAccess);
+    deployer.deploy(sharedAccess);
 };
