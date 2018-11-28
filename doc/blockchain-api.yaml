@@ -378,8 +378,8 @@ components:
         consentId:
           type: string
         timestamp:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T14:23:28.233Z"
     GetConnection:
       type: object
       properties:
@@ -446,18 +446,20 @@ components:
       type: object
       properties:
         timestamp:
-          type: number
-          example: 1542808796218
-        scope:
           type: string
+          example: "2018-11-28T13:01:04.956Z"
+        scope:
+          type: array
+          items:
+            type: string
         dataSource:
           type: string
         startDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T13:01:04.956Z"
         endDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T13:01:04.956Z"
         consentId:
           type: string
         connectionId:
