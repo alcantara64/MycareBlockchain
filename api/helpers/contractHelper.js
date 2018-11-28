@@ -56,7 +56,9 @@ ContractHelper.prototype.contractMethods = function () {
 };
 
 exports.contractNames = {
-    MYCARE: 'MyCare'
+    MYCARE: 'MyCare',
+    SHARED_ACCESS: 'SharedAccess',
+    POLICIES_AND_TERMS: 'PoliciesAndTerms'
 };
 
 exports.ContractHelper = ContractHelper;

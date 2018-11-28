@@ -1,7 +1,5 @@
 const appRoot = require('app-root-path');
-// const { contractNames, ContractHelper } = require(`../helpers/contractHelper`);
 const { contractNames, ContractHelper } = require(`${appRoot}/api/helpers/contractHelper`);
-const logger = require(`${appRoot}/config/winston`);
 
 const contractHelper = new ContractHelper(contractNames.MYCARE);
 const api = contractHelper.contractMethods();
