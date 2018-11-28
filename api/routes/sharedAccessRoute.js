@@ -8,4 +8,16 @@ module.exports = function sharedAccessRoute(router) {
 
     router.route('/share/connection/:connectionId')
         .get(sharedAccessController.getConnectionAttempt);
+
+    router.route('/share/add_consent')
+        .post(sharedAccessController.validateAddConsentParams, sharedAccessController.addConsent);
+
+    router.route('/share/consent/:consentId')
+        .get(sharedAccessController.getConsent);
+
+    router.route('/share/revoke_consent')
+        .put(sharedAccessController.validateRevokeConsentParams, sharedAccessController.revokeConsent);
+
+    router.route('/share/consent_status/:consentId')
+        .get(sharedAccessController.consentIsRevoked);
 };

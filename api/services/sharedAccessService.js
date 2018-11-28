@@ -1,5 +1,4 @@
 const appRoot = require('app-root-path');
-const logger = require(`${appRoot}/config/winston`);
 const web3 = require('web3');
 const scopeConstants = require('../constants/ScopeConstants');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
@@ -25,56 +24,62 @@ exports.addConsent = function addConsent(consent) {
     const scope = this.integersToBytes(scopeIntegers);
 
     const dataSource = JSON.stringify(consent.dataSource);
-    const startDate = Math.floor(consent.startDate.getTime() / 1000);
-    const endDate = Math.floor(consent.endDate.getTime() / 1000);
-    const timestamp = Math.floor(consent.timeStamp.getTime() / 1000);
+    const startDate = helperMethods.ISOstringToTimestamp(consent.startDate);
+    const endDate = helperMethods.ISOstringToTimestamp(consent.endDate);
+    const timestamp = helperMethods.ISOstringToTimestamp(consent.timestamp);
 
-    return SHARED_ACCESS.methods.addConsent(
-            consent._id.toString(),
-            timestamp,
-            scope,
-            dataSource,
-            startDate,
-            endDate,
-            consent.connectionId,
-        )
-        .estimateGas()
-        .then((estimatedGas) => {
-            return SHARED_ACCESS.methods.addConsent(
-                consent._id.toString(),
-                timestamp,
-                scope,
-                dataSource,
-                startDate,
-                endDate,
-                consent.connectionId,
-            ).send({
-                from: ACCOUNT_BASE,
-                gas: estimatedGas,
-            }, (err, result) => {
-                if (err) {
-                    logger.error(`Failed to save consent to blockchain ${err}`);
-                } else {
-                    logger.info(`Saved Consent to Blockchain successfully ${result}`);
-                }
-            });
-        });
+    const data = api.addConsent(
+        consent.consentId,
+        timestamp,
+        scope,
+        dataSource,
+        startDate,
+        endDate,
+        consent.connectionId
+    ).encodeABI();
+
+    return contractHelper.sendTransaction(data);
 };
 
-exports.getConsent = function getConsent(consentId) {
-    return SHARED_ACCESS.methods.getConsent(consentId).call();
+exports.revokeConsent = function revokeConsent(payload) {
+    const { consentId } = payload;
+
+    const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
+
+    const data = api.revokeConsent(consentId, timestamp).encodeABI();
+    return contractHelper.sendTransaction(data);
 };
 
-exports.addDays = function addDays(startDate, numberOfDays) {
-    const returnDate = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        startDate.getDate() + numberOfDays,
-        startDate.getHours(),
-        startDate.getMinutes(),
-        startDate.getSeconds(),
-    );
-    return returnDate;
+exports.consentIsRevoked = async function consentIsRevoked(consentId) {
+    const consentStatus = await api.consentIsRevoked(consentId);
+
+    if (!consentStatus.isEntity) {
+        return null;
+    }
+
+    return consentStatus;
+};
+
+exports.getConsent = async function getConsent(consentId) {
+    const consent = await api.getConsent(consentId).call();
+
+    if (!consent.isEntity) {
+        return null;
+    }
+
+    const {
+        startDate,
+        endDate,
+        timestamp,
+        dataSource
+    } = consent;
+
+    consent.startDate = helperMethods.timeStampToISOstring(startDate);
+    consent.endDate = helperMethods.timeStampToISOstring(endDate);
+    consent.timestamp = helperMethods.timeStampToISOstring(timestamp);
+    consent.dataSource = JSON.parse(dataSource);
+
+    return consent;
 };
 
 exports.addConnectionAttempt = function addConnectionAttempt(connection) {
@@ -107,32 +112,13 @@ exports.getConnectionAttempt = async function getConnectionAttempt(connectionId)
         return null;
     }
 
-    const { created, updated } = connectionAttempt;
+    const {
+        created,
+        updated
+    } = connectionAttempt;
 
     connectionAttempt.created = helperMethods.timeStampToISOstring(created);
     connectionAttempt.updated = helperMethods.timeStampToISOstring(updated);
 
     return connectionAttempt;
-};
-
-exports.revokeConsent = function revokeConsent(consentId, timestamp) {
-    return SHARED_ACCESS.methods.revokeConsent(consentId, timestamp)
-        .estimateGas()
-        .then((estimatedGas) => {
-            return SHARED_ACCESS.methods.revokeConsent(consentId, timestamp)
-                .send({
-                    from: ACCOUNT_BASE,
-                    gas: estimatedGas,
-                }, (err, result) => {
-                    if (err) {
-                        logger.error(`Failed to revoke Consent ${err}`);
-                    } else {
-                        logger.info(`Revoked consent Successfully: ${result}`);
-                    }
-                });
-        });
-};
-
-exports.consentIsRevoked = function consentIsRevoked(consentId) {
-    return SHARED_ACCESS.methods.consentIsRevoked(consentId);
 };

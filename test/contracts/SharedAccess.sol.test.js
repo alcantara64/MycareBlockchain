@@ -156,6 +156,10 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[5], startDate);
 
         assert.equal(savedConsent[6], endDate);
+
+        assert.equal(savedConsent[7], false);
+
+        assert.equal(savedConsent[8], true);
     });
 
     it('doesnt save consent to blockchain if connection does not exist', async () => {
@@ -198,9 +202,13 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[5], 0);
 
         assert.equal(savedConsent[6], 0);
+
+        assert.equal(savedConsent[7], false);
+
+        assert.equal(savedConsent[8], false);
     });
 
-    it('returns empty fields when consent is not found', async () => {
+    it('returns empty and falsy fields when consent is not found', async () => {
         const sharedAccess = await SharedAccess.new();
 
         const consentId = 'doesNotExist';
@@ -220,6 +228,10 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[5], 0);
 
         assert.equal(savedConsent[6], 0);
+
+        assert.equal(savedConsent[7], false);
+
+        assert.equal(savedConsent[8], false);
     });
 
     it('can revoke consent', async () => {
@@ -255,7 +267,8 @@ contract('SharedAccess', (accounts) => {
         );
 
         let consentIsRevoked = await sharedAccess.consentIsRevoked(consentId);
-        assert.equal(consentIsRevoked, false);
+        assert.equal(consentIsRevoked[0], false);
+        assert.equal(consentIsRevoked[1], true);
 
         let savedConsent = await sharedAccess.getConsent(consentId);
 
@@ -276,13 +289,16 @@ contract('SharedAccess', (accounts) => {
 
         assert.equal(savedConsent[7], false);
 
+        assert.equal(savedConsent[8], true);
+
         const revokeTime = timestamp + 3467000;
 
         await sharedAccess.revokeConsent(consentId, revokeTime);
 
         consentIsRevoked = await sharedAccess.consentIsRevoked(consentId);
 
-        assert.equal(consentIsRevoked, true);
+        assert.equal(consentIsRevoked[0], true);
+        assert.equal(consentIsRevoked[1], true);
 
         savedConsent = await sharedAccess.getConsent(consentId);
 

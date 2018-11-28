@@ -9,6 +9,7 @@ contract SharedAccess {
         uint endDate;
         string connectionId;
         bool revoked;
+        bool isEntity;
     }
     
     struct ConnectionAttempt {
@@ -45,7 +46,8 @@ contract SharedAccess {
                 startDate: startDate,
                 endDate: endDate,
                 connectionId: connectionId,
-                revoked: false
+                revoked: false,
+                isEntity: true
             });
             
             return true;
@@ -62,7 +64,8 @@ contract SharedAccess {
         string dataSource,
         uint startDate,
         uint endDate,
-        bool revoked
+        bool revoked,
+        bool isEntity
         ){
         Consent memory consent = allConsents[_consentId];
 
@@ -74,12 +77,13 @@ contract SharedAccess {
             consent.dataSource,
             consent.startDate,
             consent.endDate,
-            consent.revoked
+            consent.revoked,
+            consent.isEntity
         );
     }
     
-    function consentIsRevoked(string _consentId) public view returns(bool consentRevoked) {
-        return allConsents[_consentId].revoked;
+    function consentIsRevoked(string _consentId) public view returns(bool consentRevoked, bool isEntity) {
+        return (allConsents[_consentId].revoked, allConsents[_consentId].isEntity);
     }
     
     function addConnectionAttempt(
