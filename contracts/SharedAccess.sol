@@ -113,7 +113,8 @@ contract SharedAccess {
         address to,
         uint created,
         uint updated,
-        bool accepted
+        bool accepted,
+        bool isEntity
         ) {
         ConnectionAttempt memory connection = allConnections[_connectionId];
         
@@ -123,7 +124,8 @@ contract SharedAccess {
             connection.to,
             connection.created,
             connection.updated,
-            connection.accepted
+            connection.accepted,
+            connection.isEntity
         );
     }
     

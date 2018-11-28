@@ -2,13 +2,14 @@ const appRoot = require('app-root-path');
 const logger = require(`${appRoot}/config/winston`);
 const web3 = require('web3');
 const scopeConstants = require('../constants/ScopeConstants');
+const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 
 const {
     contractNames,
     ContractHelper
 } = require(`${appRoot}/api/helpers/contractHelper`);
 
-const contractHelper = new ContractHelper(contractNames.MYCARE);
+const contractHelper = new ContractHelper(contractNames.SHARED_ACCESS);
 const api = contractHelper.contractMethods();
 
 exports.integersToBytes = function integersToBytes(integersList) {
@@ -77,9 +78,9 @@ exports.addDays = function addDays(startDate, numberOfDays) {
 };
 
 exports.addConnectionAttempt = function addConnectionAttempt(connection) {
-    const timestamp = Math.floor((new Date(connection.timestamp)).getTime() / 1000);
+    const timestamp = Math.floor((new Date(connection.created)).getTime() / 1000);
     const data = api.addConnectionAttempt(
-        connection._id.toString(),
+        connection.connectionId.toString(),
         connection.from,
         connection.to,
         timestamp
@@ -90,14 +91,28 @@ exports.addConnectionAttempt = function addConnectionAttempt(connection) {
 
 exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
     const timestamp = Math.floor((new Date(payload.timestamp)).getTime() / 1000);
-    const { connectionId, accepted } = payload;
+    const {
+        connectionId,
+        accepted
+    } = payload;
     const data = api.updateConnectionAttempt(connectionId, accepted, timestamp).encodeABI();
 
     return contractHelper.sendTransaction(data);
 };
 
-exports.getConnectionAttempt = function getConnectionAttempt(connectionId) {
-    return api.getConnectionAttempt(connectionId);
+exports.getConnectionAttempt = async function getConnectionAttempt(connectionId) {
+    const connectionAttempt = await api.getConnectionAttempt(connectionId).call();
+
+    if (!connectionAttempt.isEntity) {
+        return null;
+    }
+
+    const { created, updated } = connectionAttempt;
+
+    connectionAttempt.created = helperMethods.timeStampToISOstring(created);
+    connectionAttempt.updated = helperMethods.timeStampToISOstring(updated);
+
+    return connectionAttempt;
 };
 
 exports.revokeConsent = function revokeConsent(consentId, timestamp) {

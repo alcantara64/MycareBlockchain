@@ -401,8 +401,8 @@ components:
       type: object
       properties:
         timestamp:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T08:44:00.076Z"
         accepted:
           type: boolean
         connectionId:
@@ -411,8 +411,8 @@ components:
       type: object
       properties:
         created:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T08:44:00.076Z"
         from:
           type: string
         to:

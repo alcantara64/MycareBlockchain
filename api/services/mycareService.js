@@ -1,4 +1,5 @@
 const appRoot = require('app-root-path');
+const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const { contractNames, ContractHelper } = require(`${appRoot}/api/helpers/contractHelper`);
 
 const contractHelper = new ContractHelper(contractNames.MYCARE);
@@ -6,14 +7,14 @@ const api = contractHelper.contractMethods();
 
 exports.AddAccount = async function AddAccount (payload) {
     const { walletAddress, profileHash } = payload;
-    const timestamp = Math.floor((new Date(payload.timestamp)).getTime() / 1000);
+    const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
     let data = api.AddAccount(walletAddress, profileHash, timestamp).encodeABI();
 
     return contractHelper.sendTransaction(data);
 };
 
 exports.DeactivateAccount = function (ownerAddress, _timestamp) {
-    const timestamp = Math.floor((new Date(_timestamp)).getTime() / 1000);
+    const timestamp = helperMethods.ISOstringToTimestamp(_timestamp);
     let data = api.DeactivateAccount(ownerAddress, timestamp).encodeABI();
 
     return contractHelper.sendTransaction(data);
@@ -32,8 +33,8 @@ exports.GetAccount = async function (param, isWalletAddress = true) {
         return null;
     }
 
-    account.created = (new Date(+account.created)).toISOString();
-    account.updated = (new Date(+account.updated)).toISOString();
+    account.created = helperMethods.timeStampToISOstring(account.created);
+    account.updated = helperMethods.timeStampToISOstring(account.updated);
 
     return account;
 };

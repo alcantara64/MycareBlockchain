@@ -26,6 +26,7 @@ contract('SharedAccess', (accounts) => {
         assert.equal(connection[3], created);
         assert.equal(connection[4], created);
         assert.equal(connection[5], false);
+        assert.equal(connection[6], true);
     });
 
     it('does not save connection if it already exists', async () => {

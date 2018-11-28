@@ -13,6 +13,7 @@ const dotenv = require('dotenv-flow').config();
 
 const winston = require(`${appRoot}/config/winston`);
 const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
+const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
 
 const port = process.env.PORT || 4000;
 
@@ -23,6 +24,7 @@ if (dotenv.error) {
 const router = express.Router();
 
 mycareRoute(router);
+sharedAccessRoute(router);
 
 const app = express();
 
