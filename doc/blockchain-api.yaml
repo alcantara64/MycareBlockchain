@@ -188,13 +188,13 @@ paths:
         - in: query
           name: walletAddress
           schema:
-            type: integer
+            type: string
             description: account wallet address
             example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
         - in: query
           name: documentHash
           schema:
-            type: integer
+            type: string
             description: terms and policy document hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
       responses:
@@ -230,7 +230,7 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/terms_and_policies/document/{documentId}':
+  '/terms_and_policies/document/{documentHash}':
     get:
       tags:
         - TermsAndPolicies
@@ -239,8 +239,8 @@ paths:
       parameters:
         - in: path
           required: true
-          name: documentId
-          description: id of document from database
+          name: documentHash
+          description: ipfsHash of the document
           schema:
             type: string
       responses:
@@ -490,15 +490,13 @@ components:
       properties:
         timestamp:
           type: number
+          example: "2018-11-21T13:22:48.069Z"
         ipfsHash:
           type: string
           description: ipfs hash of document
     PATdocument:
       type: object
       properties:
-        documentId:
-          type: string
-          description: id of document from database
         ipfsHash:
           type: string
           description: ipfs hash of document
