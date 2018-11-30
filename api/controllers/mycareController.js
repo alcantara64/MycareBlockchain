@@ -14,7 +14,7 @@ exports.addAccount = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -31,7 +31,7 @@ exports.deactivateAccount = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -62,7 +62,7 @@ exports.getAccount = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(account);
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -76,7 +76,7 @@ exports.getAccountsCount = async function (req, res) {
         });
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -118,7 +118,7 @@ function validateAccountParams(req, res, next, expectedParams) {
         next();
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };

@@ -18,7 +18,7 @@ exports.addNewDocument = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -31,7 +31,7 @@ exports.saveAcceptance = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -59,7 +59,7 @@ exports.getDocument = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -89,7 +89,7 @@ exports.getUserAcceptance = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -118,7 +118,7 @@ exports.validateAcceptancePayload = function (req, res, next) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -139,7 +139,7 @@ exports.validateAddDocumentPayload = function (req, res, next) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };

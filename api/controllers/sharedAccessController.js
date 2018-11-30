@@ -8,32 +8,36 @@ const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Constants`);
 
-exports.addConsent = async function(req, res) {
+exports.addConsent = async function (req, res) {
     try {
         const transactionReceipt = await sharedAccessService.addConsent(req.body);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({ message: err.message });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
     }
 };
 
-exports.revokeConsent = async function(req, res) {
+exports.revokeConsent = async function (req, res) {
     try {
         const transactionReceipt = await sharedAccessService.revokeConsent(req.body);
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
-exports.consentIsRevoked = async function(req, res) {
+exports.consentIsRevoked = async function (req, res) {
     try {
-        const { consentId } = req.params;
+        const {
+            consentId
+        } = req.params;
 
         if (!consentId) {
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -52,14 +56,16 @@ exports.consentIsRevoked = async function(req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
 exports.getConsent = async function (req, res) {
     try {
-        const { consentId } = req.params;
+        const {
+            consentId
+        } = req.params;
 
         if (!consentId) {
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -78,7 +84,7 @@ exports.getConsent = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -89,7 +95,9 @@ exports.saveConnectionAttempt = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({ message: err.message });
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
     }
 };
 
@@ -100,14 +108,16 @@ exports.updateConnectionAttempt = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
 exports.getConnectionAttempt = async function (req, res) {
     try {
-        const { connectionId } = req.params;
+        const {
+            connectionId
+        } = req.params;
 
         if (!connectionId) {
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -126,7 +136,7 @@ exports.getConnectionAttempt = async function (req, res) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -154,7 +164,7 @@ exports.validateAddConsentParams = function (req, res, next) {
         next();
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -182,7 +192,7 @@ exports.validateRevokeConsentParams = function (req, res, next) {
     } catch (err) {
         logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -209,7 +219,7 @@ exports.validateUpdateConnectionPayload = function (req, res, next) {
         next();
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
@@ -237,7 +247,7 @@ exports.validateSaveConnectionPayload = function (req, res, next) {
         next();
     } catch (err) {
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: err.message
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
