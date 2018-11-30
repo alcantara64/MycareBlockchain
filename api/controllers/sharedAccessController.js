@@ -14,6 +14,7 @@ exports.addConsent = async function(req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
+        logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({ message: err.message });
     }
 };
@@ -179,6 +180,7 @@ exports.validateRevokeConsentParams = function (req, res, next) {
         }
         next();
     } catch (err) {
+        logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: err.message
         });

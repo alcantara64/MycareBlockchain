@@ -14,6 +14,7 @@ const dotenv = require('dotenv-flow').config();
 const winston = require(`${appRoot}/config/winston`);
 const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
 const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
+const policiesAndTermsRoute = require(`${appRoot}/api/routes/policiesAndTermsRoute`);
 
 const port = process.env.PORT || 4000;
 
@@ -25,6 +26,7 @@ const router = express.Router();
 
 mycareRoute(router);
 sharedAccessRoute(router);
+policiesAndTermsRoute(router);
 
 const app = express();
 
