@@ -10,7 +10,10 @@ const {
 
 exports.addConsent = async function (req, res) {
     try {
+        logger.info('Save consent');
         const transactionReceipt = await sharedAccessService.addConsent(req.body);
+
+        logger.info(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
@@ -23,7 +26,11 @@ exports.addConsent = async function (req, res) {
 
 exports.revokeConsent = async function (req, res) {
     try {
+        logger.info('Revoke consent');
+
         const transactionReceipt = await sharedAccessService.revokeConsent(req.body);
+        logger.info(transactionReceipt);
+
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
@@ -35,18 +42,24 @@ exports.revokeConsent = async function (req, res) {
 
 exports.consentIsRevoked = async function (req, res) {
     try {
+        logger.info('Check if consent is revoked');
+
         const {
             consentId
         } = req.params;
 
         if (!consentId) {
+            logger.error('consentId is a required parameter');
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'consentId is a required parameter'
             });
         }
+
         const consentStatus = await sharedAccessService.getConsent(consentId);
 
         if (!consentStatus) {
+            logger.error('Consent not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Consent not found'
             });
@@ -63,11 +76,15 @@ exports.consentIsRevoked = async function (req, res) {
 
 exports.getConsent = async function (req, res) {
     try {
+        logger.info('Get consent');
+
         const {
             consentId
         } = req.params;
 
         if (!consentId) {
+            logger.error('consentId is a required parameter');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'consentId is a required parameter'
             });
@@ -75,6 +92,8 @@ exports.getConsent = async function (req, res) {
         const consent = await sharedAccessService.getConsent(consentId);
 
         if (!consent) {
+            logger.error('Consent not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Consent not found'
             });
@@ -91,7 +110,11 @@ exports.getConsent = async function (req, res) {
 
 exports.saveConnectionAttempt = async function (req, res) {
     try {
+        logger.info('Save connection attempt');
+
         const transactionReceipt = await sharedAccessService.addConnectionAttempt(req.body);
+        logger.info(transactionReceipt);
+
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
@@ -103,7 +126,11 @@ exports.saveConnectionAttempt = async function (req, res) {
 
 exports.updateConnectionAttempt = async function (req, res) {
     try {
+        logger.info('Update connection attempt');
+
         const transactionReceipt = await sharedAccessService.updateConnectionAttempt(req.body);
+        logger.info(transactionReceipt);
+
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(err);
@@ -115,18 +142,25 @@ exports.updateConnectionAttempt = async function (req, res) {
 
 exports.getConnectionAttempt = async function (req, res) {
     try {
+        logger.info('Get connection attempt');
+
         const {
             connectionId
         } = req.params;
 
         if (!connectionId) {
+            logger.error('connectionId is a required parameter');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'connectionId is a required parameter'
             });
         }
+
         const connectionAttempt = await sharedAccessService.getConnectionAttempt(connectionId);
 
         if (!connectionAttempt) {
+            logger.error('Connection attempt not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Connection attempt not found'
             });
@@ -150,6 +184,8 @@ exports.validateAddConsentParams = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });
@@ -157,12 +193,15 @@ exports.validateAddConsentParams = function (req, res, next) {
 
         const timestampIsValid = moment(payload.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
+            logger.error('timestamp is not valid ISO8601 string');
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'timestamp is not valid ISO8601 string'
             });
         }
         next();
     } catch (err) {
+        logger.error(err);
+
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -177,6 +216,8 @@ exports.validateRevokeConsentParams = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });
@@ -184,6 +225,8 @@ exports.validateRevokeConsentParams = function (req, res, next) {
 
         const timestampIsValid = moment(payload.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
+            logger.error('timestamp is not valid ISO8601 string');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'timestamp is not valid ISO8601 string'
             });
@@ -205,6 +248,8 @@ exports.validateUpdateConnectionPayload = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });
@@ -212,12 +257,15 @@ exports.validateUpdateConnectionPayload = function (req, res, next) {
 
         const timestampIsValid = moment(payload.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
+            logger.error('timestamp is not valid ISO8601 string');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'timestamp is not valid ISO8601 string'
             });
         }
         next();
     } catch (err) {
+        logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -232,6 +280,8 @@ exports.validateSaveConnectionPayload = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });
@@ -239,6 +289,8 @@ exports.validateSaveConnectionPayload = function (req, res, next) {
 
         const timestampIsValid = moment(payload.created, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
+            logger.error('created is not valid ISO8601 string');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'created is not valid ISO8601 string'
             });
@@ -246,6 +298,7 @@ exports.validateSaveConnectionPayload = function (req, res, next) {
 
         next();
     } catch (err) {
+        logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });

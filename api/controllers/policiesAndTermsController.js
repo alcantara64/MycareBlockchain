@@ -12,7 +12,10 @@ const {
 
 exports.addNewDocument = async function (req, res) {
     try {
+        logger.info('Adding new document');
         const transactionReceipt = await policiesAndTermsService.addNewDocument(req.body);
+
+        logger.info(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
@@ -25,7 +28,10 @@ exports.addNewDocument = async function (req, res) {
 
 exports.saveAcceptance = async function (req, res) {
     try {
+        logger.info('Saving acceptance');
         const transactionReceipt = await policiesAndTermsService.saveAcceptance(req.body);
+
+        logger.info(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
@@ -42,7 +48,11 @@ exports.getDocument = async function (req, res) {
             documentHash
         } = req.params;
 
+        logger.info('Get document');
+
         if (!documentHash) {
+            logger.error('documentHash is a required parameter');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'documentHash is a required parameter'
             });
@@ -50,6 +60,8 @@ exports.getDocument = async function (req, res) {
         const document = await policiesAndTermsService.getDocument(documentHash);
 
         if (!document) {
+            logger.error('document not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'document not found'
             });
@@ -71,8 +83,13 @@ exports.getUserAcceptance = async function (req, res) {
             documentHash
         } = req.query;
 
+        logger.info('Get User Acceptance');
+
         if (!documentHash || !walletAddress) {
-            const missingParam = !documentHash ? 'documentHash' : 'walletAddress'
+            const missingParam = !documentHash ? 'documentHash' : 'walletAddress';
+
+            logger.error(`${missingParam} is a required parameter`);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: `${missingParam} is a required parameter`
             });
@@ -80,6 +97,8 @@ exports.getUserAcceptance = async function (req, res) {
         const acceptance = await policiesAndTermsService.getUserAcceptance(walletAddress, documentHash);
 
         if (!acceptance) {
+            logger.error('acceptance record not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'acceptance record not found'
             });
@@ -102,6 +121,8 @@ exports.validateAcceptancePayload = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });
@@ -110,6 +131,8 @@ exports.validateAcceptancePayload = function (req, res, next) {
         const timestampIsValid = moment(payload.timestamp, moment.ISO_8601, true).isValid();
 
         if (!timestampIsValid) {
+            logger.error('timestamp is not valid ISO8601 string');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'timestamp is not valid ISO8601 string'
             });
@@ -131,6 +154,7 @@ exports.validateAddDocumentPayload = function (req, res, next) {
         const result = validators.validateRequiredParams(payload, requiredFields);
 
         if (result.missingParam) {
+            logger.error(result.message);
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: result.message
             });

@@ -8,11 +8,13 @@ const {
 
 exports.addAccount = async function (req, res) {
     try {
+        logger.info('Add account');
         const transactionReceipt = await mycareService.AddAccount(req.body);
         logger.info(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
+        logger.error(err);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -26,10 +28,16 @@ exports.deactivateAccount = async function (req, res) {
             timestamp
         } = req.body;
 
+        logger.info('Deactivate account');
+
         const transactionReceipt = await mycareService.DeactivateAccount(walletAddress, timestamp);
+
+        logger.info(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
+        logger.error(err);
+
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -43,7 +51,11 @@ exports.getAccount = async function (req, res) {
             profileHash
         } = req.query;
 
+        logger.info('Get Account');
+
         if (!walletAddress && !profileHash) {
+            logger.error('Invalid query parameters, one of walletAddress and profileHash is required');
+
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'Invalid query parameters, one of walletAddress and profileHash is required'
             });
@@ -54,6 +66,8 @@ exports.getAccount = async function (req, res) {
         const account = await mycareService.GetAccount(param, !!walletAddress);
 
         if (!account) {
+            logger.error('Account not found');
+
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Account not found'
             });
@@ -61,6 +75,8 @@ exports.getAccount = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(account);
     } catch (err) {
+        logger.error(err);
+
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -75,6 +91,8 @@ exports.getAccountsCount = async function (req, res) {
             count
         });
     } catch (err) {
+        logger.error(err);
+
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -117,6 +135,8 @@ function validateAccountParams(req, res, next, expectedParams) {
 
         next();
     } catch (err) {
+        logger.error(err);
+
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
