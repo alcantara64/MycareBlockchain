@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test:contracts": "truffle test",
-    "test:api": "mocha --recursive --exit --timeout 90000 ./spec/**/**/*.js",
-    "test:api:unit": "mocha --recursive --exit --timeout 90000 ./spec/unit/**/*.js",
+    "test:api": "mocha --recursive --exit ./spec/**/**/*.js",
+    "test:api:unit": "mocha --recursive --exit ./spec/unit/**/*.js",
     "test": "npm run test:contracts && npm run test:api",
+    "test:api:debug": "mocha --recursive --exit --inspect-brk ./spec/**/*.js",
     "start": "nodemon server.js",
     "deploy:contracts": "truffle migrate --reset --network mainnet",
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",
-    "coverage": "nyc --reporter=lcov mocha --recursive --exit --timeout 90000 ./spec/**/**/*.js",
+    "coverage": "nyc --reporter=lcov mocha --recursive --exit ./spec/**/**/*.js",
     "coverage:contracts": "./node_modules/.bin/solidity-coverage",
     "generateEthereumAccount": "node ./util/generateEthereumAccount.js"
   },
