@@ -2,6 +2,8 @@ const appRoot = require('app-root-path');
 const moment = require('moment');
 const mycareService = require(`${appRoot}/api/services/mycareService`);
 const logger = require(`${appRoot}/config/winston`);
+const keyHelper = require(`${appRoot}/api/helpers/keyHelper`);
+
 const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Constants`);
@@ -92,6 +94,22 @@ exports.getAccountsCount = async function (req, res) {
         });
     } catch (err) {
         logger.error(err);
+
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+    }
+};
+
+exports.generateChainAccount = function (req, res) {
+    try {
+        logger.info('Generate ethereum account');
+
+        const accountDetails = keyHelper.generateAddressAndPrivateKeyPair();
+
+        return res.status(HTTP_STATUS.OK.CODE).json(accountDetails);
+    } catch (err) {
+        logger.error(`error occured generating ethereum account ${err}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE

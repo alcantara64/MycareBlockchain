@@ -354,6 +354,21 @@ paths:
           description: Not found
         '500':
           description: Server Error
+  '/generate_chain_account':
+    get:
+      tags: 
+        - MyCareContract
+      summary: Generate new chain account
+      description: Generate new chain account
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChainAccount'
+        '500':
+          description: Server Error
   '/mycare/account_count':
     get:
       tags:
@@ -544,6 +559,17 @@ components:
           type: boolean
           description: flag to indicating is account is deactivated or not
           example: false
+    ChainAccount:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+        walletPrivateKey:
+          type: string
+        rsaPublicKey:
+          type: string
+        rsaPassPhrase:
+          type: string
     AccountCount:
       type: object
       properties:
