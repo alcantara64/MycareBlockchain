@@ -2,6 +2,8 @@ const appRoot = require('app-root-path');
 const moment = require('moment');
 const mycareService = require(`${appRoot}/api/services/mycareService`);
 const logger = require(`${appRoot}/config/winston`);
+const keyHelper = require(`${appRoot}/api/helpers/keyHelper`);
+
 const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Constants`);
@@ -10,11 +12,11 @@ exports.addAccount = async function (req, res) {
     try {
         logger.info('Add account');
         const transactionReceipt = await mycareService.AddAccount(req.body);
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while adding account - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -32,11 +34,11 @@ exports.deactivateAccount = async function (req, res) {
 
         const transactionReceipt = await mycareService.DeactivateAccount(walletAddress, timestamp);
 
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while deactivating account - ${err}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -66,7 +68,7 @@ exports.getAccount = async function (req, res) {
         const account = await mycareService.GetAccount(param, !!walletAddress);
 
         if (!account) {
-            logger.error('Account not found');
+            logger.error(`account not found for ${walletAddress ? 'walletAddress' : 'profileHash'} - ${param}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Account not found'
@@ -75,7 +77,7 @@ exports.getAccount = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(account);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while getting account - ${err}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -91,7 +93,23 @@ exports.getAccountsCount = async function (req, res) {
             count
         });
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while getting accounts count - ${err}`);
+
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+    }
+};
+
+exports.generateChainAccount = function (req, res) {
+    try {
+        logger.info('Generate ethereum account');
+
+        const accountDetails = keyHelper.generateAddressAndPrivateKeyPair();
+
+        return res.status(HTTP_STATUS.OK.CODE).json(accountDetails);
+    } catch (err) {
+        logger.error(`error occured generating ethereum account ${err}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE

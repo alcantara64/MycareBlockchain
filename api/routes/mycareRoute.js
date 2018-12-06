@@ -13,4 +13,7 @@ module.exports = function mycareRoute(router) {
 
     router.route('/mycare/account_count')
         .get(mycareController.getAccountsCount);
+
+    router.route('/generate_chain_account')
+        .get(mycareController.generateChainAccount);
 };
