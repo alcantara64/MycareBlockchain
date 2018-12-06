@@ -13,11 +13,11 @@ exports.addConsent = async function (req, res) {
         logger.info('Save consent');
         const transactionReceipt = await sharedAccessService.addConsent(req.body);
 
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while saving consent - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -29,11 +29,11 @@ exports.revokeConsent = async function (req, res) {
         logger.info('Revoke consent');
 
         const transactionReceipt = await sharedAccessService.revokeConsent(req.body);
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while revoking consent - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -58,7 +58,7 @@ exports.consentIsRevoked = async function (req, res) {
         const consentStatus = await sharedAccessService.getConsent(consentId);
 
         if (!consentStatus) {
-            logger.error('Consent not found');
+            logger.error(`Consent not found for id - ${consentId}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Consent not found'
@@ -67,7 +67,7 @@ exports.consentIsRevoked = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(consentStatus);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while checking if consent is revoked - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -92,7 +92,7 @@ exports.getConsent = async function (req, res) {
         const consent = await sharedAccessService.getConsent(consentId);
 
         if (!consent) {
-            logger.error('Consent not found');
+            logger.error(`Consent not found for id - ${consentId}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Consent not found'
@@ -101,7 +101,7 @@ exports.getConsent = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(consent);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while fetching consent - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -113,11 +113,11 @@ exports.saveConnectionAttempt = async function (req, res) {
         logger.info('Save connection attempt');
 
         const transactionReceipt = await sharedAccessService.addConnectionAttempt(req.body);
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while saving connection attempt - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -129,11 +129,11 @@ exports.updateConnectionAttempt = async function (req, res) {
         logger.info('Update connection attempt');
 
         const transactionReceipt = await sharedAccessService.updateConnectionAttempt(req.body);
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while updating connection attempt - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -159,7 +159,7 @@ exports.getConnectionAttempt = async function (req, res) {
         const connectionAttempt = await sharedAccessService.getConnectionAttempt(connectionId);
 
         if (!connectionAttempt) {
-            logger.error('Connection attempt not found');
+            logger.error(`Connection attempt not found for connectionId - ${connectionId}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'Connection attempt not found'
@@ -168,7 +168,7 @@ exports.getConnectionAttempt = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(connectionAttempt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while fetching connection attempt - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });

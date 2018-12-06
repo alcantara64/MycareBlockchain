@@ -15,11 +15,11 @@ exports.addNewDocument = async function (req, res) {
         logger.info('Adding new document');
         const transactionReceipt = await policiesAndTermsService.addNewDocument(req.body);
 
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while adding new document - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -31,11 +31,11 @@ exports.saveAcceptance = async function (req, res) {
         logger.info('Saving acceptance');
         const transactionReceipt = await policiesAndTermsService.saveAcceptance(req.body);
 
-        logger.info(transactionReceipt);
+        logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while saving acceptance - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -60,7 +60,7 @@ exports.getDocument = async function (req, res) {
         const document = await policiesAndTermsService.getDocument(documentHash);
 
         if (!document) {
-            logger.error('document not found');
+            logger.error(`document not found for hash ${documentHash}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'document not found'
@@ -69,7 +69,7 @@ exports.getDocument = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(document);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while getting document - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -97,7 +97,7 @@ exports.getUserAcceptance = async function (req, res) {
         const acceptance = await policiesAndTermsService.getUserAcceptance(walletAddress, documentHash);
 
         if (!acceptance) {
-            logger.error('acceptance record not found');
+            logger.error(`acceptance record not found for walletAddress - ${walletAddress} and documentHash - ${documentHash}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message: 'acceptance record not found'
@@ -106,7 +106,7 @@ exports.getUserAcceptance = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(acceptance);
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured while getting user acceptance - ${err}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
