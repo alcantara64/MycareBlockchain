@@ -60,7 +60,7 @@ exports.savePublicKey = function savePublicKey(u, fsPath) {
     }));
 };
 
-// 0000
+
 exports.publicKey = function publicKey(keyPair) {
     logger.info(`${keyPair}`);
     return keyPair.toPublicPem().toString('utf8');
@@ -70,7 +70,6 @@ exports.privateKey = function privateKey(keyPair) {
     return keyPair.toPrivatePem().toString('utf8');
 };
 
-// 00000
 //  Currently Unused at least internally
 exports.encryptedPrivateKey = function encryptedPrivateKey(keyPair) {
     const platformKey = this.platformKey();
@@ -119,10 +118,9 @@ exports.saveKeyEncrypted = function saveKeyEncrypted(u, fsPath) {
     return password;
 };
 
-// 0000
 exports.loadPrivateKey = function loadPrivateKey(
     textEncryptedPrivateKey,
-    textEncryptedPassPhrase,
+    textEncryptedPassPhrase
 ) {
     const keyPair = this.platformKey();
     const binaryArray = this.base64ToBuffer(textEncryptedPassPhrase);
@@ -139,13 +137,12 @@ exports.loadPublicKey = function loadPublicKey(fsPath) {
     return ursa.createPublicKey(pemText);
 };
 
-
 exports.restorePrivateKey = function restorePrivateKey(u, fsPath, password) {
     //  Load the encrypted private key for an Account
     //  TODO:   once basic encryption works will need this to decrypt password
     // var platformKeyPair = this.loadPlatformKey();
     const fileName = this.generateRandomFileName();
-    logger.info(`
+    logger.debug(`
     Decrypting : ${fsPath},
     to:  ${fileName},
     with password: ${password},
@@ -183,7 +180,7 @@ exports.generateRandomFileName = function generateRandomFileName() {
     return uuid();
 };
 
-// 0000
+
 exports.generateRandomEthereumKey = function generateRandomEthereumKey() {
     return `0x${crypto.randomBytes(32).toString('hex')}`;
 };
