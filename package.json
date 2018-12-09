@@ -22,6 +22,7 @@
   "dependencies": {
     "app-root-path": "^2.0.1",
     "atob": "^2.1.2",
+    "big-integer": "^1.6.40",
     "body-parser": "^1.18.3",
     "btoa": "^1.2.1",
     "cryptr": "^4.0.2",

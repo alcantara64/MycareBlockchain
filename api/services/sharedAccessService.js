@@ -2,6 +2,7 @@ const appRoot = require('app-root-path');
 const web3 = require('web3');
 const scopeConstants = require('../constants/ScopeConstants');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
+const BigInt = require('big-integer');
 
 const {
     contractNames,
@@ -11,11 +12,29 @@ const {
 const contractHelper = new ContractHelper(contractNames.SHARED_ACCESS);
 const api = contractHelper.contractMethods();
 
-exports.integersToBytes = function integersToBytes(integersList) {
-    const scope = integersList.reduce((x, y) => x | y);
+exports.integersToBytes = function (integersList) {
+    const bigIntsArray = integersList.map(x => BigInt(x));
+
+    const scope = bigIntsArray.reduce((x, y) => x.or(y));
+
     const hex = `0X${scope.toString(16)}`;
 
     return web3.utils.padLeft(hex, 32);
+};
+
+/**
+ * Checks if scope contains integer
+* @param scope {string} scope hexadecimal string
+* @param intVal {number} intVal integer
+*/
+exports.scopeContainsInteger = function (scope, intVal) {
+    const scopeInt = BigInt(parseInt(scope, 16));
+
+    const bigintVal = BigInt(intVal);
+
+    const result = scopeInt.and(bigintVal);
+
+    return result.equals(bigintVal);
 };
 
 exports.addConsent = function addConsent(consent) {
