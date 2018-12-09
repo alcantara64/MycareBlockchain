@@ -28,7 +28,7 @@ exports.integersToBytes = function (integersList) {
 * @param intVal {number} intVal integer
 */
 exports.scopeContainsInteger = function (scope, intVal) {
-    const scopeInt = BigInt(parseInt(scope, 16));
+    const scopeInt = BigInt(scope.slice(2), 16);
 
     const bigintVal = BigInt(intVal);
 
