@@ -39,7 +39,7 @@ contract SharedAccess {
         
         ConnectionAttempt memory connection = allConnections[connectionId];
         
-        if (connection.isEntity) {
+        if (connection.isEntity && !allConsents[consentId].isEntity) {
             allConsents[consentId] = Consent({
                 created: timestamp,
                 updated: timestamp,

@@ -42,7 +42,6 @@ exports.addConsent = function addConsent(consent) {
 
     const scope = this.integersToBytes(scopeIntegers);
 
-    const dataSource = JSON.stringify(consent.dataSource);
     const startDate = helperMethods.ISOstringToTimestamp(consent.startDate);
     const endDate = helperMethods.ISOstringToTimestamp(consent.endDate);
     const timestamp = helperMethods.ISOstringToTimestamp(consent.timestamp);
@@ -51,7 +50,7 @@ exports.addConsent = function addConsent(consent) {
         consent.consentId,
         timestamp,
         scope,
-        dataSource,
+        consent.dataSource,
         startDate,
         endDate,
         consent.connectionId
@@ -69,17 +68,11 @@ exports.revokeConsent = function revokeConsent(payload) {
     return contractHelper.sendTransaction(data);
 };
 
-exports.consentIsRevoked = async function consentIsRevoked(consentId) {
-    const consentStatus = await api.consentIsRevoked(consentId);
-
-    if (!consentStatus.isEntity) {
-        return null;
-    }
-
-    return consentStatus;
+exports.canAccess = function (consentId) {
+    return api.canAccess(consentId).call();
 };
 
-exports.getConsent = async function getConsent(consentId) {
+exports.getConsent = async function getConsent(consentId, scopeArray) {
     const consent = await api.getConsent(consentId).call();
 
     if (!consent.isEntity) {
@@ -89,14 +82,20 @@ exports.getConsent = async function getConsent(consentId) {
     const {
         startDate,
         endDate,
-        timestamp,
-        dataSource
+        created,
+        updated,
+        scope
     } = consent;
+
+    const savedScope = scopeArray.filter(scopeStr => {
+        return this.scopeContainsInteger(scope, scopeConstants[scopeStr]);
+    });
 
     consent.startDate = helperMethods.timeStampToISOstring(startDate);
     consent.endDate = helperMethods.timeStampToISOstring(endDate);
-    consent.timestamp = helperMethods.timeStampToISOstring(timestamp);
-    consent.dataSource = JSON.parse(dataSource);
+    consent.created = helperMethods.timeStampToISOstring(created);
+    consent.updated = helperMethods.timeStampToISOstring(updated);
+    consent.scope = savedScope;
 
     return consent;
 };

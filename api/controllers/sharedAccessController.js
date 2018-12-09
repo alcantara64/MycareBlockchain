@@ -17,7 +17,7 @@ exports.addConsent = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while saving consent - ${err}`);
+        logger.error(`error occured while saving consent - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -33,14 +33,14 @@ exports.revokeConsent = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while revoking consent - ${err}`);
+        logger.error(`error occured while revoking consent - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
-exports.consentIsRevoked = async function (req, res) {
+exports.canAccess = async function (req, res) {
     try {
         logger.info('Check if consent is revoked');
 
@@ -55,19 +55,11 @@ exports.consentIsRevoked = async function (req, res) {
             });
         }
 
-        const consentStatus = await sharedAccessService.getConsent(consentId);
+        const hasAccess = await sharedAccessService.canAccess(consentId);
 
-        if (!consentStatus) {
-            logger.error(`Consent not found for id - ${consentId}`);
-
-            return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
-                message: 'Consent not found'
-            });
-        }
-
-        return res.status(HTTP_STATUS.OK.CODE).json(consentStatus);
+        return res.status(HTTP_STATUS.OK.CODE).json({ canAccess: hasAccess });
     } catch (err) {
-        logger.error(`error occured while checking if consent is revoked - ${err}`);
+        logger.error(`error occured while verifying access - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -79,17 +71,11 @@ exports.getConsent = async function (req, res) {
         logger.info('Get consent');
 
         const {
-            consentId
-        } = req.params;
+            consentId,
+            scope
+        } = req.query;
 
-        if (!consentId) {
-            logger.error('consentId is a required parameter');
-
-            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
-                message: 'consentId is a required parameter'
-            });
-        }
-        const consent = await sharedAccessService.getConsent(consentId);
+        const consent = await sharedAccessService.getConsent(consentId, scope);
 
         if (!consent) {
             logger.error(`Consent not found for id - ${consentId}`);
@@ -101,7 +87,7 @@ exports.getConsent = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(consent);
     } catch (err) {
-        logger.error(`error occured while fetching consent - ${err}`);
+        logger.error(`error occured while fetching consent - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -117,7 +103,7 @@ exports.saveConnectionAttempt = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while saving connection attempt - ${err}`);
+        logger.error(`error occured while saving connection attempt - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -133,7 +119,7 @@ exports.updateConnectionAttempt = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while updating connection attempt - ${err}`);
+        logger.error(`error occured while updating connection attempt - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -168,7 +154,7 @@ exports.getConnectionAttempt = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(connectionAttempt);
     } catch (err) {
-        logger.error(`error occured while fetching connection attempt - ${err}`);
+        logger.error(`error occured while fetching connection attempt - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -191,6 +177,22 @@ exports.validateAddConsentParams = function (req, res, next) {
             });
         }
 
+        if (!payload.dataSource.length) {
+            logger.error('No datasource was specified');
+
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'No datasource was specified'
+            });
+        }
+
+        if (!payload.scope.length) {
+            logger.error('No scope was specified');
+
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'No scope was specified'
+            });
+        }
+
         const timestampIsValid = moment(payload.timestamp, moment.ISO_8601, true).isValid();
         if (!timestampIsValid) {
             logger.error('timestamp is not valid ISO8601 string');
@@ -200,7 +202,7 @@ exports.validateAddConsentParams = function (req, res, next) {
         }
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -233,7 +235,7 @@ exports.validateRevokeConsentParams = function (req, res, next) {
         }
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -265,7 +267,7 @@ exports.validateUpdateConnectionPayload = function (req, res, next) {
         }
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -298,7 +300,41 @@ exports.validateSaveConnectionPayload = function (req, res, next) {
 
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+    }
+};
+
+exports.validateGetConsentParams = function (req, res, next) {
+    try {
+        const payload = req.query;
+        const requiredFields = ['consentId', 'scope'];
+
+        const result = validators.validateRequiredParams(payload, requiredFields);
+
+        if (result.missingParam) {
+            logger.error(result.message);
+
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: result.message
+            });
+        }
+
+        payload.scope = JSON.parse(payload.scope);
+
+        if (!payload.scope.length) {
+            logger.error('No scope was specified');
+
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'No scope was specified'
+            });
+        }
+
+        next();
+    } catch (err) {
+        logger.error(`error occured during validation - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });

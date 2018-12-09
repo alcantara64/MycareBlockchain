@@ -12,12 +12,12 @@ module.exports = function sharedAccessRoute(router) {
     router.route('/share/add_consent')
         .post(sharedAccessController.validateAddConsentParams, sharedAccessController.addConsent);
 
-    router.route('/share/consent/:consentId')
-        .get(sharedAccessController.getConsent);
+    router.route('/share/consent')
+        .get(sharedAccessController.validateGetConsentParams, sharedAccessController.getConsent);
 
     router.route('/share/revoke_consent')
         .put(sharedAccessController.validateRevokeConsentParams, sharedAccessController.revokeConsent);
 
-    router.route('/share/consent_status/:consentId')
-        .get(sharedAccessController.consentIsRevoked);
+    router.route('/share/can_access/:consentId')
+        .get(sharedAccessController.canAccess);
 };

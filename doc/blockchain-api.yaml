@@ -84,12 +84,12 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/share/consent_status/{consentId}':
+  '/share/can_access/{consentId}':
     get:
       tags:
         - SharedAccess
-      summary: Check if consent is revoked or not
-      description: Check if consent is revoked or not
+      summary: Check if viewer has permission to access data
+      description: Check if viewer has permission to access data
       parameters: 
         - in: path
           name: consentId
@@ -133,18 +133,23 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/share/consent/{consentId}':
+  '/share/consent':
     get:
       tags:
         - SharedAccess
       summary: Get saved consent
       description: Get saved consent
       parameters: 
-        - in: path
+        - in: query
           name: consentId
-          required: true
           schema:
             type: string
+        - in: query
+          name: scope
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: OK
@@ -437,19 +442,28 @@ components:
     SavedConsent:
       type: object
       properties:
-        timestamp:
+        created:
           type: number
-          example: 1542808796218
+          example: "2018-12-09T21:02:03.110Z"
+        updated:
+          type: number
+          example: "2018-12-09T21:02:03.110Z"
         scope:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "Procedure"
         dataSource:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "0x5EF18be6e742c63AA2Dab7F52C1B699040875808"
         startDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-12-09T21:02:03.110Z"
         endDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-12-09T21:02:03.110Z"
         consentId:
           type: string
         connectionId:
@@ -467,8 +481,12 @@ components:
           type: array
           items:
             type: string
+            example: "Procedure"
         dataSource:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "0x5EF18be6e742c63AA2Dab7F52C1B699040875808"
         startDate:
           type: string
           example: "2018-11-28T13:01:04.956Z"
