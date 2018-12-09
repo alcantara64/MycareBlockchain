@@ -6,7 +6,7 @@
   "scripts": {
     "test:contracts": "truffle test",
     "start": "nodemon server.js",
-    "deploy:contracts": "truffle migrate --reset --network mainnet",
+    "deploy:contracts": "truffle migrate --reset --all --network mainnet",
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",
     "coverage:contracts": "./node_modules/.bin/solidity-coverage",

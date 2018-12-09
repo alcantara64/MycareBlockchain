@@ -2,9 +2,10 @@ pragma solidity ^0.4.17;
 
 contract SharedAccess {
     struct Consent {
-        uint timestamp;
+        uint created;
+        uint updated;
         bytes16 scope;
-        string dataSource;
+        address[] dataSource;
         uint startDate;
         uint endDate;
         string connectionId;
@@ -30,7 +31,7 @@ contract SharedAccess {
         string consentId,
         uint timestamp,
         bytes16 scope,
-        string dataSource,
+        address[] dataSource,
         uint startDate,
         uint endDate,
         string connectionId
@@ -40,7 +41,8 @@ contract SharedAccess {
         
         if (connection.isEntity) {
             allConsents[consentId] = Consent({
-                timestamp: timestamp,
+                created: timestamp,
+                updated: timestamp,
                 scope: scope,
                 dataSource: dataSource,
                 startDate: startDate,
@@ -59,9 +61,10 @@ contract SharedAccess {
     function getConsent(string _consentId) public view returns(
         string consentId,
         string connectionId,
-        uint timestamp,
+        uint created,
+        uint updated,
         bytes16 scope,
-        string dataSource,
+        address[] dataSource,
         uint startDate,
         uint endDate,
         bool revoked,
@@ -72,7 +75,8 @@ contract SharedAccess {
         return (
             _consentId,
             consent.connectionId,
-            consent.timestamp,
+            consent.created,
+            consent.updated,
             consent.scope,
             consent.dataSource,
             consent.startDate,
@@ -82,8 +86,10 @@ contract SharedAccess {
         );
     }
     
-    function consentIsRevoked(string _consentId) public view returns(bool consentRevoked, bool isEntity) {
-        return (allConsents[_consentId].revoked, allConsents[_consentId].isEntity);
+    function canAccess(string _consentId) public view returns(bool) {
+        Consent memory consent = allConsents[_consentId];
+        
+        return (consent.isEntity && !consent.revoked);
     }
     
     function addConnectionAttempt(
@@ -145,7 +151,7 @@ contract SharedAccess {
     function revokeConsent(string _consentId, uint timestamp) public returns(bool success) {
         Consent storage consent = allConsents[_consentId];
         consent.revoked = true;
-        consent.timestamp = timestamp;
+        consent.updated = timestamp;
         return true;
     } 
 }
