@@ -19,7 +19,7 @@ exports.addNewDocument = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while adding new document - ${err}`);
+        logger.error(`error occured while adding new document - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -35,7 +35,7 @@ exports.saveAcceptance = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while saving acceptance - ${err}`);
+        logger.error(`error occured while saving acceptance - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -69,7 +69,7 @@ exports.getDocument = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(document);
     } catch (err) {
-        logger.error(`error occured while getting document - ${err}`);
+        logger.error(`error occured while getting document - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -106,7 +106,7 @@ exports.getUserAcceptance = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(acceptance);
     } catch (err) {
-        logger.error(`error occured while getting user acceptance - ${err}`);
+        logger.error(`error occured while getting user acceptance - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -139,7 +139,7 @@ exports.validateAcceptancePayload = function (req, res, next) {
         }
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -161,7 +161,7 @@ exports.validateAddDocumentPayload = function (req, res, next) {
         }
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });

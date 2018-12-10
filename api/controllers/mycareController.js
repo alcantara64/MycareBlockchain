@@ -16,7 +16,7 @@ exports.addAccount = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while adding account - ${err}`);
+        logger.error(`error occured while adding account - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -38,7 +38,7 @@ exports.deactivateAccount = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while deactivating account - ${err}`);
+        logger.error(`error occured while deactivating account - ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -77,7 +77,7 @@ exports.getAccount = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(account);
     } catch (err) {
-        logger.error(`error occured while getting account - ${err}`);
+        logger.error(`error occured while getting account - ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -93,7 +93,7 @@ exports.getAccountsCount = async function (req, res) {
             count
         });
     } catch (err) {
-        logger.error(`error occured while getting accounts count - ${err}`);
+        logger.error(`error occured while getting accounts count - ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -109,7 +109,7 @@ exports.generateChainAccount = function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(accountDetails);
     } catch (err) {
-        logger.error(`error occured generating ethereum account ${err}`);
+        logger.error(`error occured generating ethereum account ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
@@ -153,7 +153,7 @@ function validateAccountParams(req, res, next, expectedParams) {
 
         next();
     } catch (err) {
-        logger.error(err);
+        logger.error(`error occured during validation - ${err.message}`);
 
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
