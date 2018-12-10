@@ -10,7 +10,7 @@
     "test": "npm run test:contracts && npm run test:api",
     "test:api:debug": "mocha --recursive --exit --inspect-brk ./spec/**/*.js --timeout 90000",
     "start": "nodemon server.js",
-    "deploy:contracts": "truffle migrate --reset --network mainnet",
+    "deploy:contracts": "truffle migrate --reset --all --network mainnet",
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",
     "coverage": "nyc --reporter=lcov mocha --recursive --exit ./spec/**/**/*.js --timeout 90000",

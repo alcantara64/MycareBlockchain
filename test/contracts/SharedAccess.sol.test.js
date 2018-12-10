@@ -6,6 +6,7 @@ contract('SharedAccess', (accounts) => {
     const from = accounts[0];
     const to = accounts[1];
     const created = Math.floor(Date.now() / 1000);
+    const dataSource = ['0x5ef18be6e742c63aa2dab7f52c1b699040875808', '0xd9ef690a2836b5e50098a391ebd490a96a416eec'];
 
     it('can save connection attempt and retrieve it', async () => {
         const sharedAccess = await SharedAccess.deployed();
@@ -90,7 +91,7 @@ contract('SharedAccess', (accounts) => {
             connectionId,
             from,
             to,
-            created,
+            created
         );
 
         let connection = await sharedAccess.getConnectionAttempt(connectionId);
@@ -114,9 +115,6 @@ contract('SharedAccess', (accounts) => {
         const consentId = 'my_consent_ID';
         const timestamp = Date.now();
 
-        const dataSource = ['provider_1_id', 'provider_2_id'];
-        const dataSourceString = JSON.stringify(dataSource);
-
         const startDate = Date.now();
         const endDate = Date.now();
 
@@ -127,17 +125,17 @@ contract('SharedAccess', (accounts) => {
             connectionId,
             from,
             to,
-            created,
+            created
         );
 
         await sharedAccess.addConsent(
             consentId,
             timestamp,
             scopeHex,
-            dataSourceString,
+            dataSource,
             startDate,
             endDate,
-            connectionId,
+            connectionId
         );
 
         let savedConsent = await sharedAccess.getConsent(consentId);
@@ -147,19 +145,21 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[1], connectionId);
 
         assert.equal(savedConsent[2], timestamp);
+        assert.equal(savedConsent[3], timestamp);
 
-        assert.equal(savedConsent[3], scopeHex);
-        assert.equal(parseInt(savedConsent[3], 16), scope);
+        assert.equal(savedConsent[4], scopeHex);
+        assert.equal(parseInt(savedConsent[4], 16), scope);
 
-        assert.equal(savedConsent[4], dataSourceString);
+        assert.equal(savedConsent[5][0].toLowerCase(), dataSource[0]);
+        assert.equal(savedConsent[5][1].toLowerCase(), dataSource[1]);
 
-        assert.equal(savedConsent[5], startDate);
+        assert.equal(savedConsent[6], startDate);
 
-        assert.equal(savedConsent[6], endDate);
+        assert.equal(savedConsent[7], endDate);
 
-        assert.equal(savedConsent[7], false);
+        assert.equal(savedConsent[8], false);
 
-        assert.equal(savedConsent[8], true);
+        assert.equal(savedConsent[9], true);
     });
 
     it('doesnt save consent to blockchain if connection does not exist', async () => {
@@ -167,9 +167,6 @@ contract('SharedAccess', (accounts) => {
 
         const consentId = 'my_consent_ID';
         const timestamp = Date.now();
-
-        const dataSource = ['provider_1_id', 'provider_2_id'];
-        const dataSourceString = JSON.stringify(dataSource);
 
         const startDate = Date.now();
         const endDate = Date.now();
@@ -181,10 +178,10 @@ contract('SharedAccess', (accounts) => {
             consentId,
             timestamp,
             scopeHex,
-            dataSourceString,
+            dataSource,
             startDate,
             endDate,
-            connectionId,
+            connectionId
         );
 
         let savedConsent = await sharedAccess.getConsent(consentId);
@@ -194,18 +191,19 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[1], '');
 
         assert.equal(savedConsent[2], 0);
+        assert.equal(savedConsent[3], 0);
 
-        assert.equal(savedConsent[3], '0x00000000000000000000000000000000');
+        assert.equal(savedConsent[4], '0x00000000000000000000000000000000');
 
-        assert.equal(savedConsent[4], '');
-
-        assert.equal(savedConsent[5], 0);
+        assert.equal(savedConsent[5].length, 0);
 
         assert.equal(savedConsent[6], 0);
 
-        assert.equal(savedConsent[7], false);
+        assert.equal(savedConsent[7], 0);
 
         assert.equal(savedConsent[8], false);
+
+        assert.equal(savedConsent[9], false);
     });
 
     it('returns empty and falsy fields when consent is not found', async () => {
@@ -220,18 +218,28 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[1], '');
 
         assert.equal(savedConsent[2], 0);
+        assert.equal(savedConsent[3], 0);
 
-        assert.equal(savedConsent[3], '0x00000000000000000000000000000000');
+        assert.equal(savedConsent[4], '0x00000000000000000000000000000000');
 
-        assert.equal(savedConsent[4], '');
-
-        assert.equal(savedConsent[5], 0);
+        assert.equal(savedConsent[5].length, 0);
 
         assert.equal(savedConsent[6], 0);
 
-        assert.equal(savedConsent[7], false);
+        assert.equal(savedConsent[7], 0);
 
         assert.equal(savedConsent[8], false);
+
+        assert.equal(savedConsent[9], false);
+    });
+
+    it('can access is false if consent doesnt not exist', async () => {
+        const sharedAccess = await SharedAccess.new();
+
+        const consentId = 'non-existent-conent';
+        const canAccess = await sharedAccess.canAccess(consentId);
+
+        assert.equal(canAccess, false);
     });
 
     it('can revoke consent', async () => {
@@ -239,9 +247,6 @@ contract('SharedAccess', (accounts) => {
 
         const consentId = 'my_consent_ID';
         const timestamp = Date.now();
-
-        const dataSource = ['provider_1_id', 'provider_2_id'];
-        const dataSourceString = JSON.stringify(dataSource);
 
         const startDate = Date.now();
         const endDate = Date.now();
@@ -253,22 +258,21 @@ contract('SharedAccess', (accounts) => {
             connectionId,
             from,
             to,
-            created,
+            created
         );
 
         await sharedAccess.addConsent(
             consentId,
             timestamp,
             scopeHex,
-            dataSourceString,
+            dataSource,
             startDate,
             endDate,
-            connectionId,
+            connectionId
         );
 
-        let consentIsRevoked = await sharedAccess.consentIsRevoked(consentId);
-        assert.equal(consentIsRevoked[0], false);
-        assert.equal(consentIsRevoked[1], true);
+        let canAccess = await sharedAccess.canAccess(consentId);
+        assert.equal(canAccess, true);
 
         let savedConsent = await sharedAccess.getConsent(consentId);
 
@@ -277,28 +281,29 @@ contract('SharedAccess', (accounts) => {
         assert.equal(savedConsent[1], connectionId);
 
         assert.equal(savedConsent[2], timestamp);
+        assert.equal(savedConsent[3], timestamp);
 
-        assert.equal(savedConsent[3], scopeHex);
-        assert.equal(parseInt(savedConsent[3], 16), scope);
+        assert.equal(savedConsent[4], scopeHex);
+        assert.equal(parseInt(savedConsent[4], 16), scope);
 
-        assert.equal(savedConsent[4], dataSourceString);
+        assert.equal(savedConsent[5][0].toLowerCase(), dataSource[0]);
+        assert.equal(savedConsent[5][1].toLowerCase(), dataSource[1]);
 
-        assert.equal(savedConsent[5], startDate);
+        assert.equal(savedConsent[6], startDate);
 
-        assert.equal(savedConsent[6], endDate);
+        assert.equal(savedConsent[7], endDate);
 
-        assert.equal(savedConsent[7], false);
+        assert.equal(savedConsent[8], false);
 
-        assert.equal(savedConsent[8], true);
+        assert.equal(savedConsent[9], true);
 
         const revokeTime = timestamp + 3467000;
 
         await sharedAccess.revokeConsent(consentId, revokeTime);
 
-        consentIsRevoked = await sharedAccess.consentIsRevoked(consentId);
+        canAccess = await sharedAccess.canAccess(consentId);
 
-        assert.equal(consentIsRevoked[0], true);
-        assert.equal(consentIsRevoked[1], true);
+        assert.equal(canAccess, false);
 
         savedConsent = await sharedAccess.getConsent(consentId);
 
@@ -306,17 +311,19 @@ contract('SharedAccess', (accounts) => {
 
         assert.equal(savedConsent[1], connectionId);
 
-        assert.equal(savedConsent[2], revokeTime);
+        assert.equal(savedConsent[2], timestamp);
+        assert.equal(savedConsent[3], revokeTime);
 
-        assert.equal(savedConsent[3], scopeHex);
-        assert.equal(parseInt(savedConsent[3], 16), scope);
+        assert.equal(savedConsent[4], scopeHex);
+        assert.equal(parseInt(savedConsent[4], 16), scope);
 
-        assert.equal(savedConsent[4], dataSourceString);
+        assert.equal(savedConsent[5][0].toLowerCase(), dataSource[0]);
+        assert.equal(savedConsent[5][1].toLowerCase(), dataSource[1]);
 
-        assert.equal(savedConsent[5], startDate);
+        assert.equal(savedConsent[6], startDate);
 
-        assert.equal(savedConsent[6], endDate);
+        assert.equal(savedConsent[7], endDate);
 
-        assert.equal(savedConsent[7], true);
+        assert.equal(savedConsent[8], true);
     });
 });
