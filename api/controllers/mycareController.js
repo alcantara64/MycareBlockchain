@@ -6,7 +6,7 @@ const keyHelper = require(`${appRoot}/api/helpers/keyHelper`);
 
 const {
     HTTP_STATUS
-} = require(`${appRoot}/api/constants/Constants`);
+} = require(`${appRoot}/api/constants/Common`);
 
 exports.addAccount = async function (req, res) {
     try {

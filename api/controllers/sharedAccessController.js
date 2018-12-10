@@ -6,7 +6,7 @@ const validators = require(`${appRoot}/api/shared/validators`);
 
 const {
     HTTP_STATUS
-} = require(`${appRoot}/api/constants/Constants`);
+} = require(`${appRoot}/api/constants/Common`);
 
 exports.addConsent = async function (req, res) {
     try {
