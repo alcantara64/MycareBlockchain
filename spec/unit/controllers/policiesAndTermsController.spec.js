@@ -3,7 +3,7 @@ const proxyquire = require('proxyquire').noCallThru();
 const chai = require('chai');
 const {
     HTTP_STATUS
-} = require(`${appRoot}/api/constants/Constants`);
+} = require(`${appRoot}/api/constants/Common`);
 
 const sinon = require('sinon');
 let sandbox = sinon.createSandbox();
