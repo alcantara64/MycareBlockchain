@@ -58,7 +58,7 @@ typings/
 *.tgz
 
 # dotenv environment variables file
-.env*
+# .env*
 
 #app and dev machine generated files
 myfile.bat

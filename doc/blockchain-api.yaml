@@ -84,12 +84,12 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/share/consent_status/{consentId}':
+  '/share/can_access/{consentId}':
     get:
       tags:
         - SharedAccess
-      summary: Check if consent is revoked or not
-      description: Check if consent is revoked or not
+      summary: Check if viewer has permission to access data
+      description: Check if viewer has permission to access data
       parameters: 
         - in: path
           name: consentId
@@ -133,18 +133,23 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/share/consent/{consentId}':
+  '/share/consent':
     get:
       tags:
         - SharedAccess
       summary: Get saved consent
       description: Get saved consent
       parameters: 
-        - in: path
+        - in: query
           name: consentId
-          required: true
           schema:
             type: string
+        - in: query
+          name: scope
+          schema:
+            type: array
+            items:
+              type: string
       responses:
         '200':
           description: OK
@@ -188,13 +193,13 @@ paths:
         - in: query
           name: walletAddress
           schema:
-            type: integer
+            type: string
             description: account wallet address
             example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
         - in: query
           name: documentHash
           schema:
-            type: integer
+            type: string
             description: terms and policy document hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
       responses:
@@ -230,7 +235,7 @@ paths:
           description: Bad request
         '500':
           description: Server Error
-  '/terms_and_policies/document/{documentId}':
+  '/terms_and_policies/document/{documentHash}':
     get:
       tags:
         - TermsAndPolicies
@@ -239,8 +244,8 @@ paths:
       parameters:
         - in: path
           required: true
-          name: documentId
-          description: id of document from database
+          name: documentHash
+          description: ipfsHash of the document
           schema:
             type: string
       responses:
@@ -333,14 +338,14 @@ paths:
           name: walletAddress
           required: false
           schema:
-            type: integer
+            type: string
             description: account wallet address
             example: "0x23ff33sd8ace82c72f82c28e82addecf23795fc"
         - in: query
           name: profileHash
           required: false
           schema:
-            type: integer
+            type: string
             description: account profile hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
       responses:
@@ -352,6 +357,21 @@ paths:
                 $ref: '#/components/schemas/Account'
         '404':
           description: Not found
+        '500':
+          description: Server Error
+  '/generate_chain_account':
+    get:
+      tags: 
+        - MyCareContract
+      summary: Generate new chain account
+      description: Generate new chain account
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChainAccount'
         '500':
           description: Server Error
   '/mycare/account_count':
@@ -378,8 +398,8 @@ components:
         consentId:
           type: string
         timestamp:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T14:23:28.233Z"
     GetConnection:
       type: object
       properties:
@@ -401,8 +421,8 @@ components:
       type: object
       properties:
         timestamp:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T08:44:00.076Z"
         accepted:
           type: boolean
         connectionId:
@@ -411,8 +431,8 @@ components:
       type: object
       properties:
         created:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T08:44:00.076Z"
         from:
           type: string
         to:
@@ -422,19 +442,28 @@ components:
     SavedConsent:
       type: object
       properties:
-        timestamp:
+        created:
           type: number
-          example: 1542808796218
+          example: "2018-12-09T21:02:03.110Z"
+        updated:
+          type: number
+          example: "2018-12-09T21:02:03.110Z"
         scope:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "Procedure"
         dataSource:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "0x5EF18be6e742c63AA2Dab7F52C1B699040875808"
         startDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-12-09T21:02:03.110Z"
         endDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-12-09T21:02:03.110Z"
         consentId:
           type: string
         connectionId:
@@ -446,18 +475,24 @@ components:
       type: object
       properties:
         timestamp:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T13:01:04.956Z"
         scope:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "Procedure"
         dataSource:
-          type: string
+          type: array
+          items:
+            type: string
+            example: "0x5EF18be6e742c63AA2Dab7F52C1B699040875808"
         startDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T13:01:04.956Z"
         endDate:
-          type: number
-          example: 1542808796218
+          type: string
+          example: "2018-11-28T13:01:04.956Z"
         consentId:
           type: string
         connectionId:
@@ -488,15 +523,13 @@ components:
       properties:
         timestamp:
           type: number
+          example: "2018-11-21T13:22:48.069Z"
         ipfsHash:
           type: string
           description: ipfs hash of document
     PATdocument:
       type: object
       properties:
-        documentId:
-          type: string
-          description: id of document from database
         ipfsHash:
           type: string
           description: ipfs hash of document
@@ -544,6 +577,17 @@ components:
           type: boolean
           description: flag to indicating is account is deactivated or not
           example: false
+    ChainAccount:
+      type: object
+      properties:
+        walletAddress:
+          type: string
+        walletPrivateKey:
+          type: string
+        rsaPublicKey:
+          type: string
+        rsaPassPhrase:
+          type: string
     AccountCount:
       type: object
       properties:
