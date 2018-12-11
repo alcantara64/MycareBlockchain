@@ -7,6 +7,7 @@
     "test:contracts": "truffle test",
     "test:api": "mocha --recursive --exit ./spec/**/**/*.js --timeout 90000",
     "test:api:unit": "mocha --recursive --exit ./spec/unit/**/*.js --timeout 90000",
+    "test:api:integration": "mocha --recursive --exit ./spec/integration/**/*.js --timeout 90000",
     "test": "npm run test:contracts && npm run test:api",
     "test:api:debug": "mocha --recursive --exit --inspect-brk ./spec/**/*.js --timeout 90000",
     "start": "nodemon server.js",

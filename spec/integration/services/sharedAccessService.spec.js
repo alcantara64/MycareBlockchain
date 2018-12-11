@@ -4,7 +4,7 @@ const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
 
-describe.only('SharedAccessService', () => {
+describe('SharedAccessService', () => {
     let sharedAccessService;
     let contractHelper;
     let contractMethods;
