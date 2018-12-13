@@ -1,0 +1,13 @@
+{
+    "extends": "standard",
+    "rules": {
+        "imports/no-dynamic-require": "off",
+        "no-plusplus": "off",
+        "func-names": "off",
+        "prefer-arrow-callback": "off",
+        "indent": ["error", 4],
+        "semi": ["error", "always"],
+        "space-before-function-paren": "off",
+        "eol-last": "off"
+    }
+}
