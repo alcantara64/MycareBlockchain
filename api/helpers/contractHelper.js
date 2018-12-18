@@ -2,13 +2,14 @@ const appRoot = require('app-root-path');
 const Web3 = require('web3');
 const fs = require('fs');
 const ethereumjs = require('ethereumjs-tx');
+const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
 
 const buildDir = `${appRoot}/build/contracts`;
 
 const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_ENDPOINT));
 
-const accountAddress = process.env.ACCOUNT_ADDRESS;
-const privateKey = Buffer.from(process.env.ACCOUNT_PRIVATE_KEY, 'hex');
+let accountAddress;
+let privateKey;
 
 function getContractInstance (contractName, options = {}) {
     const compiledFilePath = `${buildDir}/${contractName}.json`;
@@ -22,6 +23,18 @@ function getContractInstance (contractName, options = {}) {
     return new web3.eth.Contract(jsonInterface.abi, deployedContractAddress, options);
 };
 
+async function initializeTransactionCredentials() {
+    if (!accountAddress) {
+        const accountAddressJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_ADDRESS, '');
+        accountAddress = JSON.parse(accountAddressJSON).value;
+    }
+
+    if (!privateKey) {
+        const privateKeyJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_PRIVATE_KEY, '');
+        privateKey = Buffer.from(JSON.parse(privateKeyJSON).value, 'hex');
+    }
+}
+
 function ContractHelper (contractName) {
     if (!contractName) {
         throw new Error('Contract Name is required to initialize helper');
@@ -31,6 +44,7 @@ function ContractHelper (contractName) {
 }
 
 ContractHelper.prototype.sendTransaction = async function (data) {
+    await initializeTransactionCredentials();
     const nonce = await web3.eth.getTransactionCount(accountAddress);
 
     const rawTx = {
