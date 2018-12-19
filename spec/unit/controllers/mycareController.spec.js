@@ -41,7 +41,7 @@ describe('mycareController', () => {
         imports[`${appRoot}/api/services/mycareService`] = mycareService;
         imports[`${appRoot}/api/helpers/contractHelper`] = contractHelper;
 
-        mycareController = proxyquire(`${appRoot}/api/controllers/mycarecontroller`, imports);
+        mycareController = proxyquire(`${appRoot}/api/controllers/mycareController`, imports);
     });
 
     afterEach(() => {
