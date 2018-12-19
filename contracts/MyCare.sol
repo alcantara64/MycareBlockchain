@@ -4,7 +4,7 @@ contract MyCare {
 
     struct Account {
         address chainAddress;
-        bytes32 profile;
+        string profile;
         bool isEntity;
         uint created;
         uint updated;
@@ -17,8 +17,8 @@ contract MyCare {
 
     address[] userFilesList;
 
-    mapping ( address => Account ) public accountStructs;
-    mapping ( bytes32 => address ) public accountAddressesByProfile;
+    mapping ( address => Account ) private accountStructs;
+    mapping ( string => address ) private accountAddressesByProfile;
     address[] public accountList;
 
     constructor() public {
@@ -26,7 +26,7 @@ contract MyCare {
     }
 
     //  Accounts
-    function AddAccount( address ownerAddress, bytes32 profile, uint timestamp ) public returns (bool success ) {
+    function AddAccount( address ownerAddress, string profile, uint timestamp ) public returns (bool success ) {
         if ( ! accountStructs[ownerAddress].isEntity ) {
             accountStructs[ownerAddress].chainAddress = ownerAddress;
             accountStructs[ownerAddress].profile = profile;
@@ -46,12 +46,12 @@ contract MyCare {
         return true;
     }
 
-    function GetAccountByProfile( bytes32 _profile )
+    function GetAccountByProfile( string _profile )
         public
         view
         returns (
             address walletAddress,
-            bytes32 profile,
+            string profile,
             bool isEntity,
             bool active,
             uint created,
@@ -74,7 +74,7 @@ contract MyCare {
         view
         returns (
             address walletAddress,
-            bytes32 profile,
+            string profile,
             bool isEntity,
             bool active,
             uint created,
