@@ -4,6 +4,8 @@ const chai = require('chai');
 const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Common`);
+const dotenv = require('dotenv');
+dotenv.config();
 
 const sinon = require('sinon');
 let sandbox = sinon.createSandbox();

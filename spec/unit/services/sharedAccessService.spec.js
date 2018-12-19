@@ -3,6 +3,8 @@ const chai = require('chai');
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
+const dotenv = require('dotenv');
+dotenv.config();
 
 describe('SharedAccessService', () => {
     let sharedAccessService;
