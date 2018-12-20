@@ -21,8 +21,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "adal-node": "^0.1.28",
     "app-root-path": "^2.0.1",
     "atob": "^2.1.2",
+    "azure-keyvault": "^3.0.4",
     "big-integer": "^1.6.40",
     "body-parser": "^1.18.3",
     "btoa": "^1.2.1",
