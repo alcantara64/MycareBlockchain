@@ -122,16 +122,16 @@ exports.generateChainAccount = function (req, res) {
 exports.validateDeactivateAccountParams = function (req, res, next) {
     const expectedParams = ['walletAddress', 'timestamp'];
 
-    validateAccountParams(req, res, next, expectedParams);
+    exports.validateAccountParams(req, res, next, expectedParams);
 };
 
 exports.validateAddAccountParams = function (req, res, next) {
     const expectedParams = ['walletAddress', 'profileHash', 'timestamp'];
 
-    validateAccountParams(req, res, next, expectedParams);
+    exports.validateAccountParams(req, res, next, expectedParams);
 };
 
-function validateAccountParams(req, res, next, expectedParams) {
+exports.validateAccountParams = function validateAccountParams(req, res, next, expectedParams) {
     try {
         for (let i = 0; i < expectedParams.length; i++) {
             const param = expectedParams[i];
