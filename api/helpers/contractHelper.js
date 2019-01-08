@@ -43,14 +43,14 @@ function ContractHelper (contractName) {
     this._contract = getContractInstance(contractName);
 }
 
-ContractHelper.prototype.sendTransaction = async function (data) {
+ContractHelper.prototype.sendTransaction = async function (data, gasLimit) {
     await initializeTransactionCredentials();
     const nonce = await web3.eth.getTransactionCount(accountAddress);
 
     const rawTx = {
         nonce,
         gasPrice: '0x00',
-        gasLimit: '0x2FAF080',
+        gasLimit,
         to: this._contract._address,
         value: '0x00',
         data
