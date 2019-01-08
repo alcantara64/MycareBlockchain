@@ -3,10 +3,11 @@ const chai = require('chai');
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
+const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
 const dotenv = require('dotenv');
 dotenv.config();
 
-describe.only('MycareService', () => {
+describe('MycareService', () => {
     let mycareService;
     let contractHelper;
     let contractMethods;
@@ -79,7 +80,7 @@ describe.only('MycareService', () => {
 
         mycareService.AddAccount(payload);
 
-        sandbox.assert.calledWith(sendTransactionStub, data);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
 
         sandbox.assert.calledWith(
             contractMethods.AddAccount,
@@ -103,6 +104,8 @@ describe.only('MycareService', () => {
         });
 
         mycareService.DeactivateAccount(ownerAddress, _timestamp);
+
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.DEACTIVATE_ACCOUNT);
 
         sandbox.assert.calledWith(contractMethods.DeactivateAccount, ownerAddress, timestamp);
 
