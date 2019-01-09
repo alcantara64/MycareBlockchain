@@ -7,12 +7,6 @@ const sandbox = sinon.createSandbox();
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 
 describe('helperMethods', () => {
-    // let helperMethods;
-
-    beforeEach(() => {
-        // helperMethods = proxyquire(`${appRoot}/api/helpers/helperMethods`);
-    });
-
     afterEach(() => {
         sandbox.restore();
     });
