@@ -15,6 +15,7 @@ const winston = require(`${appRoot}/config/winston`);
 const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
 const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
 const policiesAndTermsRoute = require(`${appRoot}/api/routes/policiesAndTermsRoute`);
+const db = require(`${appRoot}/config/dbConnection`);
 
 const port = process.env.PORT || 4000;
 
