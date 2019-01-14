@@ -1,5 +1,6 @@
 const appRoot = require('app-root-path');
 const mycareController = require(`${appRoot}/api/controllers/mycareController`);
+const commonController = require(`${appRoot}/api/controllers/commonController`);
 
 module.exports = function mycareRoute(router) {
     router.route('/mycare/add_account')
@@ -15,5 +16,5 @@ module.exports = function mycareRoute(router) {
         .get(mycareController.getAccountsCount);
 
     router.route('/generate_chain_account')
-        .get(mycareController.generateChainAccount);
+        .get(commonController.protected, mycareController.generateChainAccount);
 };

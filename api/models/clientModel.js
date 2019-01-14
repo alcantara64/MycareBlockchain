@@ -4,13 +4,16 @@ const clientSchema = new mongoose.Schema({
     name: {
         type: 'string'
     },
-    access_token: {
+    email: {
         type: 'string'
     },
-    client_id: {
+    // accessToken: {
+    //     type: 'string'
+    // },
+    clientId: {
         type: 'string'
     },
-    client_secret: {
+    clientSecret: {
         type: 'string'
     }
 }, {
