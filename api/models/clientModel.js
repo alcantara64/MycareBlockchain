@@ -7,20 +7,12 @@ const clientSchema = new mongoose.Schema({
     email: {
         type: 'string'
     },
-    // accessToken: {
-    //     type: 'string'
-    // },
     clientId: {
         type: 'string'
     },
     clientSecret: {
         type: 'string'
     }
-}, {
-    timestamps: {
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
-    }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Client', clientSchema);

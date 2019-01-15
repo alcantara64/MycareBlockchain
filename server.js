@@ -16,12 +16,8 @@ const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
 const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
 const authRoute = require(`${appRoot}/api/routes/authRoute`);
 const policiesAndTermsRoute = require(`${appRoot}/api/routes/policiesAndTermsRoute`);
-const clientService = require(`${appRoot}/api/services/clientService`);
 // initialize database configuration
 require(`${appRoot}/config/dbConnection`);
-
-// generate seed data
-clientService.seedData();
 
 const port = process.env.PORT || 4000;
 
