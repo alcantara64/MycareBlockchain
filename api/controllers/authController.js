@@ -11,6 +11,7 @@ const {
 
 exports.getAccessToken = async function (req, res) {
     try {
+        logger.info('get access token');
         const {
             clientId,
             clientSecret
@@ -61,8 +62,25 @@ exports.getAccessToken = async function (req, res) {
     }
 };
 
+exports.deleteClient = async function (req, res) {
+    try {
+        logger.info('Delete client');
+
+        await clientService.delete(req.params.id);
+
+        return res.status(HTTP_STATUS.OK.CODE).json({ message: 'deleted client successful' });
+    } catch (err) {
+        logger.error(`error ocured deleting client ${err.message}`);
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+    }
+};
+
 exports.newClient = async function (req, res) {
     try {
+        logger.info('create new client');
+
         const {
             email,
             name
@@ -99,6 +117,8 @@ exports.newClient = async function (req, res) {
 
 exports.getClientById = async function (req, res) {
     try {
+        logger.info('get client by id');
+
         const {
             id
         } = req.params;
@@ -135,6 +155,8 @@ exports.getClientById = async function (req, res) {
 
 exports.updateClient = async function (req, res) {
     try {
+        logger.info('update client');
+
         const disallowedFields = ['_id', 'clientId', 'clientToken'];
         const updateFields = Object.keys(req.body);
 
@@ -172,6 +194,7 @@ exports.updateClient = async function (req, res) {
 
 exports.getClients = async function (req, res) {
     try {
+        logger.info('get clients');
         const {
             startFrom,
             limitTo
@@ -190,6 +213,7 @@ exports.getClients = async function (req, res) {
 
 exports.validateClientExists = async function (req, res, next) {
     try {
+        logger.info('validate client exists');
         const {
             id
         } = req.params;

@@ -14,5 +14,6 @@ module.exports = function (router) {
 
     router.route('/auth/client/:id')
         .get(authController.validateClientExists, authController.getClientById)
-        .put(authController.validateClientExists, authController.updateClient);
+        .put(authController.validateClientExists, authController.updateClient)
+        .delete(authController.validateClientExists, authController.deleteClient);
 };

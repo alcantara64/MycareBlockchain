@@ -18,3 +18,7 @@ exports.create = function (payload) {
 exports.update = function (query, newValues) {
     return Client.findOneAndUpdate(query, newValues);
 };
+
+exports.delete = function (clientId) {
+    return Client.findOneAndRemove({ _id: clientId });
+};
