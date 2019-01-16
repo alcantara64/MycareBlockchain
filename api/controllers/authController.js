@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const logger = require(`${appRoot}/config/winston`);
 const clientService = require(`${appRoot}/api/services/clientService`);
 const requestHelper = require(`${appRoot}/api/helpers/requestHelper`);
+const { TOKEN_TYPE } = require(`${appRoot}/api/constants/authConstants`);
 const jwt = require('jsonwebtoken');
 
 const {
@@ -49,6 +50,7 @@ exports.getAccessToken = async function (req, res) {
             access_token: jwt.sign({
                 sub: client._id,
                 email: client.email,
+                tokenType: TOKEN_TYPE.CLIENT,
                 exp: expiration
             }, process.env.JWT_TOKEN)
         };

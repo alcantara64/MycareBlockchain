@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 exports.ISOstringToTimestamp = function(isoString) {
     const date = new Date(isoString);
     return Math.floor(date.getTime() / 1000);
@@ -10,4 +12,8 @@ exports.timeStampToISOstring = function (timestamp) {
 
 exports.createTimeStamp = function (timestamp) {
     return Math.floor(Date.now() / 1000);
+};
+
+exports.hashPassword = function (salt, password) {
+    return crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
 };

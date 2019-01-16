@@ -66,3 +66,6 @@ myfile.json
 .DS_STORE
 .vscode/
 package-lock.json
+
+#seed data
+util/seedData/
