@@ -5,7 +5,8 @@ const passportJWT = require('passport-jwt');
 const ExtractJWT = passportJWT.ExtractJwt;
 const JWTStrategy = passportJWT.Strategy;
 const {
-    TOKEN_TYPE
+    TOKEN_TYPE,
+    ROLES
 } = require(`${appRoot}/api/constants/authConstants`);
 
 const jwtOptions = {};
@@ -29,7 +30,7 @@ const strategy = new JWTStrategy(jwtOptions, (jwtPayload, next) => {
         case TOKEN_TYPE.USER:
             User.findOne()
                 .then((user) => {
-                    if (user && !tokenExpired) {
+                    if (user && !tokenExpired && user.role.includes(ROLES.ADMIN)) {
                         next(null, client);
                     } else {
                         next(null, false);

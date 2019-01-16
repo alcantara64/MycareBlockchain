@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const logger = require(`${appRoot}/config/winston`);
 const User = require(`${appRoot}/api/models/userModel`);
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
+const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 
 exports.createAdminUser = async function () {
     try {
@@ -21,7 +22,7 @@ exports.createAdminUser = async function () {
             user.salt = crypto.randomBytes(16).toString('hex');
             user.hash = helperMethods.hashPassword(user.salt, user.password);
 
-            user.role = ['Admin'];
+            user.role = [ROLES.ADMIN];
 
             await User.create(user);
             logger.info('created user successflly');
