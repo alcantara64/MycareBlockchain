@@ -22,16 +22,8 @@ describe('authController', () => {
     let Client;
     let jwt;
     let contractHelper;
+    let emailHelper;
     let crypto;
-
-    const transactionReceipt = {
-        status: true,
-        hash: '0x807c81e8a72b8e897dd820d2e482e3dcea744f316bb4f0ccd612da275241c28b00000000000029993999'
-    };
-
-    const walletAddress = '0x23ff33sd8ace82c72f82c28e82addecf23795fc';
-    const timestamp = '2018-11-21T11:26:34.142Z';
-    const profileHash = '282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d';
 
     beforeEach(() => {
         clientService = {};
@@ -39,6 +31,9 @@ describe('authController', () => {
         Client = {};
         jwt = {};
         crypto = {};
+        emailHelper = {
+            sendMail: sandbox.stub()
+        };
 
         resJson = sandbox.spy();
 
@@ -55,6 +50,7 @@ describe('authController', () => {
 
         imports[`${appRoot}/api/services/clientService`] = clientService;
         imports[`${appRoot}/api/helpers/contractHelper`] = contractHelper;
+        imports[`${appRoot}/api/helpers/emailHelper`] = emailHelper;
         imports[`${appRoot}/api/models/clientsModel`] = Client;
 
         authController = proxyquire(`${appRoot}/api/controllers/authController`, imports);
@@ -293,7 +289,7 @@ describe('authController', () => {
         });
     });
 
-    it('newCient returns 500 status when server error occurs', async() => {
+    it('newClient returns 500 status when server error occurs', async () => {
         const req = {
             body: {
                 name: 'mycareAPI',
@@ -311,7 +307,7 @@ describe('authController', () => {
         });
     });
 
-    it('can create new client successfully', async() => {
+    it('can create new client successfully', async () => {
         const req = {
             body: {
                 name: 'mycareAPI',
@@ -325,7 +321,9 @@ describe('authController', () => {
 
         const toString = sandbox.stub().returns(randomStr);
 
-        crypto.randomBytes = sandbox.stub().returns({ toString });
+        crypto.randomBytes = sandbox.stub().returns({
+            toString
+        });
 
         const client = {
             name: req.body.name,
@@ -344,18 +342,27 @@ describe('authController', () => {
         });
 
         sandbox.assert.calledWith(clientService.create, client);
+        sandbox.assert.calledWith(emailHelper.sendMail,
+            client.email,
+            'myCareAI :: Blockchain-api credentials',
+            'clientCredentials', {
+                appName: client.name,
+                clientId: client.clientId,
+                clientSecret: client.clientSecret
+            });
     });
 
     it('getClientById returns status 400 if id is not supplied', () => {
         const req = {
-            params: {
-            }
+            params: {}
         };
 
         authController.getClientById(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
-        sandbox.assert.calledWith(resJson, { message: '"id" is required' });
+        sandbox.assert.calledWith(resJson, {
+            message: '"id" is required'
+        });
     });
 
     it('getClientById returns status 404 client is not found', async () => {
@@ -370,7 +377,9 @@ describe('authController', () => {
         await authController.getClientById(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'client not found' });
+        sandbox.assert.calledWith(resJson, {
+            message: 'client not found'
+        });
     });
 
     it('can get client by id successfully', async () => {
@@ -410,7 +419,9 @@ describe('authController', () => {
         await authController.getClientById(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
-        sandbox.assert.calledWith(resJson, { message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE });
+        sandbox.assert.calledWith(resJson, {
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
     });
 
     it('returns status 400 if no update is sent', () => {
@@ -421,7 +432,9 @@ describe('authController', () => {
         authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'no update data found' });
+        sandbox.assert.calledWith(resJson, {
+            message: 'no update data found'
+        });
     });
 
     it('returns status 422 if thers an attempt to update clientId', () => {
@@ -434,7 +447,9 @@ describe('authController', () => {
         authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.UNPROCESSABLE_ENTITY.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'cannot update clientId' });
+        sandbox.assert.calledWith(resJson, {
+            message: 'cannot update clientId'
+        });
     });
 
     it('returns status 422 if thers an attempt to update clientSecret', () => {
@@ -447,7 +462,9 @@ describe('authController', () => {
         authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.UNPROCESSABLE_ENTITY.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'cannot update clientSecret' });
+        sandbox.assert.calledWith(resJson, {
+            message: 'cannot update clientSecret'
+        });
     });
 
     it('can update client successfully', async () => {
@@ -465,8 +482,12 @@ describe('authController', () => {
         await authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.OK.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'update was successful' });
-        sandbox.assert.calledWith(clientService.update, { _id: req.params.id }, req.body);
+        sandbox.assert.calledWith(resJson, {
+            message: 'update was successful'
+        });
+        sandbox.assert.calledWith(clientService.update, {
+            _id: req.params.id
+        }, req.body);
     });
 
     it('update client returns status 500 whn error occurs', async () => {
@@ -484,8 +505,12 @@ describe('authController', () => {
         await authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
-        sandbox.assert.calledWith(resJson, { message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE });
-        sandbox.assert.calledWith(clientService.update, { _id: req.params.id }, req.body);
+        sandbox.assert.calledWith(resJson, {
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+        sandbox.assert.calledWith(clientService.update, {
+            _id: req.params.id
+        }, req.body);
     });
 
     it('can get clients', async () => {
@@ -496,16 +521,17 @@ describe('authController', () => {
             }
         };
 
-        const clients = [
-            {
-                _id: 'dkddoedmi3inddie',
-                name: 'eobAPI'
-            }
-        ];
+        const clients = [{
+            _id: 'dkddoedmi3inddie',
+            name: 'eobAPI'
+        }];
 
         clientService.get = sandbox.stub().resolves(clients);
 
-        const { startFrom, limitTo } = requestHelper.computeQueryResultLimit(req.query.startFrom, req.query.limitTo);
+        const {
+            startFrom,
+            limitTo
+        } = requestHelper.computeQueryResultLimit(req.query.startFrom, req.query.limitTo);
 
         await authController.getClients(req, res);
 
@@ -522,28 +548,30 @@ describe('authController', () => {
             }
         };
 
-        const clients = [
-            {
-                _id: 'dkddoedmi3inddie',
-                name: 'eobAPI'
-            }
-        ];
+        const clients = [{
+            _id: 'dkddoedmi3inddie',
+            name: 'eobAPI'
+        }];
 
         clientService.get = sandbox.stub().rejects(new Error('DATABASE Error ocured'));
 
-        const { startFrom, limitTo } = requestHelper.computeQueryResultLimit(req.query.startFrom, req.query.limitTo);
+        const {
+            startFrom,
+            limitTo
+        } = requestHelper.computeQueryResultLimit(req.query.startFrom, req.query.limitTo);
 
         await authController.getClients(req, res);
 
         sandbox.assert.calledWith(clientService.get, {}, startFrom, limitTo);
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
-        sandbox.assert.calledWith(resJson, { message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE });
+        sandbox.assert.calledWith(resJson, {
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
     });
 
     it('validateClientExists returns status 400 if id is missing', () => {
         const req = {
-            params: {
-            }
+            params: {}
         };
 
         const next = sandbox.spy();
@@ -551,7 +579,9 @@ describe('authController', () => {
         authController.validateClientExists(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
-        sandbox.assert.calledWith(resJson, { message: '"id" is required' });
+        sandbox.assert.calledWith(resJson, {
+            message: '"id" is required'
+        });
         sandbox.assert.notCalled(next);
     });
 
@@ -568,7 +598,9 @@ describe('authController', () => {
         await authController.validateClientExists(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
-        sandbox.assert.calledWith(resJson, { message: 'client not found' });
+        sandbox.assert.calledWith(resJson, {
+            message: 'client not found'
+        });
         sandbox.assert.notCalled(next);
     });
 
@@ -607,6 +639,8 @@ describe('authController', () => {
 
         sandbox.assert.notCalled(next);
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
-        sandbox.assert.calledWith(resJson, { message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE });
+        sandbox.assert.calledWith(resJson, {
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
     });
 });
