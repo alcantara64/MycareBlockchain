@@ -33,7 +33,7 @@ exports.login = async function (req, res) {
         if (!user) {
             logger.error(`User lookup failed`);
 
-            return res.status(HTTP_STATUS.FORBIDDEN.CODE).send({
+            return res.status(HTTP_STATUS.FORBIDDEN.CODE).json({
                 message: 'User login failed. Please check email and password.'
             });
         }
@@ -67,12 +67,8 @@ exports.login = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(payload);
     } catch (err) {
         logger.error(`error occured during login ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
-
-function hashPassword(salt, password) {
-    return crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-}

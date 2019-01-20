@@ -4,17 +4,17 @@ const commonController = require(`${appRoot}/api/controllers/commonController`);
 
 module.exports = function mycareRoute(router) {
     router.route('/mycare/add_account')
-        .post(mycareController.validateAddAccountParams, mycareController.addAccount);
+        .post(commonController.protected, commonController.clientProtected, mycareController.validateAddAccountParams, mycareController.addAccount);
 
     router.route('/mycare/account')
-        .get(mycareController.getAccount);
+        .get(commonController.protected, commonController.clientProtected, mycareController.getAccount);
 
     router.route('/mycare/deactivate_account')
-        .put(mycareController.validateDeactivateAccountParams, mycareController.deactivateAccount);
+        .put(commonController.protected, commonController.clientProtected, mycareController.validateDeactivateAccountParams, mycareController.deactivateAccount);
 
     router.route('/mycare/account_count')
-        .get(mycareController.getAccountsCount);
+        .get(commonController.protected, commonController.clientProtected, mycareController.getAccountsCount);
 
     router.route('/generate_chain_account')
-        .get(commonController.protected, mycareController.generateChainAccount);
+        .get(commonController.protected, commonController.clientProtected, mycareController.generateChainAccount);
 };
