@@ -30,6 +30,10 @@ const httpStatus = {
     UNPROCESSABLE_ENTITY: {
         CODE: 422,
         MESSAGE: 'The request was well-formed but was unable to be followed due to semantic errors'
+    },
+    CONFLICT: {
+        CODE: 409,
+        MESSAGE: 'Request could not be processed due to conflicts with existing resources'
     }
 };
 

@@ -58,7 +58,7 @@ exports.getAccessToken = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(payload);
     } catch (err) {
         logger.error(`error ocured generating access token ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
@@ -93,6 +93,17 @@ exports.newClient = async function (req, res) {
 
             logger.error(message);
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message
+            });
+        }
+
+        const existingClient = await clientService.getOne({ name });
+
+        if (existingClient) {
+            const message = 'client with this name exists';
+
+            logger.error(message);
+            return res.status(HTTP_STATUS.CONFLICT.CODE).json({
                 message
             });
         }

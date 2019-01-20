@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 
 const clientSchema = new mongoose.Schema({
     name: {
-        type: 'string'
+        type: 'string',
+        unique: true,
+        trim: true,
+        required: true
     },
     email: {
         type: 'string'
@@ -13,6 +16,8 @@ const clientSchema = new mongoose.Schema({
     clientSecret: {
         type: 'string'
     }
-}, { timestamps: true });
+}, {
+    timestamps: true
+});
 
 module.exports = mongoose.model('Client', clientSchema);
