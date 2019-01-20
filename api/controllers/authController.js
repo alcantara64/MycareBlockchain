@@ -3,7 +3,10 @@ const crypto = require('crypto');
 const logger = require(`${appRoot}/config/winston`);
 const clientService = require(`${appRoot}/api/services/clientService`);
 const requestHelper = require(`${appRoot}/api/helpers/requestHelper`);
-const { TOKEN_TYPE } = require(`${appRoot}/api/constants/authConstants`);
+const emailHelper = require(`${appRoot}/api/helpers/emailHelper`);
+const {
+    TOKEN_TYPE
+} = require(`${appRoot}/api/constants/authConstants`);
 const jwt = require('jsonwebtoken');
 
 const {
@@ -70,7 +73,9 @@ exports.deleteClient = async function (req, res) {
 
         await clientService.delete(req.params.id);
 
-        return res.status(HTTP_STATUS.OK.CODE).json({ message: 'deleted client successful' });
+        return res.status(HTTP_STATUS.OK.CODE).json({
+            message: 'deleted client successful'
+        });
     } catch (err) {
         logger.error(`error ocured deleting client ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
@@ -78,6 +83,14 @@ exports.deleteClient = async function (req, res) {
         });
     }
 };
+
+function sendClientCredentials(appName, clientId, clientSecret, email) {
+    return emailHelper.sendMail(email, 'myCareAI :: Blockchain-api credentials', 'clientCredentials', {
+        appName,
+        clientId,
+        clientSecret
+    });
+}
 
 exports.newClient = async function (req, res) {
     try {
@@ -97,7 +110,9 @@ exports.newClient = async function (req, res) {
             });
         }
 
-        const existingClient = await clientService.getOne({ name });
+        const existingClient = await clientService.getOne({
+            name
+        });
 
         if (existingClient) {
             const message = 'client with this name exists';
@@ -117,9 +132,13 @@ exports.newClient = async function (req, res) {
 
         await clientService.create(client);
 
+        sendClientCredentials(client.name, client.clientId, client.clientSecret, client.email);
+
         // TODO send credentials by email
 
-        return res.status(HTTP_STATUS.OK.CODE).json({ message: 'created client successfully' });
+        return res.status(HTTP_STATUS.OK.CODE).json({
+            message: 'created client successfully'
+        });
     } catch (err) {
         logger.error(`error occured creating new client ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
@@ -192,7 +211,9 @@ exports.updateClient = async function (req, res) {
             }
         }
 
-        await clientService.update({ _id: req.params.id }, req.body);
+        await clientService.update({
+            _id: req.params.id
+        }, req.body);
 
         return res.status(HTTP_STATUS.OK.CODE).json({
             message: 'update was successful'

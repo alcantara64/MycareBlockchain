@@ -1,14 +1,14 @@
+const appRoot = require('app-root-path');
 const dotenv = require('dotenv');
 const handlebars = require('handlebars');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
-const appRoot = require('app-root-path');
 const logger = require(`${appRoot}/config/winston`);
 
 dotenv.config();
 
 exports.createEmailTemplate = function createEmailTemplate(templateName, templateVariables) {
-    let path = process.env.BASEDIR + '/public/templates/' + templateName + '.html';
+    let path = `${appRoot}/public/templates/${templateName}.html`;
     let html = fs.readFileSync(path, 'utf8');
 
     var template = handlebars.compile(html);
