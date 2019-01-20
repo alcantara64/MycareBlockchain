@@ -73,7 +73,7 @@ exports.deleteClient = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json({ message: 'deleted client successful' });
     } catch (err) {
         logger.error(`error ocured deleting client ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
@@ -122,7 +122,7 @@ exports.newClient = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json({ message: 'created client successfully' });
     } catch (err) {
         logger.error(`error occured creating new client ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
@@ -160,7 +160,7 @@ exports.getClientById = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(client);
     } catch (err) {
         logger.error(`error occured fetching client ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     };
@@ -170,7 +170,7 @@ exports.updateClient = async function (req, res) {
     try {
         logger.info('update client');
 
-        const disallowedFields = ['_id', 'clientId', 'clientToken'];
+        const disallowedFields = ['_id', 'clientId', 'clientSecret'];
         const updateFields = Object.keys(req.body);
 
         if (!updateFields.length) {
@@ -218,7 +218,7 @@ exports.getClients = async function (req, res) {
         return res.status(HTTP_STATUS.OK.CODE).json(clients);
     } catch (err) {
         logger.error(`error occured fetching clients ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
@@ -255,7 +255,7 @@ exports.validateClientExists = async function (req, res, next) {
         next();
     } catch (err) {
         logger.error(`error occured validating client`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }

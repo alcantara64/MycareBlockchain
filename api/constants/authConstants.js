@@ -1,6 +1,6 @@
 exports.TOKEN_TYPE = {
-    CLIENT: 'sdscskdskksdhruieddmdkjnnmdmer',
-    USER: 'ddrjmdkhfdfdfdnibbisr3490onrrjik'
+    CLIENT: 89234678923,
+    USER: 37397397393
 };
 
 exports.ROLES = {
