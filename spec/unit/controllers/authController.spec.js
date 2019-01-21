@@ -332,14 +332,12 @@ describe('authController', () => {
             clientSecret: randomStr
         };
 
-        clientService.create = sandbox.stub().resolves(true);
+        clientService.create = sandbox.stub().resolves(client);
 
         await authController.newClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.OK.CODE);
-        sandbox.assert.calledWith(resJson, {
-            message: 'created client successfully'
-        });
+        sandbox.assert.calledWith(resJson, client);
 
         sandbox.assert.calledWith(clientService.create, client);
         sandbox.assert.calledWith(emailHelper.sendMail,
