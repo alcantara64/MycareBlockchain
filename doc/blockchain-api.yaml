@@ -18,6 +18,267 @@ tags:
   - name: SharedAccess
     description: endpoints to interact with SharedAccess smart contract
 paths:
+  /user:
+    post:
+      tags: 
+        - User
+      summary: Admin user login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+  '/auth/client/{id}':
+    get:
+      tags: 
+        - Auth
+      summary: get clients list
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: json web token gotten from login
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
+    delete:
+      tags: 
+        - Auth
+      summary: deletes specified client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: json web token gotten from login
+          required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+    put:
+      tags: 
+        - Auth
+      summary: updates client
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: json web token gotten from login
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: unique name for app /client
+                  example: eob-API
+                email:
+                  type: string
+                  description: contact email for this client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
+  '/auth/clients':
+    get:
+      tags: 
+        - Auth
+      summary: get clients list
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: json web token gotten from login
+          required: true
+        - in: header
+          name: startFrom
+          schema:
+            type: number
+            example: 1
+            description: defines an offset for the result
+        - in: header
+          name: limitTo
+          schema:
+            type: number
+            example: 100
+            description: defines how large the results shoud be
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
+  '/auth/new_client':
+    post:
+      tags: 
+        - Auth
+      summary: create new client
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: json web token gotten from login
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: unique name for app /client
+                  example: eob-API
+                email:
+                  type: string
+                  description: contact email for this client
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Not found
+        '500':
+          description: Server Error
+
+  /auth:
+    post:
+      tags: 
+        - Auth
+      summary: Get access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                clientSecret:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+      
   '/share/connection/{connectionId}':
     get:
       tags:
@@ -30,6 +291,13 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
+          required: true
       responses:
         '200':
           description: OK
@@ -39,14 +307,30 @@ paths:
                 $ref: '#/components/schemas/GetConnection'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/share/connection':
     put:
       tags:
         - SharedAccess
       summary: Update connection attempt with acceptance or rejection
       description: Update connection attempt with acceptance or rejection
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
+          required: true
       requestBody:
         required: true
         content:
@@ -59,15 +343,35 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
     post:
       tags:
         - SharedAccess
       summary: Save connection attempt to the chain
       description: Save connection attempt to the chain
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
+          required: true
       requestBody:
         required: true
         content:
@@ -82,8 +386,16 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/share/can_access/{consentId}':
     get:
       tags:
@@ -96,6 +408,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -109,14 +427,29 @@ paths:
                     example: true
         '400':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/share/revoke_consent':
     put:
       tags:
         - SharedAccess
       summary: Revoke consent
       description: Revoke consent
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         required: true
         content:
@@ -131,8 +464,16 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/share/consent':
     get:
       tags:
@@ -150,6 +491,12 @@ paths:
             type: array
             items:
               type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -159,14 +506,29 @@ paths:
                 $ref: '#/components/schemas/SavedConsent'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/share/add_consent':
     post:
       tags:
         - SharedAccess
       summary: Save new consent to the chain
       description: Save new consent to the chain
+      parameters: 
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         required: true
         content:
@@ -181,8 +543,16 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/terms_and_policies/acceptance':
     get:
       tags:
@@ -202,6 +572,12 @@ paths:
             type: string
             description: terms and policy document hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -211,14 +587,29 @@ paths:
                 $ref: '#/components/schemas/SavedPATAcceptance'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/terms_and_policies/add_acceptance':
     post:
       tags:
         - TermsAndPolicies
       summary: Save user acceptance of terms and policies to the chain
       description: Save user acceptance of terms and policies to the chain
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         required: true
         content:
@@ -233,8 +624,16 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/terms_and_policies/document/{documentHash}':
     get:
       tags:
@@ -248,6 +647,12 @@ paths:
           description: ipfsHash of the document
           schema:
             type: string
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -257,14 +662,29 @@ paths:
                 $ref: '#/components/schemas/SavedPATdocument'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/terms_and_policies/add_document':
     post:
       tags:
         - TermsAndPolicies
       summary: Save new policies and terms document to chain
       description: Save new policies and terms document to chain
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         required: true
         content:
@@ -279,14 +699,29 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/mycare/add_account':
     post:
       tags:
         - MyCareContract
       summary: Save new user account to the blockchain
       description: Save new user account to the blockchain
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         description: Required data to save new account
         required: true
@@ -302,14 +737,29 @@ paths:
           description: OK
         '400':
           description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/mycare/deactivate_account':
     put:
       tags:
         - MyCareContract
       summary: flag saved user account as inactive
       description: flag saved user profile as inactive
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       requestBody:
         description: Required data to save new account
         required: true
@@ -325,8 +775,16 @@ paths:
           description: OK
         '400':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/mycare/account':
     get:
       tags:
@@ -348,6 +806,12 @@ paths:
             type: string
             description: account profile hash
             example: "282yg82gs3ed83h9nd93die93nd3ndemdudnndu3jdjd3ndeednu27d"
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -357,13 +821,28 @@ paths:
                 $ref: '#/components/schemas/Account'
         '404':
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/generate_chain_account':
     get:
       tags: 
         - MyCareContract
       summary: Generate new chain account
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       description: Generate new chain account
       responses:
         '200':
@@ -374,12 +853,23 @@ paths:
                 $ref: '#/components/schemas/ChainAccount'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
   '/mycare/account_count':
     get:
       tags:
         - MyCareContract
       summary: Get total number of saved accounts
       description: Get total number of saved accounts
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
       responses:
         '200':
           description: OK
@@ -389,6 +879,10 @@ paths:
                 $ref: '#/components/schemas/AccountCount'
         '500':
           description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
           
 components:
   schemas:
@@ -605,6 +1099,25 @@ components:
           type: string
           description: timestamp showing when account was created
           example: "2018-11-21T11:26:34.142Z"
+    Client:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+          description: unique name of client / application
+        email:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+    ResponseMessage:
+      type: object
+      properties:
+        message:
+          type: string
     NewAccount:
       type: object
       properties:

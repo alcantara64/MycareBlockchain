@@ -130,15 +130,13 @@ exports.newClient = async function (req, res) {
             clientSecret: crypto.randomBytes(80).toString('hex')
         };
 
-        await clientService.create(client);
+        const newClient = await clientService.create(client);
 
         sendClientCredentials(client.name, client.clientId, client.clientSecret, client.email);
 
         // TODO send credentials by email
 
-        return res.status(HTTP_STATUS.OK.CODE).json({
-            message: 'created client successfully'
-        });
+        return res.status(HTTP_STATUS.OK.CODE).json(newClient);
     } catch (err) {
         logger.error(`error occured creating new client ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
