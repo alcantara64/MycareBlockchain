@@ -5,7 +5,8 @@ const clientService = require(`${appRoot}/api/services/clientService`);
 const requestHelper = require(`${appRoot}/api/helpers/requestHelper`);
 const emailHelper = require(`${appRoot}/api/helpers/emailHelper`);
 const {
-    TOKEN_TYPE
+    TOKEN_TYPE,
+    TOKEN_EXPIRATION_TIME
 } = require(`${appRoot}/api/constants/authConstants`);
 const jwt = require('jsonwebtoken');
 
@@ -45,8 +46,7 @@ exports.getAccessToken = async function (req, res) {
         }
 
         const now = Math.floor(Date.now() / 1000);
-        const hours = 2 * 60 * 60; // 2hrs in seconds
-        const expiration = now + hours;
+        const expiration = now + TOKEN_EXPIRATION_TIME;
 
         const payload = {
             // create token

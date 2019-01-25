@@ -6,3 +6,5 @@ exports.TOKEN_TYPE = {
 exports.ROLES = {
     ADMIN: 111011
 };
+
+exports.TOKEN_EXPIRATION_TIME = 2 * 60 * 60; // 2hrs in seconds
