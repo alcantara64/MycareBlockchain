@@ -16,11 +16,12 @@ const {
 
 exports.getAccessToken = async function (req, res) {
     try {
-        logger.info('get access token');
         const {
             clientId,
             clientSecret
         } = req.body;
+
+        logger.info(`get access token for client ${clientId}`);
 
         if (!clientId || !clientSecret) {
             const message = 'clientId and clientSecret are required parammeters';
