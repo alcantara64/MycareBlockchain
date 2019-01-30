@@ -468,6 +468,38 @@ describe('authController', () => {
         });
     });
 
+    it('update client returns conflict code when client name is unavailable', async () => {
+        const req = {
+            params: {
+                id: 'hddkdhdk8y83d93dnddnskskw93'
+            },
+            body: {
+                name: 'newName'
+            }
+        };
+
+        const dbClient = {
+            _id: '328deiheuu8yi2g2iu28idbucee',
+            name: 'mycare-API',
+            email: 'mycare@newwave.io',
+            clientId: 'ffe738a93dc838e28d28c882eadeeccbe3f2c',
+            clientToken: 'b2492f8393e93a38483d83e82827b837f82fcea3b92a38d83c8e8a8'
+        };
+
+        clientService.update = sandbox.stub().resolves(true);
+        clientService.getOne = sandbox.stub().resolves(dbClient);
+
+        await authController.updateClient(req, res);
+
+        sandbox.assert.calledWith(res.status, HTTP_STATUS.CONFLICT.CODE);
+        sandbox.assert.calledWith(resJson, {
+            message: 'client with this name exists'
+        });
+        sandbox.assert.calledWith(clientService.getOne, {
+            name: req.body.name
+        });
+    });
+
     it('can update client successfully', async () => {
         const req = {
             params: {
@@ -479,6 +511,7 @@ describe('authController', () => {
         };
 
         clientService.update = sandbox.stub().resolves(true);
+        clientService.getOne = sandbox.stub().resolves(null);
 
         await authController.updateClient(req, res);
 
@@ -491,7 +524,7 @@ describe('authController', () => {
         }, req.body);
     });
 
-    it('update client returns status 500 whn error occurs', async () => {
+    it('update client returns status 500 when error occurs', async () => {
         const req = {
             params: {
                 id: 'hddkdhdk8y'
@@ -502,12 +535,16 @@ describe('authController', () => {
         };
 
         clientService.update = sandbox.stub().rejects(false);
+        clientService.getOne = sandbox.stub().resolves(null);
 
         await authController.updateClient(req, res);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
         sandbox.assert.calledWith(resJson, {
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+        sandbox.assert.calledWith(clientService.getOne, {
+            name: req.body.name
         });
         sandbox.assert.calledWith(clientService.update, {
             _id: req.params.id

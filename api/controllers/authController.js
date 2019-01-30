@@ -211,6 +211,23 @@ exports.updateClient = async function (req, res) {
             }
         }
 
+        const { name } = req.body;
+
+        if (name) {
+            const existingClient = await clientService.getOne({
+                name
+            });
+
+            if (existingClient && !(req.params.id === existingClient._id.toString())) {
+                const message = 'client with this name exists';
+
+                logger.error(message);
+                return res.status(HTTP_STATUS.CONFLICT.CODE).json({
+                    message
+                });
+            }
+        }
+
         await clientService.update({
             _id: req.params.id
         }, req.body);
