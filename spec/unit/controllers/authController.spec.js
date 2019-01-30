@@ -71,7 +71,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'clientId and clientSecret are required parammeters'
+            message: 'clientId is required'
         });
     });
 
@@ -86,7 +86,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'clientId and clientSecret are required parammeters'
+            message: 'clientSecret is required'
         });
     });
 
@@ -104,7 +104,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.FORBIDDEN.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'client not found'
+            message: `client not found for id ${req.body.clientId}`
         });
 
         sandbox.assert.calledWith(clientService.getOne, {
@@ -127,7 +127,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.FORBIDDEN.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'client not found'
+            message: `client not found for id ${req.body.clientId}`
         });
 
         sandbox.assert.calledWith(clientService.getOne, {
@@ -376,7 +376,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'client not found'
+            message: `client not found for id ${req.params.id}`
         });
     });
 
@@ -424,6 +424,7 @@ describe('authController', () => {
 
     it('returns status 400 if no update is sent', () => {
         const req = {
+            params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {}
         };
 
@@ -437,6 +438,7 @@ describe('authController', () => {
 
     it('returns status 422 if thers an attempt to update clientId', () => {
         const req = {
+            params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {
                 clientId: 'ddjddk93dm393emi'
             }
@@ -452,6 +454,7 @@ describe('authController', () => {
 
     it('returns status 422 if thers an attempt to update clientSecret', () => {
         const req = {
+            params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {
                 clientSecret: 'ddjddk93dm393emi'
             }
@@ -597,7 +600,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: 'client not found'
+            message: `client not found for id ${req.params.id}`
         });
         sandbox.assert.notCalled(next);
     });

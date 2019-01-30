@@ -21,10 +21,9 @@ exports.getAccessToken = async function (req, res) {
             clientSecret
         } = req.body;
 
-        logger.info(`get access token for client ${clientId}`);
-
         if (!clientId || !clientSecret) {
-            const message = 'clientId and clientSecret are required parammeters';
+            const message = !clientId ? 'clientId is required'
+                : 'clientSecret is required';
 
             logger.error(message);
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
@@ -32,13 +31,15 @@ exports.getAccessToken = async function (req, res) {
             });
         }
 
+        logger.info(`get access token for client ${clientId}`);
+
         const client = await clientService.getOne({
             clientId,
             clientSecret
         });
 
         if (!client) {
-            const message = 'client not found';
+            const message = `client not found for id ${clientId}`;
             logger.error(message);
 
             return res.status(HTTP_STATUS.FORBIDDEN.CODE).json({
@@ -70,7 +71,7 @@ exports.getAccessToken = async function (req, res) {
 
 exports.deleteClient = async function (req, res) {
     try {
-        logger.info('Delete client');
+        logger.info(`Delete client with id: ${req.params.id}`);
 
         await clientService.delete(req.params.id);
 
@@ -78,7 +79,7 @@ exports.deleteClient = async function (req, res) {
             message: 'deleted client successful'
         });
     } catch (err) {
-        logger.error(`error ocured deleting client ${err.message}`);
+        logger.error(`error ocured deleting client with id ${req.params.id} ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -148,8 +149,6 @@ exports.newClient = async function (req, res) {
 
 exports.getClientById = async function (req, res) {
     try {
-        logger.info('get client by id');
-
         const {
             id
         } = req.params;
@@ -163,12 +162,14 @@ exports.getClientById = async function (req, res) {
             });
         }
 
+        logger.info(`get client by id ${id}`);
+
         const client = await clientService.getOne({
             _id: id
         });
 
         if (!client) {
-            const message = 'client not found';
+            const message = `client not found for id ${id}`;
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message
@@ -177,7 +178,7 @@ exports.getClientById = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(client);
     } catch (err) {
-        logger.error(`error occured fetching client ${err.message}`);
+        logger.error(`error occured fetching client with id ${req.params.id} ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -186,7 +187,7 @@ exports.getClientById = async function (req, res) {
 
 exports.updateClient = async function (req, res) {
     try {
-        logger.info('update client');
+        logger.info(`update client with id ${req.params.id}`);
 
         const disallowedFields = ['_id', 'clientId', 'clientSecret'];
         const updateFields = Object.keys(req.body);
@@ -218,7 +219,7 @@ exports.updateClient = async function (req, res) {
             message: 'update was successful'
         });
     } catch (err) {
-        logger.error(`error occured updating client ${err.message}`);
+        logger.error(`error occured updating client with id ${req.params.id} ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -246,7 +247,6 @@ exports.getClients = async function (req, res) {
 
 exports.validateClientExists = async function (req, res, next) {
     try {
-        logger.info('validate client exists');
         const {
             id
         } = req.params;
@@ -260,12 +260,14 @@ exports.validateClientExists = async function (req, res, next) {
             });
         }
 
+        logger.info(`validate client exists for id ${id}`);
+
         const client = await clientService.getOne({
             _id: id
         });
 
         if (!client) {
-            const message = 'client not found';
+            const message = `client not found for id ${id}`;
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message
@@ -274,7 +276,7 @@ exports.validateClientExists = async function (req, res, next) {
 
         next();
     } catch (err) {
-        logger.error(`error occured validating client`);
+        logger.error(`error occured validating client for id ${req.params.id} ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });

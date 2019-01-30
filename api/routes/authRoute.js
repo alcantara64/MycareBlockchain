@@ -8,7 +8,7 @@ module.exports = function (router) {
 
     // only super admin has access to these routes
     router.route('/auth/new_client')
-        .post(commonController.protected, authController.newClient);
+        .post(commonController.protected, commonController.adminProtected, authController.newClient);
 
     router.route('/auth/clients')
         .get(commonController.protected, commonController.adminProtected, authController.getClients);
