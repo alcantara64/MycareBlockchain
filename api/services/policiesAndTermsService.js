@@ -2,7 +2,7 @@ const appRoot = require('app-root-path');
 const web3 = require('web3');
 const scopeConstants = require('../constants/ScopeConstants');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
-
+const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
 const {
     contractNames,
     ContractHelper
@@ -18,7 +18,7 @@ exports.addNewDocument = function (payload) {
     const timestamp = helperMethods.createTimeStamp();
 
     const data = api.addNewDocument(ipfsHash, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.ADD_NEW_DOCUMENT);
 };
 
 exports.saveAcceptance = function (payload) {
@@ -29,7 +29,7 @@ exports.saveAcceptance = function (payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
 
     const data = api.saveAcceptance(walletAddress, documentHash, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.SAVE_ACCEPTANCE);
 };
 
 exports.getDocument = async function getDocument(documentHash) {
