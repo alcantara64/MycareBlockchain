@@ -10,6 +10,7 @@
     "test:api:integration": "mocha --recursive --exit ./spec/integration/**/*.js --timeout 90000",
     "test": "npm run test:contracts && npm run test:api",
     "test:api:debug": "mocha --recursive --exit --inspect-brk ./spec/**/*.js --timeout 90000",
+    "test:junit": "mocha --recursive --exit --timeout 90000 ./spec/**/*.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/test-results.xml",
     "start": "nodemon server.js",
     "deploy:contracts": "truffle migrate --reset --all --network mainnet",
     "lint:api": "eslint api/**",
@@ -41,7 +42,7 @@
     "truffle-hdwallet-provider": "0.0.6",
     "ursa": "^0.9.4",
     "uuid": "^3.3.2",
-    "web3": "^1.0.0-beta.36",
+    "web3": "1.0.0-beta.34",
     "winston": "^2.4.2"
   },
   "devDependencies": {
@@ -62,6 +63,7 @@
     "ethereumjs-wallet": "^0.6.2",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
+    "mocha-junit-reporter": "^1.18.0",
     "nodemon": "^1.18.6",
     "nyc": "^13.1.0",
     "proxyquire": "^2.1.0",
