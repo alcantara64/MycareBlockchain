@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const logger = require(`${appRoot}/config/winston`);
 const clientService = require(`${appRoot}/api/services/clientService`);
 const requestHelper = require(`${appRoot}/api/helpers/requestHelper`);
+const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 const emailHelper = require(`${appRoot}/api/helpers/emailHelper`);
 const {
     TOKEN_TYPE,
@@ -129,7 +130,8 @@ exports.newClient = async function (req, res) {
             name,
             email,
             clientId: crypto.randomBytes(80).toString('hex'),
-            clientSecret: crypto.randomBytes(80).toString('hex')
+            clientSecret: crypto.randomBytes(80).toString('hex'),
+            role: [ROLES.CLIENT]
         };
 
         const newClient = await clientService.create(client);

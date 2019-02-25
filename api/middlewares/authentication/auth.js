@@ -11,7 +11,8 @@ const {
 
 const jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderWithScheme('Bearer');
-jwtOptions.secretOrKey = process.env.JWT_TOKEN;
+const secret = process.env.JWT_TOKEN;
+jwtOptions.secretOrKey = secret;
 
 const strategy = new JWTStrategy(jwtOptions, (jwtPayload, next) => {
     const tokenExpired = Math.floor(Date.now() / 1000) > jwtPayload.exp;
@@ -31,8 +32,8 @@ const strategy = new JWTStrategy(jwtOptions, (jwtPayload, next) => {
 
         case TOKEN_TYPE.USER:
             User.findOne({
-                    _id: jwtPayload.sub
-                })
+                _id: jwtPayload.sub
+            })
                 .then((user) => {
                     if (user && !tokenExpired) {
                         next(null, user);

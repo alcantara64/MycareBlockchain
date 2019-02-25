@@ -15,6 +15,9 @@ const clientSchema = new mongoose.Schema({
     },
     clientSecret: {
         type: 'string'
+    },
+    role: {
+        type: Array
     }
 }, {
     timestamps: true
