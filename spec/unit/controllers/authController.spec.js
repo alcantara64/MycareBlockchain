@@ -8,6 +8,7 @@ const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Common`);
 const requestHelper = require(`${appRoot}/api/helpers/requestHelper`);
+const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -329,7 +330,8 @@ describe('authController', () => {
             name: req.body.name,
             email: req.body.email,
             clientId: randomStr,
-            clientSecret: randomStr
+            clientSecret: randomStr,
+            role: [ROLES.CLIENT]
         };
 
         clientService.create = sandbox.stub().resolves(client);
