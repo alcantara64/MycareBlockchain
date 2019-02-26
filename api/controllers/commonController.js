@@ -17,6 +17,7 @@ exports.authorize = function authorize(roles = []) {
     return [
         protectedRoute,
         // authorize based on user role
+        // todo load all authorization roles in the database and check against them
         (req, res, next) => {
             if (roles.length && !req.user.role.includes(...roles)) {
                 logger.error(`User: ${req.user._id} failed role check. Required roles are ${roles}`);
