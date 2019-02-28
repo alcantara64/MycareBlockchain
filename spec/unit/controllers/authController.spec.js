@@ -105,7 +105,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.FORBIDDEN.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: `client not found for id ${req.body.clientId}`
+            message: 'client not found'
         });
 
         sandbox.assert.calledWith(clientService.getOne, {
@@ -128,7 +128,7 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.FORBIDDEN.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: `client not found for id ${req.body.clientId}`
+            message: 'client not found'
         });
 
         sandbox.assert.calledWith(clientService.getOne, {
@@ -200,6 +200,9 @@ describe('authController', () => {
 
     it('can delete a client', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'd278hdndedddudjdge8ebd3'
             }
@@ -219,6 +222,9 @@ describe('authController', () => {
 
     it('returns status 500 if delete fails', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'd278hdndedddudjdge8ebd3'
             }
@@ -239,6 +245,9 @@ describe('authController', () => {
 
     it('newClient returns status of 400 if email is not provided', () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             body: {
                 name: 'mycareAPI'
             }
@@ -254,6 +263,9 @@ describe('authController', () => {
 
     it('newClient returns status of 400 if email is not provided', () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             body: {
                 email: 'org@mycaree.com'
             }
@@ -269,6 +281,9 @@ describe('authController', () => {
 
     it('newClient returns status of 400 if client with name already exists', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             body: {
                 name: 'mycareAPI',
                 email: 'org@mycaree.com'
@@ -292,6 +307,9 @@ describe('authController', () => {
 
     it('newClient returns 500 status when server error occurs', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             body: {
                 name: 'mycareAPI',
                 email: 'org@mycaree.com'
@@ -310,6 +328,9 @@ describe('authController', () => {
 
     it('can create new client successfully', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             body: {
                 name: 'mycareAPI',
                 email: 'org@mycaree.com'
@@ -367,6 +388,9 @@ describe('authController', () => {
 
     it('getClientById returns status 404 client is not found', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'dhdfjke9hnfji3fffggg'
             }
@@ -378,12 +402,15 @@ describe('authController', () => {
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
         sandbox.assert.calledWith(resJson, {
-            message: `client not found for id ${req.params.id}`
+            message: `client not found for id: ${req.params.id}`
         });
     });
 
     it('can get client by id successfully', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'dhdfjke9hnfji3fffggg'
             }
@@ -404,14 +431,12 @@ describe('authController', () => {
 
     it('getClientById returns 500 status if error occurs fetching client', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'dhdfjke9hnfji3fffggg'
             }
-        };
-
-        const client = {
-            _id: req.params.id,
-            email: 'org@newwave.io'
         };
 
         clientService.getOne = sandbox.stub().rejects(new Error('database connection error'));
@@ -426,6 +451,9 @@ describe('authController', () => {
 
     it('returns status 400 if no update is sent', () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {}
         };
@@ -438,8 +466,11 @@ describe('authController', () => {
         });
     });
 
-    it('returns status 422 if thers an attempt to update clientId', () => {
+    it('returns status 422 if theres an attempt to update clientId', () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {
                 clientId: 'ddjddk93dm393emi'
@@ -456,6 +487,9 @@ describe('authController', () => {
 
     it('returns status 422 if thers an attempt to update clientSecret', () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: { id: 'jdn9kenwjoiwcooocieocdnc9303c' },
             body: {
                 clientSecret: 'ddjddk93dm393emi'
@@ -472,6 +506,9 @@ describe('authController', () => {
 
     it('update client returns conflict code when client name is unavailable', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'hddkdhdk8y83d93dnddnskskw93'
             },
@@ -504,6 +541,9 @@ describe('authController', () => {
 
     it('can update client successfully', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'hddkdhdk8y'
             },
@@ -528,6 +568,9 @@ describe('authController', () => {
 
     it('update client returns status 500 when error occurs', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             params: {
                 id: 'hddkdhdk8y'
             },
@@ -555,6 +598,9 @@ describe('authController', () => {
 
     it('can get clients', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             query: {
                 startFrom: 1,
                 limitTo: 80
@@ -582,16 +628,14 @@ describe('authController', () => {
 
     it('getClients returns 500 error if error occurs', async () => {
         const req = {
+            user: {
+                _id: 'e929b292937c9d9b98a9ff8e'
+            },
             query: {
                 startFrom: 1,
                 limitTo: 80
             }
         };
-
-        const clients = [{
-            _id: 'dkddoedmi3inddie',
-            name: 'eobAPI'
-        }];
 
         clientService.get = sandbox.stub().rejects(new Error('DATABASE Error ocured'));
 

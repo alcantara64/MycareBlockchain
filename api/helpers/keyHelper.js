@@ -60,7 +60,6 @@ exports.savePublicKey = function savePublicKey(u, fsPath) {
     }));
 };
 
-
 exports.publicKey = function publicKey(keyPair) {
     logger.info(`${keyPair}`);
     return keyPair.toPublicPem().toString('utf8');
