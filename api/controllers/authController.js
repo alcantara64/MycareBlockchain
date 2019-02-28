@@ -32,7 +32,7 @@ exports.getAccessToken = async function (req, res) {
             });
         }
 
-        logger.info(`get access token for client ${clientId}`);
+        logger.info(`get access token for client: ${clientId}`);
 
         const client = await clientService.getOne({
             clientId,
@@ -40,11 +40,10 @@ exports.getAccessToken = async function (req, res) {
         });
 
         if (!client) {
-            const message = `client not found for id ${clientId}`;
-            logger.error(message);
+            logger.error(`client not found for id: ${clientId}`);
 
             return res.status(HTTP_STATUS.FORBIDDEN.CODE).json({
-                message
+                message: 'client not found'
             });
         }
 
@@ -63,7 +62,7 @@ exports.getAccessToken = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(payload);
     } catch (err) {
-        logger.error(`error ocured generating access token ${err.message}`);
+        logger.error(`error ocured generating access token for client: ${req.body.clientId}. MSG: ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -72,7 +71,7 @@ exports.getAccessToken = async function (req, res) {
 
 exports.deleteClient = async function (req, res) {
     try {
-        logger.info(`Delete client with id: ${req.params.id}`);
+        logger.info(`Delete client request by user: ${req.user._id}.  client: ${req.params.id}`);
 
         await clientService.delete(req.params.id);
 
@@ -97,7 +96,7 @@ function sendClientCredentials(appName, clientId, clientSecret, email) {
 
 exports.newClient = async function (req, res) {
     try {
-        logger.info('create new client');
+        logger.info(`create new client, request by user: ${req.user._id}`);
 
         const {
             email,
@@ -138,11 +137,9 @@ exports.newClient = async function (req, res) {
 
         sendClientCredentials(client.name, client.clientId, client.clientSecret, client.email);
 
-        // TODO send credentials by email
-
         return res.status(HTTP_STATUS.OK.CODE).json(newClient);
     } catch (err) {
-        logger.error(`error occured creating new client ${err.message}`);
+        logger.error(`error occured creating new client by user: ${req.user._id}. MSG: ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -164,14 +161,14 @@ exports.getClientById = async function (req, res) {
             });
         }
 
-        logger.info(`get client by id ${id}`);
+        logger.info(`getClientById request by user: ${req.user._id} clientId ${id}`);
 
         const client = await clientService.getOne({
             _id: id
         });
 
         if (!client) {
-            const message = `client not found for id ${id}`;
+            const message = `client not found for id: ${id}`;
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
                 message
@@ -180,7 +177,7 @@ exports.getClientById = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(client);
     } catch (err) {
-        logger.error(`error occured fetching client with id ${req.params.id} ${err.message}`);
+        logger.error(`getClientById call by user: ${req.user._id} failed. clientId: ${req.params.id} ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -189,7 +186,7 @@ exports.getClientById = async function (req, res) {
 
 exports.updateClient = async function (req, res) {
     try {
-        logger.info(`update client with id ${req.params.id}`);
+        logger.info(`updateClient request by user: ${req.user._id}. client: ${req.params.id}`);
 
         const disallowedFields = ['_id', 'clientId', 'clientSecret'];
         const updateFields = Object.keys(req.body);
@@ -238,7 +235,7 @@ exports.updateClient = async function (req, res) {
             message: 'update was successful'
         });
     } catch (err) {
-        logger.error(`error occured updating client with id ${req.params.id} ${err.message}`);
+        logger.error(`updateClient request by user: ${req.user._id} for client: ${req.params.id} failed. MSG: ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -247,7 +244,7 @@ exports.updateClient = async function (req, res) {
 
 exports.getClients = async function (req, res) {
     try {
-        logger.info('get clients');
+        logger.info(`get clients request by user: ${req.user._id}`);
         const {
             startFrom,
             limitTo
@@ -257,7 +254,7 @@ exports.getClients = async function (req, res) {
 
         return res.status(HTTP_STATUS.OK.CODE).json(clients);
     } catch (err) {
-        logger.error(`error occured fetching clients ${err.message}`);
+        logger.error(`getClients request by user: ${req.user._id} failed. MSG: ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
