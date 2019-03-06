@@ -727,4 +727,14 @@ describe('authController', () => {
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     });
+
+    it('validateToken returns status code 200 if token valid', async () => {
+        const req = {};
+
+        await authController.validateToken(req, res);
+
+        sandbox.assert.calledWith(resJson, {
+            message: 'Token is valid'
+        });
+    });
 });

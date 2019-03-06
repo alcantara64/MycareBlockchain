@@ -5,7 +5,8 @@ const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 
 module.exports = function (router) {
     router.route('/auth')
-        .post(authController.getAccessToken);
+        .post(authController.getAccessToken)
+        .get(commonController.authorize(), authController.validateToken);
 
     // only super admin has access to these routes
     router.route('/auth/new_client')
