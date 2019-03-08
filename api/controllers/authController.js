@@ -70,17 +70,10 @@ exports.getAccessToken = async function (req, res) {
 };
 
 exports.validateToken = function (req, res) {
-    try {
-        logger.info(`validate access token`);
-        return res.status(HTTP_STATUS.OK.CODE).json({
-            message: 'Token is valid'
-        });
-    } catch (err) {
-        logger.error(`error ocured validating token. ${err.message}`);
-        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
-            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
-        });
-    }
+    logger.info(`validate access token for client: ${req.user._id}`);
+    return res.status(HTTP_STATUS.OK.CODE).json({
+        message: 'Token is valid'
+    });
 };
 
 exports.deleteClient = async function (req, res) {

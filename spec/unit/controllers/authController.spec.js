@@ -729,7 +729,11 @@ describe('authController', () => {
     });
 
     it('validateToken returns status code 200 if token valid', async () => {
-        const req = {};
+        const req = {
+            user: {
+                _id: 'djkbijdcijsdbbdijbfhofh49384y3984f9384ef9384gf389'
+            }
+        };
 
         await authController.validateToken(req, res);
 
