@@ -119,23 +119,15 @@ function deleteSecret(secretName, callback) {
 }
 
 async function getSecret(secretName, secretVersion) {
-
-    const promise = new Promise((async (resolve, reject) => {
-        try {
-
-            client.getSecret(process.env.VAULT_URI, secretName, '', (err, result) => {
-                if (err) {
-                    logger.error(`error occurred in getSecret function :   ${err.message}`);
-                    reject(err);
-                }
-                resolve(JSON.stringify(result));
-            });
-        } catch (error) {
-            logger.error(`getSecret error : ${error}`);
-        }
-    }));
-    const result = await promise;
-    return result;
+    return new Promise(async (resolve, reject) => {
+        client.getSecret(process.env.VAULT_URI, secretName, '', (err, result) => {
+            if (err) {
+                logger.error(`error occurred in getSecret function :   ${err.message}`);
+                reject(err);
+            }
+            resolve(JSON.stringify(result));
+        });
+    });
 }
 
 function getKeyOptions() {
