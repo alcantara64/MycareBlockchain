@@ -65,3 +65,6 @@ myfile.bat
 myfile.json
 .DS_STORE
 .vscode/
+
+#seed data
+util/seedData/
