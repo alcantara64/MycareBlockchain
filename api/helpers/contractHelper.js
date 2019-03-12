@@ -26,12 +26,12 @@ function getContractInstance (contractName, options = {}) {
 async function initializeTransactionCredentials() {
     if (!accountAddress) {
         const accountAddressJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_ADDRESS, '');
-        accountAddress = JSON.parse(accountAddressJSON).value;
+        accountAddress = accountAddressJSON.value;
     }
 
     if (!privateKey) {
         const privateKeyJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_PRIVATE_KEY, '');
-        privateKey = Buffer.from(JSON.parse(privateKeyJSON).value, 'hex');
+        privateKey = Buffer.from(privateKeyJSON.value, 'hex');
     }
 }
 
