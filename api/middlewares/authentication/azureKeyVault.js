@@ -53,7 +53,7 @@ function decrypt(kid, cipherText) {
 }
 
 function createSecret(secretName, secretValue) {
-    logger.info(`Creating new secret with name ${secretName} and value ${secretValue}`);
+    logger.info(`Creating new secret with name ${secretName}`);
     const attributes = {
         expires: constants.AzureKeyVault_Expiration_Date
     };
