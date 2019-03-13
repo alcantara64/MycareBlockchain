@@ -114,9 +114,9 @@ describe('contractHelper', () => {
 
     it('can get and iniialize transaction credentials', async () => {
         const accountAddress = '0x474ee25b7c86a818ec75f6a48112bd278589e5d3';
-        const accountAddressJSON = `{"value": "${accountAddress}"}`;
+        const accountAddressJSON = { value: accountAddress };
         const privateKey = '83332de5fd5b26f04ca526713cbf27330f9c38addabf18cddaa75292ec07692c';
-        const privateKeyJSON = `{"value": "${privateKey}"}`;
+        const privateKeyJSON = { value: privateKey };
 
         const gasLimit = 12094567;
 
@@ -146,7 +146,7 @@ describe('contractHelper', () => {
         sandbox.assert.calledWith(contractStub, jsonObj.abi, contractAddress, {});
 
         sandbox.assert.calledWith(ethereumjs.instance, rawTx);
-        const privateKeyBuff = Buffer.from(JSON.parse(privateKeyJSON).value, 'hex');
+        const privateKeyBuff = Buffer.from(privateKeyJSON.value, 'hex');
         sandbox.assert.calledWith(tx.sign, privateKeyBuff);
 
         const raw = `0x${txStr.toString('hex')}`;
