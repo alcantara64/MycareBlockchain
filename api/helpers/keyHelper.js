@@ -49,17 +49,22 @@ exports.saveKey = function saveKey(u, fsPath) {
     });
 };
 
+/**
+ * @param {{ encrypt: Function, toPublicPem: Function }} u this is the result from
+ *  running "ursa.createPublicKey" method - see https://www.npmjs.com/package/ursa
+ * @param {String} fsPath path where public key will be saved
+ */
 exports.savePublicKey = function savePublicKey(u, fsPath) {
     logger.info(`${u.toPublicPem().toString()}`);
     const text = u.toPublicPem().toString();
 
-    return new Promise(((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         fs.writeFile(fsPath, text, (err) => {
             if (err) reject(err);
+            else resolve(true);
         });
-    }));
+    });
 };
-
 
 exports.publicKey = function publicKey(keyPair) {
     logger.info(`${keyPair}`);
@@ -90,10 +95,17 @@ exports.encryptedPrivateKey = function encryptedPrivateKey(keyPair) {
     return ret;
 };
 
+/**
+ * @description Save the given private key encrypted with the platforms public key
+ * @description on success, returns password / passphrase that was used for file encryption
+ * @description on failure, returns empty string
+ * @param {{ encrypt: Function, toPrivatePem: Function }} u this is the result from running
+ * "ursa.createPrivateKey" method see https://www.npmjs.com/package/ursa
+ * @param {string} fsPath path where encrypted file will be saved
+ */
 exports.saveKeyEncrypted = function saveKeyEncrypted(u, fsPath) {
     // Save the given private key encrypted with the platforms public key
     const password = this.generateRandomPassPhrase();
-    logger.info(`Random Passphrase: [ ${password} ]`);
     const fileName = this.generateRandomFileName();
 
     const pemText = u.toPrivatePem().toString('utf8');
@@ -102,20 +114,18 @@ exports.saveKeyEncrypted = function saveKeyEncrypted(u, fsPath) {
     logger.info(
         `Encrypting: ${fileName},
      to: ${fsPath},
-     with password: ${password},
     Options: ${options}
   `);
 
-    encryptor.encryptFile(fileName, fsPath, password, options, (err) => {
-        logger.info(`Encryption Failed: ${err}`);
-        //      assert.fail();
+    return encryptor.encryptFile(fileName, fsPath, password, options, (err) => {
+        if (err) {
+            logger.error(`Encryption Failed: ${err.message}`);
+            logger.info(`removing file: ${fileName}`);
+            fs.unlinkSync(fileName);
+            return '';
+        }
+        return password;
     });
-
-    //  encryptor.encryptFile(fileName, fsPath, password, options, function( err ) {
-    //    throw err;
-    //    fs.unlink(fileName, function( err ) {
-    //    });
-    return password;
 };
 
 exports.loadPrivateKey = function loadPrivateKey(
@@ -137,6 +147,12 @@ exports.loadPublicKey = function loadPublicKey(fsPath) {
     return ursa.createPublicKey(pemText);
 };
 
+/**
+ * @param {{ encrypt: Function, toPrivatePem: Function }} u this is the result from running
+ * "ursa.createPrivateKey" method see https://www.npmjs.com/package/ursa
+ * @param {String} fsPath file path
+ * @param {String} password
+ */
 exports.restorePrivateKey = function restorePrivateKey(u, fsPath, password) {
     //  Load the encrypted private key for an Account
     //  TODO:   once basic encryption works will need this to decrypt password
@@ -145,15 +161,13 @@ exports.restorePrivateKey = function restorePrivateKey(u, fsPath, password) {
     logger.debug(`
     Decrypting : ${fsPath},
     to:  ${fileName},
-    with password: ${password},
     Options: ${options}`);
     encryptor.decryptFile(fsPath, fileName, password, options, (err) => {
-        logger.error(`Decryption Failed: ${err}`);
-        throw err;
+        if (err) {
+            logger.error(`Decryption Failed: ${err}`);
+            throw err;
+        }
     });
-    //  encryptor.decryptFile(fsPath, fileName, password, options, function( err ) {
-    //    throw err;
-    //  });
     const pemText = fs.readFileSync(fileName);
     logger.info(`AAA: ${pemText}`);
     return u.createPrivateKey(pemText);
@@ -179,7 +193,6 @@ exports.generateRandomPassPhrase = function generateRandomPassPhrase() {
 exports.generateRandomFileName = function generateRandomFileName() {
     return uuid();
 };
-
 
 exports.generateRandomEthereumKey = function generateRandomEthereumKey() {
     return `0x${crypto.randomBytes(32).toString('hex')}`;
