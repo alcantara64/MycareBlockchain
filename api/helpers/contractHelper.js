@@ -10,6 +10,7 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_ENDPOINT))
 
 let accountAddress;
 let privateKey;
+let seedTxnCount;
 
 function getContractInstance (contractName, options = {}) {
     const compiledFilePath = `${buildDir}/${contractName}.json`;
@@ -27,6 +28,7 @@ async function initializeTransactionCredentials() {
     if (!accountAddress) {
         const accountAddressJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_ADDRESS, '');
         accountAddress = accountAddressJSON.value;
+        seedTxnCount = await web3.eth.getTransactionCount(accountAddress);
     }
 
     if (!privateKey) {
@@ -45,10 +47,9 @@ function ContractHelper (contractName) {
 
 ContractHelper.prototype.sendTransaction = async function (data, gasLimit) {
     await initializeTransactionCredentials();
-    const nonce = await web3.eth.getTransactionCount(accountAddress);
 
     const rawTx = {
-        nonce,
+        nonce: seedTxnCount++,
         gasPrice: '0x00',
         gasLimit,
         to: this._contract._address,
