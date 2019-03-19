@@ -47,7 +47,6 @@ function ContractHelper (contractName) {
 
 ContractHelper.prototype.sendTransaction = async function (data, gasLimit) {
     await initializeTransactionCredentials();
-    const nonce = await web3.eth.getTransactionCount(accountAddress);
 
     const rawTx = {
         nonce: seedTxnCount++,
