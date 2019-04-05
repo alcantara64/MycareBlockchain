@@ -15,7 +15,10 @@ const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_ENDPOINT))
 let accountAddress;
 let privateKey;
 
-// indicates if message handler is currently processing some message
+/**
+ * @description indicates if message handler is currently processing some message
+ * @type {Boolean}
+ */
 let messageHandlerBusy = false;
 
 const TX_EVENTS = {
@@ -39,7 +42,7 @@ async function handleNewTxInQueue() {
         messageHandlerBusy = true;
         const results = await azureStorageHelper.getMessages();
 
-        logger.info('Processing messages from queue')
+        logger.info('Processing messages from queue');
         for (const message of results) {
             const txObj = JSON.parse(message.messageText);
             const {
@@ -51,23 +54,20 @@ async function handleNewTxInQueue() {
             try {
                 await exports.sendSignedTransaction(data, gasLimit, contractAddress);
             } catch (sendErr) {
-                logger.error(`sendSignedTransaction failed with ERROR: ${sendErr.message}`);
-                logger.debug(JSON.stringify(sendErr));
+                logger.error(`sendSignedTransaction failed for message: ${message.messageId} with ERROR: ${sendErr.message}`);
             }
 
             try {
-            // delete message from queue
             await azureStorageHelper.deleteMessage(message);
             } catch(delError) {
-                logger.error(`deleteMessage FAILED with error: ${delError.message}`);
-                logger.debug(JSON.stringify(delError));
+                logger.error(`deleteMessage for messageId: ${message.messageId} FAILED with error: ${delError.message}`);
             }
         }
-
+    } catch (err) {
+        logger.error(`processNewTxInQueue - Error occured processing transactions. MSG: ${err.message}`);
+    } finally {
         logger.info('Completed processing batch of messages');
         eventEmitter.emit(TX_EVENTS.TX_PROCESSING_COMPLETED);
-    } catch (err) {
-        logger.error(`processNewTxInQueue - Error occured processing a transaction. MSG: ${err.message}`);
     }
 }
 
@@ -75,7 +75,6 @@ async function checkIfTxInQueue () {
     const messageCount = await azureStorageHelper.getQueueLength();
 
     if (messageCount > 0) {
-        // messageHandlerBusy = true;
         eventEmitter.emit(TX_EVENTS.ADDED_TX_TO_QUEUE);
     } else {
         messageHandlerBusy = false;
@@ -132,8 +131,6 @@ async function getTransactionCount() {
 
 
 exports.sendSignedTransaction = async function (data, gasLimit, contractAddress) {
-    await initializeTransactionCredentials();
-
     const nonce = await getTransactionCount();
     logger.info(`Transaction Number: ${nonce}`);
 
@@ -185,3 +182,7 @@ exports.contractNames = {
 };
 
 exports.ContractHelper = ContractHelper;
+exports.initializeTransactionCredentials = initializeTransactionCredentials;
+exports.handleNewTxInQueue = handleNewTxInQueue;
+exports.TX_EVENTS = TX_EVENTS;
+exports.checkIfTxInQueue = checkIfTxInQueue;
