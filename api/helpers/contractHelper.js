@@ -55,6 +55,7 @@ async function handleNewTxInQueue() {
                 await exports.sendSignedTransaction(data, gasLimit, contractAddress);
             } catch (sendErr) {
                 logger.error(`sendSignedTransaction failed for message: ${message.messageId} with ERROR: ${sendErr.message}`);
+                continue;
             }
 
             try {

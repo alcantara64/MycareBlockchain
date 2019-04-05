@@ -268,9 +268,9 @@ describe('contractHelper', () => {
                 }
             ];
 
-            contractHelper.sendSignedTransaction = sandbox.spy();
+            contractHelper.sendSignedTransaction = sandbox.stub().resolves(true);
 
-            azureStorageHelper.deleteMessage = sandbox.spy();
+            azureStorageHelper.deleteMessage = sandbox.stub().resolves(true);
 
             azureStorageHelper.getMessages = sandbox.stub().resolves(messages);
             await contractHelper.handleNewTxInQueue();
@@ -279,6 +279,38 @@ describe('contractHelper', () => {
             sandbox.assert.calledWith(contractHelper.sendSignedTransaction, data, gasLimit, contractAddress);
             sandbox.assert.calledWith(azureStorageHelper.deleteMessage, messages[0]);
 
+            sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
+        });
+
+        it('does not delete message from queue if sendSignedTransactionn fails', async () => {
+            const gasLimit = 11235600;
+            const txObj = {
+                data,
+                gasLimit,
+                contractAddress
+            };
+            const messages = [
+                {
+                    messageId: 'cf9b8ff8-8072-43d8-bcfe-5efc0e007e60',
+                    insertionTime: 'Wed, 03 Apr 2019 18:04:20 GMT',
+                    expirationTime: 'Wed, 10 Apr 2019 18:04:20 GMT',
+                    popReceipt: 'AgAAAAMAAAAAAAAAcsh0/Ujq1AE=',
+                    timeNextVisible: 'Wed, 03 Apr 2019 18:13:51 GMT',
+                    dequeueCount: 2,
+                    messageText: JSON.stringify(txObj)
+                }
+            ];
+
+            contractHelper.sendSignedTransaction = sandbox.stub().rejects(new Error('Transaction out of gas'));
+
+            azureStorageHelper.deleteMessage = sandbox.stub().resolves(true);
+
+            azureStorageHelper.getMessages = sandbox.stub().resolves(messages);
+            await contractHelper.handleNewTxInQueue();
+
+            sandbox.assert.called(azureStorageHelper.getMessages);
+            sandbox.assert.calledWith(contractHelper.sendSignedTransaction, data, gasLimit, contractAddress);
+            sandbox.assert.notCalled(azureStorageHelper.deleteMessage);
             sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
         });
     });
