@@ -86,16 +86,3 @@ exports.createQueue = () => {
         });
     });
 };
-
-/**
- * Message definition
- * @typedef {Message}
- * @property {String} messageId
- * @property {String} insertionTime
- * @property {String} expirationTime
- * @property {String} popReceipt
- * @property {String} timeNextVisible
- * @property {Number} dequeueCount
- * @property {String} messageText
- * @returns Message
- */
