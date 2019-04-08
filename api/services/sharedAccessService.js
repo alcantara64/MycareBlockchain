@@ -3,7 +3,7 @@ const web3 = require('web3');
 const scopeConstants = require('../constants/ScopeConstants');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const BigInt = require('big-integer');
-
+const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
 const {
     contractNames,
     ContractHelper
@@ -56,7 +56,7 @@ exports.addConsent = function addConsent(consent) {
         consent.connectionId
     ).encodeABI();
 
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONSENT);
 };
 
 exports.revokeConsent = function revokeConsent(payload) {
@@ -65,7 +65,7 @@ exports.revokeConsent = function revokeConsent(payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
 
     const data = api.revokeConsent(consentId, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.REVOKE_CONSENT);
 };
 
 exports.canAccess = function (consentId) {
@@ -109,7 +109,7 @@ exports.addConnectionAttempt = function addConnectionAttempt(connection) {
         timestamp
     ).encodeABI();
 
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT);
 };
 
 exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
@@ -120,7 +120,7 @@ exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
     } = payload;
     const data = api.updateConnectionAttempt(connectionId, accepted, timestamp).encodeABI();
 
-    return contractHelper.sendTransaction(data);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT);
 };
 
 exports.getConnectionAttempt = async function getConnectionAttempt(connectionId) {

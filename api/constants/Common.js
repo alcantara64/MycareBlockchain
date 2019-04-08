@@ -26,6 +26,14 @@ const httpStatus = {
     INTERNAL_SERVER_ERROR: {
         CODE: 500,
         MESSAGE: 'There was an internal server error while processing the request.'
+    },
+    UNPROCESSABLE_ENTITY: {
+        CODE: 422,
+        MESSAGE: 'The request was well-formed but was unable to be followed due to semantic errors'
+    },
+    CONFLICT: {
+        CODE: 409,
+        MESSAGE: 'Request could not be processed due to conflicts with existing resources'
     }
 };
 

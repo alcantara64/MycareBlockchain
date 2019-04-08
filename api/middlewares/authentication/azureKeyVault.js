@@ -23,119 +23,56 @@ const client = new azureKeyVault.KeyVaultClient(credentials);
 
 logger.info(`client: ${client}`);
 
-function createkey(keyname, callback) {
+function createkey(keyname) {
     logger.info(`Creating key with name: ${keyname}`);
     const keyType = 'RSA';
     // eslint-disable-next-line no-use-before-define
-    client.createKey(process.env.VAULT_URI, keyname, keyType, getKeyOptions(), (err, result) => {
-        if (err) {
-            logger.error(`error occurred in createKey function : ${err.message}`);
-            throw err;
-        }
-        logger.info(`Key created: ${JSON.stringify(result)}`);
-        callback(result);
-    });
+    return client.createKey(process.env.VAULT_URI, keyname, keyType, getKeyOptions());
 }
 
-function deletekey(keyname, callback) {
+function deletekey(keyname) {
     logger.info('Deleting key...');
-    client.deleteKey(process.env.VAULT_URI, keyname, (err, result) => {
-        if (err) {
-            logger.error(`error occurred in deletekey function : ${err.message}`);
-            throw err;
-        }
-        logger.info(`Key deleted: ${JSON.stringify(result)}`);
-        callback(result);
-    });
+    return client.deleteKey(process.env.VAULT_URI, keyname);
 }
 
-function getallkeys(maxresults, callback) {
+function getallkeys(maxresults) {
     logger.info(`Retrieving ${maxresults} keys...`);
-    client.getKeys(process.env.VAULT_URI, maxresults, (err, result) => {
-        if (err) {
-            logger.error(`error occurred in getallkeys function : ${err.message}`);
-            throw err;
-        }
-        logger.info(`${result.value.length} keys returned.`);
-        callback(result);
-    });
+    return client.getKeys(process.env.VAULT_URI, maxresults);
 }
 
-function encrypt(kid, textToEncrypt, callback) {
+async function encrypt(kid, textToEncrypt) {
     logger.info(`Encrypting ${textToEncrypt}`);
-    client.encrypt(kid, 'RSA-OAEP', new Buffer(textToEncrypt), (err, result) => {
-        if (err) {
-            logger.error(`error occurred in encrypt function : ${err.message}`);
-            throw err;
-        }
-        logger.info(`Encryption result: ${JSON.stringify(result)}`);
-        callback(result.result.toString('base64'));
-    });
+    const { result } = await client.encrypt(kid, 'RSA-OAEP', Buffer.from(textToEncrypt));
+
+    return result.toString('base64');
 }
 
-function decrypt(kid, cipherText, callback) {
+function decrypt(kid, cipherText) {
     logger.info(`Decrypting value ${cipherText}`);
-    client.decrypt(kid, 'RSA-OAEP', Buffer.from(cipherText, 'base64'), (err, result) => {
-        if (err) {
-            logger.error(`error occurred in decrypt function :  ${err.message}`);
-            throw err;
-        }
-        logger.info(`Decryption result: ${JSON.stringify(result)}`);
-        callback(result);
-    });
+    return client.decrypt(kid, 'RSA-OAEP', Buffer.from(cipherText, 'base64'));
 }
 
-function createSecret(secretName, secretValue, callback) {
-    logger.info(`Creating new secret with name ${secretName} and value ${secretValue}`);
+function createSecret(secretName, secretValue) {
+    logger.info(`Creating new secret with name ${secretName}`);
     const attributes = {
         expires: constants.AzureKeyVault_Expiration_Date
     };
     const secretOptions = {
         contentType: 'application/text',
-        secretAttributes: attributes,
+        secretAttributes: attributes
     };
     logger.info(`secretOptions: ${JSON.stringify(secretOptions, null, ' ')}`);
-    client.setSecret(process.env.VAULT_URI, secretName, secretValue, secretOptions, (err, result) => {
-        if (err) {
-            logger.error(`error occurred in createSecret function :  ${err.message}`);
-            throw err;
-        }
-        logger.info(`Secret written: ${JSON.stringify(result, null, ' ')}`);
-        callback(result);
-    });
+    return client.setSecret(process.env.VAULT_URI, secretName, secretValue, secretOptions);
 }
 
-function deleteSecret(secretName, callback) {
+function deleteSecret(secretName) {
     logger.info(`Deleting secret with name ${secretName}`);
 
-    client.deleteSecret(process.env.VAULT_URI, secretName, (err, result) => {
-        if (err) {
-            logger.error(`err: ${err.message}`);
-            throw err;
-        }
-        logger.info('Secret deleted successfully');
-        callback(result);
-    });
+    return client.deleteSecret(process.env.VAULT_URI, secretName);
 }
 
-async function getSecret(secretName, secretVersion) {
-
-    const promise = new Promise((async (resolve, reject) => {
-        try {
-
-            client.getSecret(process.env.VAULT_URI, secretName, '', (err, result) => {
-                if (err) {
-                    logger.error(`error occurred in getSecret function :   ${err.message}`);
-                    reject(err);
-                }
-                resolve(JSON.stringify(result));
-            });
-        } catch (error) {
-            logger.error(`getSecret error : ${error}`);
-        }
-    }));
-    const result = await promise;
-    return result;
+async function getSecret(secretName) {
+    return client.getSecret(process.env.VAULT_URI, secretName, '')
 }
 
 function getKeyOptions() {
