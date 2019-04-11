@@ -4,7 +4,7 @@ const fs = require('fs');
 const ethereumjs = require('ethereumjs-tx');
 const events = require('events');
 const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
-const azureStorageHelper = require(`${appRoot}/api/helpers/azureStorageHelper`);
+const { requireAsync } = require(`${appRoot}/api/helpers/helperMethods`);
 const axios = require('axios');
 const logger = require(`${appRoot}/config/winston`);
 
@@ -32,8 +32,14 @@ eventEmitter.addListener(TX_EVENTS.ADDED_TX_TO_QUEUE, handleNewTxInQueue);
 eventEmitter.addListener(TX_EVENTS.TX_PROCESSING_COMPLETED, checkIfTxInQueue);
 eventEmitter.addListener(TX_EVENTS.INITIALIZED_TX_CREDENTIALS, checkIfTxInQueue);
 
-initializeTransactionCredentials().then(() => {
-    eventEmitter.emit(TX_EVENTS.INITIALIZED_TX_CREDENTIALS);
+let azureStorageHelper;
+// asynchronously load azureStorageHelper
+requireAsync(`${appRoot}/api/helpers/azureStorageHelper`, (storageHelper) => {
+    azureStorageHelper = storageHelper;
+
+    initializeTransactionCredentials().then(() => {
+        eventEmitter.emit(TX_EVENTS.INITIALIZED_TX_CREDENTIALS);
+    });
 });
 
 // exports.processNewTxInQueue = async () => {
@@ -59,8 +65,8 @@ async function handleNewTxInQueue() {
             }
 
             try {
-            await azureStorageHelper.deleteMessage(message);
-            } catch(delError) {
+                await azureStorageHelper.deleteMessage(message);
+            } catch (delError) {
                 logger.error(`deleteMessage for messageId: ${message.messageId} FAILED with error: ${delError.message}`);
             }
         }
@@ -72,7 +78,7 @@ async function handleNewTxInQueue() {
     }
 }
 
-async function checkIfTxInQueue () {
+async function checkIfTxInQueue() {
     const messageCount = await azureStorageHelper.getQueueLength();
 
     if (messageCount > 0) {
@@ -113,6 +119,7 @@ function ContractHelper(contractName) {
 /**
  * @description calls parity_nextNonce api. The returned value gives the next available nonce
  * for a transaction taking all pending transactions into consideration.
+ * This is meant to be an rpc call, see more here `https://wiki.parity.io/JSONRPC-parity-module#parity_nextnonce`
  * Note that is is only available if connection is established to a parity node.
  * This means this call wont work if connecton is establlished to a geth node
  */
@@ -123,13 +130,12 @@ async function getTransactionCount() {
         data: {
             method: 'parity_nextNonce',
             params: [accountAddress],
-            id: 1,
+            id: 1, // https://ethereum.stackexchange.com/questions/50647/json-rpc-api-id
             jsonrpc: '2.0'
         }
     });
     return Number(response.data.result);
 }
-
 
 exports.sendSignedTransaction = async function (data, gasLimit, contractAddress) {
     const nonce = await getTransactionCount();

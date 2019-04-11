@@ -1,6 +1,8 @@
 const appRoot = require('app-root-path');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const sandbox = sinon.createSandbox();
 const { assert } = sandbox;
@@ -9,11 +11,19 @@ describe('azureStorageHelper', () => {
     let azureStorageHelper;
     let azureStorage;
     let queueSvc;
+    let keyvault;
 
-    const queueName = process.env.AZURE_STORAGE_QUEUE_NAME;
+    const queueName = 'tx-pool-str';
+    const connectionString = 'keyvault=+connection-=string';
 
-    beforeEach(() => {
+    beforeEach((done) => {
         queueSvc = {};
+        keyvault = {
+            getSecret: sandbox.stub()
+        };
+
+        keyvault.getSecret.withArgs(process.env.AZURE_STORAGE_QUEUE_NAME).resolves({ value: queueName });
+        keyvault.getSecret.withArgs(process.env.AZURE_STORAGE_CONNECTION_STRING).resolves({ value: connectionString });
 
         azureStorage = {
             createQueueService: sandbox.stub().returns(queueSvc)
@@ -23,7 +33,17 @@ describe('azureStorageHelper', () => {
             'azure-storage': azureStorage
         };
 
-        azureStorageHelper = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
+        imports[`${appRoot}/api/middlewares/authentication/azureKeyVault`] = keyvault;
+
+        const azureStorageHelperModule = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
+
+        azureStorageHelperModule((storageHelper) => {
+            assert.calledWith(keyvault.getSecret, process.env.AZURE_STORAGE_CONNECTION_STRING);
+            assert.calledWith(keyvault.getSecret, process.env.AZURE_STORAGE_QUEUE_NAME);
+            assert.calledWith(azureStorage.createQueueService, connectionString);
+            azureStorageHelper = storageHelper;
+            done();
+        });
     });
 
     afterEach(() => {

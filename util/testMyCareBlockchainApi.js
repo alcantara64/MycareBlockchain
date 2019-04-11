@@ -4,8 +4,8 @@ const crypto = require('crypto');
 const baseUrl = 'http://127.0.0.1:4000/api/v1';
 
 async function getAccessToken() {
-    const BLOCKCHAIN_API_CLIENT_ID = 'b38f89ed80a33d85fa367358c13f701b6ae2565bf2241751d08eabcaae717628ee37c18ef54fd23d8d8e8e887e8b5fbf08ffe2ae05654104a2169d304395727d737e0654849e7ae4690d9fd6041d90a4'
-    const BLOCKCHAIN_API_CLIENT_SECRET = '63f7c370895ccc3a990be3590ce8cf345e9cfcb264acfbe769cc432eb76e8650d525d5c090479b521f4de91f9dc25c5b3bdc6768d74e754125c5dd29733d8e0ac5019b2f2977f1da8e55b45938457831'
+    const BLOCKCHAIN_API_CLIENT_ID = 'a86695261cc35ea2c79f89cbe974a8ddad70c61724b1b6eafde45e406f67ea39889f0fd10a3739b37402d29e30a445f4cd136c3248e39e9785b276f85bd88052c534255afe451235491927f1df2e5a44';
+    const BLOCKCHAIN_API_CLIENT_SECRET = '62ff7e54f2062698ba09e59b8a1dccbdeae78173d2ca2ad56522bd21c6114884f2a04bd34ef32aa6c9a19fb2e3e6830615824b18f5fc6fa949dfd3f510b4ebb21ea1cb5ad524696578a040167b70836b';
     console.log(`GET access token`);
     // console.log(`CLIENT_ID: ${BLOCKCHAIN_API_CLIENT_ID}`);
     // console.log(`CLIENT_SECRET: ${BLOCKCHAIN_API_CLIENT_SECRET}`);
@@ -79,7 +79,7 @@ async function Main(sizeOfData) {
 };
 
 const sizeOfData = process.argv[2];
-const size = !!sizeOfData ? Number(sizeOfData) : 1;
+const size = sizeOfData ? Number(sizeOfData) : 1;
 
 if (isNaN(size)) {
     throw new Error('Expecting a number(integer)');

@@ -1,13 +1,39 @@
+const appRoot = require('app-root-path');
 const azure = require('azure-storage');
+const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
 
-const queueSvc = azure.createQueueService();
-const queueName = process.env.AZURE_STORAGE_QUEUE_NAME;
+let queueSvc;
+let queueName;
+
+module.exports = function (callback) {
+    getConnectionCredsFromVault().then((credentials) => {
+        queueName = credentials.AZURE_STORAGE_QUEUE_NAME;
+        queueSvc = azure.createQueueService(credentials.AZURE_STORAGE_CONNECTION_STRING);
+
+        const storageHelper = { createMessage, deleteMessage, getMessages, getQueueLength, createQueue };
+        callback(storageHelper);
+    });
+};
+
+/**
+ * Gets the needed credentials to connect to azure storage queue from Azure keyvault
+ * @returns {Promise<{AZURE_STORAGE_QUEUE_NAME: String, AZURE_STORAGE_CONNECTION_STRING: String}>} connectionCredentials
+ */
+async function getConnectionCredsFromVault() {
+    const AZURE_STORAGE_CONNECTION_STRING = await azureKeyVault.getSecret(process.env.AZURE_STORAGE_CONNECTION_STRING, '');
+    const AZURE_STORAGE_QUEUE_NAME = await azureKeyVault.getSecret(process.env.AZURE_STORAGE_QUEUE_NAME, '');
+
+    return {
+        AZURE_STORAGE_QUEUE_NAME: AZURE_STORAGE_QUEUE_NAME.value,
+        AZURE_STORAGE_CONNECTION_STRING: AZURE_STORAGE_CONNECTION_STRING.value
+    };
+}
 
 /**
  * send message to queue
  * @param {String} messageText blockchain transaction details
  */
-exports.createMessage = (messageText) => {
+function createMessage(messageText) {
     return new Promise((resolve, reject) => {
         queueSvc.createMessage(queueName, messageText, function (error, results, response) {
             if (error) {
@@ -25,7 +51,7 @@ exports.createMessage = (messageText) => {
  * Message object that was returned from a requst to get message
  * @returns {Promise}
  */
-exports.deleteMessage = (message) => {
+function deleteMessage(message) {
     return new Promise((resolve, reject) => {
         queueSvc.deleteMessage(queueName, message.messageId, message.popReceipt, function (error, response) {
             if (error) reject(error);
@@ -49,10 +75,10 @@ exports.deleteMessage = (message) => {
  * @description Get messages in queue. Currently fetches max of `10` in a single batch
  * @return {Array<Message>} Returns Array of message
  */
-exports.getMessages = () => {
+function getMessages() {
     const options = {
         numOfMessages: 10
-        // visibilityTimeout: 5 * 60
+        // visibilityTimeout: 5 * 60 // this is commented now, but will be used later for scaling purposes
     };
     return new Promise((resolve, reject) => {
         queueSvc.getMessages(queueName, options, function (error, results, response) {
@@ -69,7 +95,7 @@ exports.getMessages = () => {
  * Get total number of messages in the queue
  * @returns {number}
  */
-exports.getQueueLength = () => {
+function getQueueLength() {
     return new Promise((resolve, reject) => {
         queueSvc.getQueueMetadata(queueName, function (error, results, response) {
             if (error) reject(error);
@@ -78,7 +104,7 @@ exports.getQueueLength = () => {
     });
 };
 
-exports.createQueue = () => {
+function createQueue() {
     return new Promise((resolve, reject) => {
         queueSvc.createQueueIfNotExists(queueName, (error, results, response) => {
             if (error) reject(error);

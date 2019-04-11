@@ -24,6 +24,7 @@ describe('contractHelper', () => {
     let addListener;
     let emit;
     let axios;
+    let helperMethods;
 
     const baseAddress = '0xE6VFT57677EdB17eE116407236CF904g42342d21bfd1';
     const data = '0x300000000000000ddeeecc300099aa9cccc9ff9eedacf83035ad93e939f99c929a939e939a99b9';
@@ -63,6 +64,11 @@ describe('contractHelper', () => {
         };
 
         azureStorageHelper = {};
+
+        helperMethods = {
+            requireAsync: sandbox.stub().yields(azureStorageHelper)
+        };
+
         jsonObj.networks[process.env.NETWORK_ID] = {
             address: contractAddress
         };
@@ -132,6 +138,7 @@ describe('contractHelper', () => {
         imports[`${appRoot}/api/middlewares/authentication/azureKeyVault`] = azureKeyVault;
         imports['ethereumjs-tx'] = ethereumjs;
         imports[`${appRoot}/api/helpers/azureStorageHelper`] = azureStorageHelper;
+        imports[`${appRoot}/api/helpers/helperMethods`] = helperMethods;
 
         contractHelper = proxyquire(`${appRoot}/api/helpers/contractHelper`, imports);
     });
@@ -233,7 +240,7 @@ describe('contractHelper', () => {
 
     describe('checkIfTxInQueue', () => {
         it('emits event ADDED_TX_TO_QUEUE if there are transactions in queue', async () => {
-            azureStorageHelper.getQueueLength = sandbox.stub().resolves(2);   
+            azureStorageHelper.getQueueLength = sandbox.stub().resolves(2);
             await contractHelper.checkIfTxInQueue();
 
             sandbox.assert.called(azureStorageHelper.getQueueLength);
@@ -245,6 +252,7 @@ describe('contractHelper', () => {
             await contractHelper.checkIfTxInQueue();
 
             sandbox.assert.called(azureStorageHelper.getQueueLength);
+            sandbox.assert.neverCalledWith(emit, contractHelper.TX_EVENTS.ADDED_TX_TO_QUEUE);
         });
     });
 
