@@ -17,7 +17,8 @@
     "lint:contracts": "solium -d contracts/",
     "coverage": "nyc --reporter=lcov mocha --recursive --exit ./spec/**/**/*.js --timeout 90000",
     "coverage:contracts": "./node_modules/.bin/solidity-coverage",
-    "generateEthereumAccount": "node ./util/generateEthereumAccount.js"
+    "generateEthereumAccount": "node ./util/generateEthereumAccount.js",
+    "api:stress:test": "node ./util/testMyCareBlockchainApi.js"
   },
   "author": "",
   "license": "ISC",
@@ -25,7 +26,9 @@
     "adal-node": "^0.1.28",
     "app-root-path": "^2.0.1",
     "atob": "^2.1.2",
+    "axios": "^0.18.0",
     "azure-keyvault": "^3.0.4",
+    "azure-storage": "^2.10.2",
     "big-integer": "^1.6.40",
     "body-parser": "^1.18.3",
     "btoa": "^1.2.1",
@@ -44,6 +47,7 @@
     "nodemailer": "^5.1.1",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
+    "save": "^2.3.3",
     "solium": "^1.1.8",
     "truffle-hdwallet-provider": "0.0.6",
     "ursa": "^0.9.4",
