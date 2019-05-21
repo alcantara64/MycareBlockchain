@@ -1,6 +1,7 @@
 const appRoot = require('app-root-path');
 const moment = require('moment');
 const sharedAccessService = require(`${appRoot}/api/services/sharedAccessService`);
+const scopeConstants = require(`${appRoot}/api/constants/aggregateScopeConstants`);
 const logger = require(`${appRoot}/config/winston`);
 const validators = require(`${appRoot}/api/shared/validators`);
 
@@ -161,6 +162,29 @@ exports.getConnectionAttempt = async function (req, res) {
     }
 };
 
+/**
+ * Check if given scopes are among the know list of scopes
+ * @param {Array<String>} scope array of scopes
+ */
+function invalidScope(scope) {
+    let invalidScopeName = '';
+    if (scope.length < 1) {
+        return true;
+    }
+
+    const knownScopes = Object.keys(scopeConstants);
+    // for (const val of scope) {
+    for (let i = 0; i < scope.length; i += 1) {
+        const value = scope[i];
+        if (!knownScopes.includes(value)) {
+            invalidScopeName = value;
+            break;
+        }
+    }
+
+    return invalidScopeName;
+}
+
 // validators
 exports.validateAddConsentParams = function (req, res, next) {
     try {
@@ -185,11 +209,16 @@ exports.validateAddConsentParams = function (req, res, next) {
             });
         }
 
-        if (!payload.scope.length) {
-            logger.error('No scope was specified');
+        const { scope } = payload;
+        const invalidScopeValue = invalidScope(scope);
+        const emptyScope = scope.length < 1;
+
+        if (emptyScope || invalidScopeValue) {
+            const message = emptyScope ? 'no scope was sent' : `scope ${invalidScopeValue} is invalid`;
+            logger.error(`validateAddConsentParams - ${message}`);
 
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
-                message: 'No scope was specified'
+                message
             });
         }
 

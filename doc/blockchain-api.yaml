@@ -1166,4 +1166,4 @@ components:
         timestamp:
           type: string
           description: timestamp showing when account was created
-          example: "2018-11-21T11:26:34.142Z"
+          example: "2018-11-21T11:26:34.142Z" 
