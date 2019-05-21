@@ -127,6 +127,9 @@ async function getTransactionCount() {
     const response = await axios({
         method: 'post',
         url: process.env.RPC_ENDPOINT,
+        headers: {
+            'Content-Type': 'application/json'
+        },
         data: {
             method: 'parity_nextNonce',
             params: [accountAddress],

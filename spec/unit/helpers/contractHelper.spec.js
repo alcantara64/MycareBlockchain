@@ -222,6 +222,9 @@ describe('contractHelper', () => {
         sandbox.assert.calledWith(axios, {
             method: 'post',
             url: process.env.RPC_ENDPOINT,
+            headers: {
+                'Content-Type': 'application/json'
+            },
             data: {
                 method: 'parity_nextNonce',
                 params: [accountAddress],
