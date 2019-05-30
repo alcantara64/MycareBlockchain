@@ -5,6 +5,8 @@ const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Common`);
 
+const scopeConstants = require(`${appRoot}/api/constants/aggregateScopeConstants`);
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -19,9 +21,10 @@ describe('sharedAccessController', () => {
     let contractHelper;
     let validators;
 
+    const scopeNames = Object.keys(scopeConstants);
     const consent = {
         timestamp: '2018-11-28T13:01:04.956Z',
-        scope: ['Medication', 'MessageDefinition', 'ServiceDefinition', 'Specimen'],
+        scope: [...scopeNames],
         dataSource: ['0x5EF18be6e742c63AA2Dab7F52C1B699040875808', '0xd9Ef690a2836b5e50098A391Ebd490A96a416EEc'],
         startDate: '2018-11-28T13:01:04.956Z',
         endDate: '2018-11-28T13:01:04.956Z',
@@ -488,7 +491,35 @@ describe('sharedAccessController', () => {
         sandbox.assert.calledWith(validators.validateRequiredParams, req.body, requiredFields);
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
         sandbox.assert.calledWith(resJSON, {
-            message: 'No scope was specified'
+            message: 'no scope was sent'
+        });
+    });
+
+    it('validateAddConsentParams returns bad request if scope contains an unknown value', () => {
+        const unknownScope = 'unknown-unrecognnised-scope';
+        const req = {
+            body: {
+                ...consent,
+                scope: [scopeNames[0], unknownScope]
+            }
+        };
+
+        const result = {
+            message: '',
+            missingParam: false
+        };
+
+        validators.validateRequiredParams = sandbox.stub().returns(result);
+
+        const requiredFields = ['timestamp', 'scope', 'dataSource', 'startDate', 'endDate', 'consentId', 'connectionId'];
+
+        const next = sandbox.spy();
+
+        sharedAccessController.validateAddConsentParams(req, res, next);
+        sandbox.assert.calledWith(validators.validateRequiredParams, req.body, requiredFields);
+        sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
+        sandbox.assert.calledWith(resJSON, {
+            message: `scope ${unknownScope} is invalid`
         });
     });
 

@@ -1,12 +1,10 @@
 const appRoot = require('app-root-path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
-const chai = require('chai');
-const constants = require(`${appRoot}/api/constants/ScopeConstants`);
+const constants = require(`${appRoot}/api/constants/Common`);
 
 const sandbox = sinon.createSandbox();
 const { assert } = sandbox;
-const { expect } = chai;
 
 describe('AzureKeyVaultHelper', () => {
     let azureKeyVault;

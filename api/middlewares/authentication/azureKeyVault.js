@@ -3,7 +3,7 @@ const moment = require('moment');
 const azureKeyVault = require('azure-keyvault');
 const appRoot = require('app-root-path');
 const logger = require(`${appRoot}/config/winston`);
-const constants = require(`${appRoot}/api/constants/ScopeConstants`);
+const constants = require(`${appRoot}/api/constants/Common`);
 
 function authenticator(challenge, callback) {
     // Create a new authentication context.
