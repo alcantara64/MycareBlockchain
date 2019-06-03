@@ -1,6 +1,4 @@
 const appRoot = require('app-root-path');
-const web3 = require('web3');
-const scopeConstants = require('../constants/ScopeConstants');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
 const {

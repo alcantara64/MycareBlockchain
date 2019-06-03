@@ -38,3 +38,5 @@ const httpStatus = {
 };
 
 module.exports.HTTP_STATUS = httpStatus;
+
+exports.AzureKeyVault_Expiration_Date = new Date(2300, 1, 1);
