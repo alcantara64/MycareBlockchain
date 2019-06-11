@@ -14,8 +14,8 @@ exports.createAdminUser = async function () {
         const userData = fs.readFileSync(`${appRoot}/util/seedData/adminUser.json`);
         const user = JSON.parse(userData);
 
-        const email = JSON.parse(await azureKeyVault.getSecret(process.env.ADMIN_EMAIL, '')).value;
-        const password = JSON.parse(await azureKeyVault.getSecret(process.env.ADMIN_PASSWORD, '')).value;
+        const email = (await azureKeyVault.getSecret(process.env.ADMIN_EMAIL, '')).value;
+        const password = (await azureKeyVault.getSecret(process.env.ADMIN_PASSWORD, '')).value;
 
         const dbUser = await User.findOne({
             email
