@@ -9,52 +9,64 @@ const appRoot = require('app-root-path');
 const bodyParser = require('body-parser');
 const express = require('express');
 const morgan = require('morgan');
-const dotenv = require('dotenv-flow').config();
+const dotenv = require('dotenv').config();
 
-const winston = require(`${appRoot}/config/winston`);
-const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
-const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
-const authRoute = require(`${appRoot}/api/routes/authRoute`);
-const userRoute = require(`${appRoot}/api/routes/userRoute`);
-const policiesAndTermsRoute = require(`${appRoot}/api/routes/policiesAndTermsRoute`);
-const userService = require(`${appRoot}/api/services/userService`);
-// initialize database configuration
-require(`${appRoot}/config/dbConnection`);
+const curProfile = process.env.PROFILE || 'dev';
+const configPath = `./profiles/${curProfile}.env`;
 
-const port = process.env.PORT || 4000;
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+const logger = require(`${appRoot}/config/winston`);
 
 if (dotenv.error) {
     throw dotenv.error;
 }
 
-const router = express.Router();
-
-mycareRoute(router);
-sharedAccessRoute(router);
-policiesAndTermsRoute(router);
-authRoute(router);
-userRoute(router);
-
 const app = express();
 
-// Authentication middleware
-require(`${appRoot}/api/middlewares/authentication/auth`);
+logger.info('Initializing env constants and secrets...');
+envHelper.initialize()
+    .then(async function envHelperInitilised() {
+        logger.info('env constants and secrets initialised successfully');
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+        const env = envHelper.getConstants();
 
-// parse application/json
-app.use(bodyParser.json());
+        const port = env.PORT || 4000;
+        const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
+        const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
+        const authRoute = require(`${appRoot}/api/routes/authRoute`);
+        const userRoute = require(`${appRoot}/api/routes/userRoute`);
+        const policiesAndTermsRoute = require(`${appRoot}/api/routes/policiesAndTermsRoute`);
+        const userService = require(`${appRoot}/api/services/userService`);
+        // initialize database configuration
+        require(`${appRoot}/config/dbConnection`);
 
-app.use(morgan('combined', {
-    stream: winston.stream
-}));
+        const router = express.Router();
 
-app.use('/api/v1', router);
+        mycareRoute(router);
+        sharedAccessRoute(router);
+        policiesAndTermsRoute(router);
+        authRoute(router);
+        userRoute(router);
 
-// seed data
-userService.createAdminUser();
+        // Authentication middleware
+        require(`${appRoot}/api/middlewares/authentication/auth`);
 
-app.listen(port);
+        // parse application/x-www-form-urlencoded
+        app.use(bodyParser.urlencoded({ extended: false }));
+
+        // parse application/json
+        app.use(bodyParser.json());
+
+        app.use(morgan('combined', {
+            stream: logger.stream
+        }));
+
+        app.use('/api/v1', router);
+
+        // seed data
+        userService.createAdminUser();
+
+        app.listen(port);
+    });
 
 module.exports = app;

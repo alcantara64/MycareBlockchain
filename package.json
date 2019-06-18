@@ -12,6 +12,7 @@
     "test:api:debug": "mocha --recursive --exit --inspect-brk ./spec/**/*.js --timeout 90000",
     "test:junit": "mocha --recursive --exit --timeout 90000 ./spec/**/*.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/test-results.xml",
     "start": "nodemon server.js",
+    "start-dev": "export PROFILE='dev'; nodemon server.js",
     "deploy:contracts": "truffle migrate --reset --all --network mainnet",
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",

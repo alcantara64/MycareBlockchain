@@ -1,16 +1,18 @@
 const adalNode = require('adal-node'); // Used for authentication
 const moment = require('moment');
+const fs = require('fs');
 const azureKeyVault = require('azure-keyvault');
 const appRoot = require('app-root-path');
 const logger = require(`${appRoot}/config/winston`);
 const constants = require(`${appRoot}/api/constants/Common`);
 
+const config = JSON.parse(fs.readFileSync('./keyvault.json'));
+
 function authenticator(challenge, callback) {
     // Create a new authentication context.
     const context = new adalNode.AuthenticationContext(challenge.authorization);
     // Use the context to acquire an authentication token.
-    // eslint-disable-next-line max-len
-    return context.acquireTokenWithClientCredentials(challenge.resource, process.env.CLIENT_ID, process.env.CLIENT_SECRET, (err, tokenResponse) => {
+    return context.acquireTokenWithClientCredentials(challenge.resource, config.CLIENT_ID, config.CLIENT_SECRET, (err, tokenResponse) => {
         if (err) throw err;
         // Calculate the value to be set in the request's Authorization header and resume the call.
         const authorizationValue = `${tokenResponse.tokenType} ${tokenResponse.accessToken}`;
@@ -27,17 +29,17 @@ function createkey(keyname) {
     logger.info(`Creating key with name: ${keyname}`);
     const keyType = 'RSA';
     // eslint-disable-next-line no-use-before-define
-    return client.createKey(process.env.VAULT_URI, keyname, keyType, getKeyOptions());
+    return client.createKey(config.VAULT_URI, keyname, keyType, getKeyOptions());
 }
 
 function deletekey(keyname) {
     logger.info('Deleting key...');
-    return client.deleteKey(process.env.VAULT_URI, keyname);
+    return client.deleteKey(config.VAULT_URI, keyname);
 }
 
 function getallkeys(maxresults) {
     logger.info(`Retrieving ${maxresults} keys...`);
-    return client.getKeys(process.env.VAULT_URI, maxresults);
+    return client.getKeys(config.VAULT_URI, maxresults);
 }
 
 async function encrypt(kid, textToEncrypt) {
@@ -62,17 +64,17 @@ function createSecret(secretName, secretValue) {
         secretAttributes: attributes
     };
     logger.info(`secretOptions: ${JSON.stringify(secretOptions, null, ' ')}`);
-    return client.setSecret(process.env.VAULT_URI, secretName, secretValue, secretOptions);
+    return client.setSecret(config.VAULT_URI, secretName, secretValue, secretOptions);
 }
 
 function deleteSecret(secretName) {
     logger.info(`Deleting secret with name ${secretName}`);
 
-    return client.deleteSecret(process.env.VAULT_URI, secretName);
+    return client.deleteSecret(config.VAULT_URI, secretName);
 }
 
 async function getSecret(secretName) {
-    return client.getSecret(process.env.VAULT_URI, secretName, '')
+    return client.getSecret(config.VAULT_URI, secretName, '');
 }
 
 function getKeyOptions() {
