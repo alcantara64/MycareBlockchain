@@ -1,6 +1,4 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const dotenv = require('dotenv');
-dotenv.config();
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const mnemonic = process.env.METAMASK_ACCOUNT_MNEMONIC;

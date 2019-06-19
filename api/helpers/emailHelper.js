@@ -1,11 +1,11 @@
 const appRoot = require('app-root-path');
-const dotenv = require('dotenv');
 const handlebars = require('handlebars');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const logger = require(`${appRoot}/config/winston`);
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-dotenv.config();
+const env = envHelper.getConstants();
 
 exports.createEmailTemplate = function createEmailTemplate(templateName, templateVariables) {
     let path = `${appRoot}/public/templates/${templateName}.html`;
@@ -25,12 +25,12 @@ exports.sendMail = function sendEmail(to, subject, templateName, templateVariabl
             }
 
             const transporter = nodemailer.createTransport({
-                host: process.env.EMAIL_HOST,
+                host: env.EMAIL_HOST,
                 port: 587,
                 secureConnection: false,
                 auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
+                    user: env.EMAIL_USER,
+                    pass: env.EMAIL_PASS
                 },
                 tls: {
                     // do not fail on invalid certs

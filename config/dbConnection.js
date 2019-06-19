@@ -1,11 +1,12 @@
 const appRoot = require('app-root-path');
 const mongoose = require('mongoose');
 const logger = require(`${appRoot}/config/winston`);
-const dotenv = require('dotenv');
-dotenv.config();
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+
+const env = envHelper.getConstants();
 
 // const dbConnection = `mongodb://${dbUser}:${dbPass}@${dbHostPortName}`;
-const dbConnection = process.env.MONGODB_URI;
+const dbConnection = env.MONGODB_URI;
 
 mongoose.Promise = global.Promise;
 

@@ -15,6 +15,10 @@ const {
     HTTP_STATUS
 } = require(`${appRoot}/api/constants/Common`);
 
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+
+const env = envHelper.getConstants();
+
 exports.getAccessToken = async function (req, res) {
     try {
         const {
@@ -57,7 +61,7 @@ exports.getAccessToken = async function (req, res) {
                 email: client.email,
                 tokenType: TOKEN_TYPE.CLIENT,
                 exp: expiration
-            }, process.env.JWT_TOKEN)
+            }, env.JWT_TOKEN)
         };
 
         return res.status(HTTP_STATUS.OK.CODE).json(payload);
