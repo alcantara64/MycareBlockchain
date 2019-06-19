@@ -1,10 +1,13 @@
 const appRoot = require('app-root-path');
 const proxyquire = require('proxyquire');
 const sinon = require('sinon');
+const fs = require('fs');
 const constants = require(`${appRoot}/api/constants/Common`);
 
 const sandbox = sinon.createSandbox();
 const { assert } = sandbox;
+
+const config = JSON.parse(fs.readFileSync('./keyvault.json'));
 
 describe('AzureKeyVaultHelper', () => {
     let azureKeyVault;
@@ -63,8 +66,8 @@ describe('AzureKeyVaultHelper', () => {
         assert.calledWith(
             context.acquireTokenWithClientCredentials,
             challenge.resource,
-            process.env.CLIENT_ID,
-            process.env.CLIENT_SECRET
+            config.CLIENT_ID,
+            config.CLIENT_SECRET
         );
 
         assert.calledWith(azureKeyVault.KeyVaultClient, credentials);
@@ -97,7 +100,7 @@ describe('AzureKeyVaultHelper', () => {
 
         azureKeyVault.KeyVaultClient = sandbox.stub();
         azureKeyVaultHelper.createkey(keyname, cb);
-        assert.calledWith(client.createKey, process.env.VAULT_URI, keyname, 'RSA', keyOptionsStr);
+        assert.calledWith(client.createKey, config.VAULT_URI, keyname, 'RSA', keyOptionsStr);
     });
 
     it('deleteKey can remove existing keys', () => {
@@ -106,7 +109,7 @@ describe('AzureKeyVaultHelper', () => {
         client.deleteKey = sandbox.spy();
 
         azureKeyVaultHelper.deletekey(keyname);
-        assert.calledWith(client.deleteKey, process.env.VAULT_URI, keyname);
+        assert.calledWith(client.deleteKey, config.VAULT_URI, keyname);
     });
 
     it('can get all keys', () => {
@@ -115,7 +118,7 @@ describe('AzureKeyVaultHelper', () => {
         const maxresults = 45;
 
         azureKeyVaultHelper.getallkeys(maxresults);
-        assert.calledWith(client.getKeys, process.env.VAULT_URI, maxresults);
+        assert.calledWith(client.getKeys, config.VAULT_URI, maxresults);
     });
 
     it('can encrypt plain text', async () => {
@@ -165,7 +168,7 @@ describe('AzureKeyVaultHelper', () => {
 
         azureKeyVaultHelper.createSecret(secretName, secretValue);
 
-        assert.calledWith(client.setSecret, process.env.VAULT_URI, secretName, secretValue, secretOptions);
+        assert.calledWith(client.setSecret, config.VAULT_URI, secretName, secretValue, secretOptions);
     });
 
     it('can delete secret successfully', () => {
@@ -175,7 +178,7 @@ describe('AzureKeyVaultHelper', () => {
         const cb = sandbox.spy();
 
         azureKeyVaultHelper.deleteSecret(secretName, cb);
-        assert.calledWith(client.deleteSecret, process.env.VAULT_URI, secretName);
+        assert.calledWith(client.deleteSecret, config.VAULT_URI, secretName);
     });
 
     it('can get secret successfuly', async () => {
@@ -185,6 +188,6 @@ describe('AzureKeyVaultHelper', () => {
 
         azureKeyVaultHelper.getSecret(secretName);
 
-        assert.calledWith(client.getSecret, process.env.VAULT_URI, secretName, '');
+        assert.calledWith(client.getSecret, config.VAULT_URI, secretName, '');
     });
 });
