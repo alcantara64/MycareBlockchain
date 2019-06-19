@@ -9,10 +9,10 @@ const appRoot = require('app-root-path');
 const bodyParser = require('body-parser');
 const express = require('express');
 const morgan = require('morgan');
-const dotenv = require('dotenv').config();
 
 const curProfile = process.env.PROFILE || 'dev';
 const configPath = `./profiles/${curProfile}.env`;
+const dotenv = require('dotenv').config({ path: configPath });
 
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 const logger = require(`${appRoot}/config/winston`);
