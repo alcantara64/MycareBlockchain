@@ -1,14 +1,30 @@
 const shell = require('shelljs');
 const appRoot = require('app-root-path');
-
-const logger = require(`${appRoot}/config/winston`);
+const program = require('commander');
 
 const curProfile = process.env.PROFILE || 'dev';
 const configPath = `${appRoot}/profiles/${curProfile}.env`;
 
-const dotenv = require('dotenv').config({ path: configPath });
+require('dotenv').config({ path: configPath });
 
 const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
+
+program
+    .version('"Truffle commands runner" -v0.1.0', '-v, --version')
+    .option('-m, --migrate', 'Migrate smart contracts')
+    .option('-t, --test', 'Run smart contract tests')
+    .parse(process.argv);
+
+let truffleCommand = '';
+
+if (program.migrate) {
+    truffleCommand = 'truffle migrate --reset --all --network mainnet';
+} else if (program.test) {
+    truffleCommand = 'truffle test';
+} else {
+    const errMsg = 'Invalid or no command line options supplied';
+    throw new Error(errMsg);
+}
 
 function getBlockchainCredentials(callback) {
     const secretNames = [
@@ -30,16 +46,13 @@ function getBlockchainCredentials(callback) {
     });
 }
 
-function deployContracts() {
+function runTruffleCommand() {
     getBlockchainCredentials((secrets) => {
-        logger.info('SECRETS ARE');
-        logger.info(JSON.stringify(secrets));
-
         shell.exec(`RPC_ENDPOINT="${secrets.RPC_ENDPOINT}" 
         METAMASK_ACCOUNT_MNEMONIC=${secrets.METAMASK_ACCOUNT_MNEMONIC}
         NETWORK_ID=${secrets.NETWORK_ID}
-        npm run deploy:contracts`);
+        ${truffleCommand}`);
     });
 }
 
-deployContracts();
+runTruffleCommand();
