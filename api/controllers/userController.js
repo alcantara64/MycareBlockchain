@@ -11,7 +11,7 @@ const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const jwt = require('jsonwebtoken');
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
 exports.login = async function (req, res) {
     try {
@@ -64,7 +64,7 @@ exports.login = async function (req, res) {
                 email: user.email,
                 tokenType: TOKEN_TYPE.USER,
                 exp: expiration
-            }, env.JWT_TOKEN)
+            }, envConstants.JWT_TOKEN)
         };
 
         return res.status(HTTP_STATUS.OK.CODE).json(payload);

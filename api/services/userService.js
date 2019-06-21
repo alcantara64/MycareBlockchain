@@ -8,7 +8,7 @@ const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();;
 
 exports.createAdminUser = async function () {
     try {
@@ -17,8 +17,8 @@ exports.createAdminUser = async function () {
         const userData = fs.readFileSync(`${appRoot}/util/seedData/adminUser.json`);
         const user = JSON.parse(userData);
 
-        const email = env.ADMIN_EMAIL;
-        const password = env.ADMIN_PASSWORD;
+        const email = envConstants.ADMIN_EMAIL;
+        const password = envConstants.ADMIN_PASSWORD;
 
         const dbUser = await User.findOne({
             email

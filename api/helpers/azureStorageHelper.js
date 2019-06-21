@@ -2,10 +2,10 @@ const appRoot = require('app-root-path');
 const azure = require('azure-storage');
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
-let queueSvc = azure.createQueueService(env.AZURE_STORAGE_CONNECTION_STRING);
-let queueName = env.AZURE_STORAGE_QUEUE_NAME;
+let queueSvc = azure.createQueueService(envConstants.AZURE_STORAGE_CONNECTION_STRING);
+let queueName = envConstants.AZURE_STORAGE_QUEUE_NAME;
 
 /**
  * send message to queue

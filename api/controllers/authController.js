@@ -17,7 +17,7 @@ const {
 
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
 exports.getAccessToken = async function (req, res) {
     try {
@@ -61,7 +61,7 @@ exports.getAccessToken = async function (req, res) {
                 email: client.email,
                 tokenType: TOKEN_TYPE.CLIENT,
                 exp: expiration
-            }, env.JWT_TOKEN)
+            }, envConstants.JWT_TOKEN)
         };
 
         return res.status(HTTP_STATUS.OK.CODE).json(payload);

@@ -10,11 +10,11 @@ const {
 } = require(`${appRoot}/api/constants/authConstants`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
 const jwtOptions = {};
 jwtOptions.jwtFromRequest = ExtractJWT.fromAuthHeaderWithScheme('Bearer');
-const secret = env.JWT_TOKEN;
+const secret = envConstants.JWT_TOKEN;
 jwtOptions.secretOrKey = secret;
 
 const strategy = new JWTStrategy(jwtOptions, (jwtPayload, next) => {

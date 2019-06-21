@@ -8,14 +8,14 @@ const axios = require('axios');
 const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
 const buildDir = `${appRoot}/build/contracts`;
 
-const web3 = new Web3(new Web3.providers.HttpProvider(env.RPC_ENDPOINT));
+const web3 = new Web3(new Web3.providers.HttpProvider(envConstants.RPC_ENDPOINT));
 
-const accountAddress = env.ACCOUNT_ADDRESS;
-const privateKey = Buffer.from(env.ACCOUNT_PRIVATE_KEY, 'hex');
+const accountAddress = envConstants.ACCOUNT_ADDRESS;
+const privateKey = Buffer.from(envConstants.ACCOUNT_PRIVATE_KEY, 'hex');
 
 /**
  * @description indicates if message handler is currently processing some message
@@ -85,7 +85,7 @@ function getContractInstance(contractName, options = {}) {
     const contractJson = fs.readFileSync(compiledFilePath);
     const jsonInterface = JSON.parse(contractJson);
 
-    const networkId = env.NETWORK_ID;
+    const networkId = envConstants.NETWORK_ID;
 
     const deployedContractAddress = jsonInterface.networks[networkId].address;
     return new web3.eth.Contract(jsonInterface.abi, deployedContractAddress, options);
@@ -109,7 +109,7 @@ function ContractHelper(contractName) {
 async function getTransactionCount() {
     const response = await axios({
         method: 'post',
-        url: env.RPC_ENDPOINT,
+        url: envConstants.RPC_ENDPOINT,
         headers: {
             'Content-Type': 'application/json'
         },

@@ -3,10 +3,9 @@ const mongoose = require('mongoose');
 const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const env = envHelper.getConstants();
+const envConstants = envHelper.getConstants();
 
-// const dbConnection = `mongodb://${dbUser}:${dbPass}@${dbHostPortName}`;
-const dbConnection = env.MONGODB_URI;
+const dbConnection = envConstants.MONGODB_URI;
 
 mongoose.Promise = global.Promise;
 
