@@ -13,6 +13,7 @@ program
     .version('"Truffle commands runner" -v0.1.0', '-v, --version')
     .option('-m, --migrate', 'Migrate smart contracts')
     .option('-t, --test', 'Run smart contract tests')
+    .option('-c, --coverage', 'Run code coverage analysis')
     .parse(process.argv);
 
 let truffleCommand = '';
@@ -21,6 +22,8 @@ if (program.migrate) {
     truffleCommand = 'truffle migrate --reset --all --network mainnet';
 } else if (program.test) {
     truffleCommand = 'truffle test';
+} else if (program.coverage) {
+    truffleCommand = `./node_modules/.bin/solidity-coverage`;
 } else {
     const errMsg = 'Invalid or no command line options supplied';
     throw new Error(errMsg);

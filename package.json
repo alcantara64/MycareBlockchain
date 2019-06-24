@@ -32,7 +32,11 @@
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",
     "coverage": "nyc --reporter=lcov mocha --recursive --exit ./spec/**/**/*.js --timeout 90000",
-    "coverage:contracts": "./node_modules/.bin/solidity-coverage",
+    "coverage:contracts": "node ./util/truffleHelper.js --coverage",
+    "coverage:contracts:dev": "node ./util/truffleHelper.js --coverage",
+    "coverage:contracts:prod": "export PROFILE='prod'; node ./util/truffleHelper.js --coverage",
+    "coverage:contracts:test": "export PROFILE='test'; node ./util/truffleHelper.js --coverage",
+    "coverage:contracts:uat": "export PROFILE='uat'; node ./util/truffleHelper.js --coverage",
     "generateEthereumAccount": "node ./util/generateEthereumAccount.js",
     "api:stress:test": "node ./util/testMyCareBlockchainApi.js"
   },
