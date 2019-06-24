@@ -2,7 +2,6 @@ const appRoot = require('app-root-path');
 const Web3 = require('web3');
 const Crypto = require('crypto');
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
-const logger = require(`${appRoot}/config/winston`);
 
 const envConstants = envHelper.getConstants();
 
@@ -11,7 +10,6 @@ let web3;
 //  Config
 const web3http = envConstants.RPC_ENDPOINT;
 if (web3 !== undefined) {
-    logger.info(`Web3= ${web3}`);
     web3 = new Web3(web3.currentProvider);
 } else {
     web3 = new Web3(new Web3.providers.HttpProvider(web3http));
