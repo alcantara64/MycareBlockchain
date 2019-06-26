@@ -10,7 +10,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const morgan = require('morgan');
 
-const curProfile = process.envConstants.PROFILE || 'dev';
+const curProfile = process.env.PROFILE || 'dev';
 const configPath = `./profiles/${curProfile}.env`;
 const dotenv = require('dotenv').config({ path: configPath });
 
@@ -28,7 +28,7 @@ envHelper.initialize()
     .then(async function envHelperInitilised() {
         logger.info('env constants and secrets initialised successfully');
 
-        const envConstants = envHelper.getConstants();;
+        const envConstants = envHelper.getConstants();
 
         const port = envConstants.PORT || 4000;
         const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);

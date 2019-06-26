@@ -8,7 +8,7 @@ const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-const envConstants = envHelper.getConstants();;
+const envConstants = envHelper.getConstants();
 
 exports.createAdminUser = async function () {
     try {

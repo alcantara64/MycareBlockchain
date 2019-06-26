@@ -5,15 +5,9 @@ const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
 const envConstants = envHelper.getConstants();
 
-let web3;
-
 //  Config
 const web3http = envConstants.RPC_ENDPOINT;
-if (web3 !== undefined) {
-    web3 = new Web3(web3.currentProvider);
-} else {
-    web3 = new Web3(new Web3.providers.HttpProvider(web3http));
-}
+const web3 = new Web3(new Web3.providers.HttpProvider(web3http));
 
 exports.getAccount = function getAccount(privateKeyText) {
     return web3.eth.accounts.privateKeyToAccount(privateKeyText);
