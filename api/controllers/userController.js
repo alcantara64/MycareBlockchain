@@ -9,6 +9,9 @@ const User = require(`${appRoot}/api/models/userModel`);
 const { TOKEN_TYPE } = require(`${appRoot}/api/constants/authConstants`);
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const jwt = require('jsonwebtoken');
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+
+const envConstants = envHelper.getConstants();
 
 exports.login = async function (req, res) {
     try {
@@ -61,7 +64,7 @@ exports.login = async function (req, res) {
                 email: user.email,
                 tokenType: TOKEN_TYPE.USER,
                 exp: expiration
-            }, process.env.JWT_TOKEN)
+            }, envConstants.JWT_TOKEN)
         };
 
         return res.status(HTTP_STATUS.OK.CODE).json(payload);

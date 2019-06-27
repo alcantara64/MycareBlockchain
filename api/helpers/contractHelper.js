@@ -3,17 +3,19 @@ const Web3 = require('web3');
 const fs = require('fs');
 const ethereumjs = require('ethereumjs-tx');
 const events = require('events');
-const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
-const { requireAsync } = require(`${appRoot}/api/helpers/helperMethods`);
+const azureStorageHelper = require(`${appRoot}/api/helpers/azureStorageHelper`);
 const axios = require('axios');
 const logger = require(`${appRoot}/config/winston`);
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+
+const envConstants = envHelper.getConstants();
 
 const buildDir = `${appRoot}/build/contracts`;
 
-const web3 = new Web3(new Web3.providers.HttpProvider(process.env.RPC_ENDPOINT));
+const web3 = new Web3(new Web3.providers.HttpProvider(envConstants.RPC_ENDPOINT));
 
-let accountAddress;
-let privateKey;
+const accountAddress = envConstants.ACCOUNT_ADDRESS;
+const privateKey = Buffer.from(envConstants.ACCOUNT_PRIVATE_KEY, 'hex');
 
 /**
  * @description indicates if message handler is currently processing some message
@@ -23,24 +25,13 @@ let messageHandlerBusy = false;
 
 const TX_EVENTS = {
     ADDED_TX_TO_QUEUE: 'added_new_transaction_to_queue',
-    TX_PROCESSING_COMPLETED: 'completed_transaction_processing',
-    INITIALIZED_TX_CREDENTIALS: 'initialized_transaction_credentials'
+    TX_PROCESSING_COMPLETED: 'completed_transaction_processing'
 };
 
 const eventEmitter = new events.EventEmitter();
 eventEmitter.addListener(TX_EVENTS.ADDED_TX_TO_QUEUE, handleNewTxInQueue);
 eventEmitter.addListener(TX_EVENTS.TX_PROCESSING_COMPLETED, checkIfTxInQueue);
-eventEmitter.addListener(TX_EVENTS.INITIALIZED_TX_CREDENTIALS, checkIfTxInQueue);
-
-let azureStorageHelper;
-// asynchronously load azureStorageHelper
-requireAsync(`${appRoot}/api/helpers/azureStorageHelper`, (storageHelper) => {
-    azureStorageHelper = storageHelper;
-
-    initializeTransactionCredentials().then(() => {
-        eventEmitter.emit(TX_EVENTS.INITIALIZED_TX_CREDENTIALS);
-    });
-});
+checkIfTxInQueue();
 
 // exports.processNewTxInQueue = async () => {
 async function handleNewTxInQueue() {
@@ -94,19 +85,11 @@ function getContractInstance(contractName, options = {}) {
     const contractJson = fs.readFileSync(compiledFilePath);
     const jsonInterface = JSON.parse(contractJson);
 
-    const networkId = process.env.NETWORK_ID;
+    const networkId = envConstants.NETWORK_ID;
 
     const deployedContractAddress = jsonInterface.networks[networkId].address;
     return new web3.eth.Contract(jsonInterface.abi, deployedContractAddress, options);
 };
-
-async function initializeTransactionCredentials() {
-    const accountAddressJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_ADDRESS, '');
-    accountAddress = accountAddressJSON.value;
-
-    const privateKeyJSON = await azureKeyVault.getSecret(process.env.ACCOUNT_PRIVATE_KEY, '');
-    privateKey = Buffer.from(privateKeyJSON.value, 'hex');
-}
 
 function ContractHelper(contractName) {
     if (!contractName) {
@@ -126,7 +109,7 @@ function ContractHelper(contractName) {
 async function getTransactionCount() {
     const response = await axios({
         method: 'post',
-        url: process.env.RPC_ENDPOINT,
+        url: envConstants.RPC_ENDPOINT,
         headers: {
             'Content-Type': 'application/json'
         },
@@ -192,7 +175,6 @@ exports.contractNames = {
 };
 
 exports.ContractHelper = ContractHelper;
-exports.initializeTransactionCredentials = initializeTransactionCredentials;
 exports.handleNewTxInQueue = handleNewTxInQueue;
 exports.TX_EVENTS = TX_EVENTS;
 exports.checkIfTxInQueue = checkIfTxInQueue;

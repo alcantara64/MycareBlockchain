@@ -14,7 +14,6 @@ describe('contractHelper', () => {
     let getAccountsStub;
     let unlockAccountStub;
     let readFileSyncStub;
-    let azureKeyVault;
     let getTxCountStub;
     let azureStorageHelper;
     let ethereumjs;
@@ -25,20 +24,20 @@ describe('contractHelper', () => {
     let emit;
     let axios;
     let helperMethods;
+    let envHelper;
+
+    const env = {
+        RPC_ENDPOINT: 'http://localhost:345678',
+        ACCOUNT_ADDRESS: '0xc0e0edfcaeacb373efa72c2bfe28',
+        NETWORK_ID: '10938372',
+        ACCOUNT_PRIVATE_KEY: '9e383eb2a7ee7afddd73ffc38e28b8a73e3733b27bf282c3eacefaae'
+    };
 
     const baseAddress = '0xE6VFT57677EdB17eE116407236CF904g42342d21bfd1';
     const data = '0x300000000000000ddeeecc300099aa9cccc9ff9eedacf83035ad93e939f99c929a939e939a99b9';
     const txCount = 4;
     const contractAddress = '0x91e02c6d3bbcfd1e4a00c232e0da0a29fe56f114';
     const txStr = 'dgfhcmsoufkfrfkfrni47fbn47rf8438';
-    const accountAddress = '0x474ee25b7c86a818ec75f6a48112bd278589e5d3';
-    const accountAddressJSON = {
-        value: accountAddress
-    };
-    const privateKey = '83332de5fd5b26f04ca526713cbf27330f9c38addabf18cddaa75292ec07692c';
-    const privateKeyJSON = {
-        value: privateKey
-    };
 
     let jsonObj = {
         networks: {},
@@ -55,6 +54,13 @@ describe('contractHelper', () => {
         axios = sandbox.stub();
         addListener = sandbox.spy();
         emit = sandbox.spy();
+
+        envHelper = {
+            getConstants() {
+                return { ...env };
+            }
+        };
+
         function EventEmitterConstructor() {
             this.addListener = addListener;
             this.emit = emit;
@@ -63,21 +69,19 @@ describe('contractHelper', () => {
             EventEmitter: EventEmitterConstructor
         };
 
-        azureStorageHelper = {};
+        azureStorageHelper = {
+            '@noCallThru': true,
+            getQueueLength: sandbox.stub()
+        };
 
         helperMethods = {
             requireAsync: sandbox.stub().yields(azureStorageHelper)
         };
 
-        jsonObj.networks[process.env.NETWORK_ID] = {
+        jsonObj.networks[env.NETWORK_ID] = {
             address: contractAddress
         };
-        azureKeyVault = {
-            getSecret: sandbox.stub()
-        };
 
-        azureKeyVault.getSecret.withArgs(process.env.ACCOUNT_PRIVATE_KEY).resolves(privateKeyJSON);
-        azureKeyVault.getSecret.withArgs(process.env.ACCOUNT_ADDRESS).resolves(accountAddressJSON);
         tx = {
             sign: sandbox.stub(),
             serialize: sandbox.stub().returns(txStr)
@@ -133,9 +137,9 @@ describe('contractHelper', () => {
             fs: {
                 readFileSync: readFileSyncStub
             },
-            axios
+            axios,
+            [`${appRoot}/api/helpers/envHelper`]: envHelper
         };
-        imports[`${appRoot}/api/middlewares/authentication/azureKeyVault`] = azureKeyVault;
         imports['ethereumjs-tx'] = ethereumjs;
         imports[`${appRoot}/api/helpers/azureStorageHelper`] = azureStorageHelper;
         imports[`${appRoot}/api/helpers/helperMethods`] = helperMethods;
@@ -149,24 +153,10 @@ describe('contractHelper', () => {
     });
 
     it('can initalize contract instance', async () => {
-        const accountAddress = '0x474ee25b7c86a818ec75f6a48112bd278589e5d3';
-        const accountAddressJSON = {
-            value: accountAddress
-        };
-        const privateKey = '83332de5fd5b26f04ca526713cbf27330f9c38addabf18cddaa75292ec07692c';
-        const privateKeyJSON = {
-            value: privateKey
-        };
-
         const gasLimit = 12094567;
 
         const contractName = 'MyCare';
         const compiledFilePath = `${appRoot}/build/contracts/${contractName}.json`;
-
-        azureKeyVault.getSecret = sandbox.stub();
-
-        azureKeyVault.getSecret.withArgs(process.env.ACCOUNT_PRIVATE_KEY).resolves(privateKeyJSON);
-        azureKeyVault.getSecret.withArgs(process.env.ACCOUNT_ADDRESS).resolves(accountAddressJSON);
 
         azureStorageHelper.createMessage = sandbox.stub().resolves(true);
 
@@ -191,7 +181,6 @@ describe('contractHelper', () => {
     it('adds needed listeners on initialization', () => {
         sandbox.assert.calledWith(addListener, contractHelper.TX_EVENTS.ADDED_TX_TO_QUEUE);
         sandbox.assert.calledWith(addListener, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
-        sandbox.assert.calledWith(addListener, contractHelper.TX_EVENTS.INITIALIZED_TX_CREDENTIALS);
     });
 
     it('can send signed transaction', async () => {
@@ -214,26 +203,23 @@ describe('contractHelper', () => {
             data
         };
 
-        // this call ensures private key and public key are loaded
-        await contractHelper.initializeTransactionCredentials();
-
         await contractHelper.sendSignedTransaction(data, gasLimit, contractAddress);
 
         sandbox.assert.calledWith(axios, {
             method: 'post',
-            url: process.env.RPC_ENDPOINT,
+            url: env.RPC_ENDPOINT,
             headers: {
                 'Content-Type': 'application/json'
             },
             data: {
                 method: 'parity_nextNonce',
-                params: [accountAddress],
+                params: [env.ACCOUNT_ADDRESS],
                 id: 1,
                 jsonrpc: '2.0'
             }
         });
 
-        const privateKeyBuff = Buffer.from(privateKeyJSON.value, 'hex');
+        const privateKeyBuff = Buffer.from(env.ACCOUNT_PRIVATE_KEY, 'hex');
 
         const raw = `0x${txStr.toString('hex')}`;
         sandbox.assert.calledWith(sendSignedTransactionStub, raw);

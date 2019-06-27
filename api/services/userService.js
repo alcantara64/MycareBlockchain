@@ -5,7 +5,10 @@ const logger = require(`${appRoot}/config/winston`);
 const User = require(`${appRoot}/api/models/userModel`);
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
-const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
+
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+
+const envConstants = envHelper.getConstants();
 
 exports.createAdminUser = async function () {
     try {
@@ -14,8 +17,8 @@ exports.createAdminUser = async function () {
         const userData = fs.readFileSync(`${appRoot}/util/seedData/adminUser.json`);
         const user = JSON.parse(userData);
 
-        const email = (await azureKeyVault.getSecret(process.env.ADMIN_EMAIL, '')).value;
-        const password = (await azureKeyVault.getSecret(process.env.ADMIN_PASSWORD, '')).value;
+        const email = envConstants.ADMIN_EMAIL;
+        const password = envConstants.ADMIN_PASSWORD;
 
         const dbUser = await User.findOne({
             email

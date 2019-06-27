@@ -1,33 +1,11 @@
 const appRoot = require('app-root-path');
 const azure = require('azure-storage');
-const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
+const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
-let queueSvc;
-let queueName;
+const envConstants = envHelper.getConstants();
 
-module.exports = function (callback) {
-    getConnectionCredsFromVault().then((credentials) => {
-        queueName = credentials.AZURE_STORAGE_QUEUE_NAME;
-        queueSvc = azure.createQueueService(credentials.AZURE_STORAGE_CONNECTION_STRING);
-
-        const storageHelper = { createMessage, deleteMessage, getMessages, getQueueLength, createQueue };
-        callback(storageHelper);
-    });
-};
-
-/**
- * Gets the needed credentials to connect to azure storage queue from Azure keyvault
- * @returns {Promise<{AZURE_STORAGE_QUEUE_NAME: String, AZURE_STORAGE_CONNECTION_STRING: String}>} connectionCredentials
- */
-async function getConnectionCredsFromVault() {
-    const AZURE_STORAGE_CONNECTION_STRING = await azureKeyVault.getSecret(process.env.AZURE_STORAGE_CONNECTION_STRING, '');
-    const AZURE_STORAGE_QUEUE_NAME = await azureKeyVault.getSecret(process.env.AZURE_STORAGE_QUEUE_NAME, '');
-
-    return {
-        AZURE_STORAGE_QUEUE_NAME: AZURE_STORAGE_QUEUE_NAME.value,
-        AZURE_STORAGE_CONNECTION_STRING: AZURE_STORAGE_CONNECTION_STRING.value
-    };
-}
+let queueSvc = azure.createQueueService(envConstants.AZURE_STORAGE_CONNECTION_STRING);
+let queueName = envConstants.AZURE_STORAGE_QUEUE_NAME;
 
 /**
  * send message to queue
@@ -111,4 +89,12 @@ function createQueue() {
             else resolve(results);
         });
     });
+};
+
+module.exports = {
+    createMessage,
+    deleteMessage,
+    getMessages,
+    getQueueLength,
+    createQueue
 };
