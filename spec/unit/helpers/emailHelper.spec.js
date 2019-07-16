@@ -16,14 +16,27 @@ describe('EmailHelper', () => {
 
     let operationError;
     let operationResult;
+    let envHelper;
+
+    const env = {
+        EMAIL_USER: 'mycareai@newwave.io',
+        EMAIL_PASS: 'AA@Pwise1',
+        EMAIL_HOST: 'office.mssoft.com'
+    };
 
     beforeEach(() => {
         operationError = null;
         operationResult = {};
 
+        envHelper = {
+            getConstants() {
+                return { ...env };
+            }
+        };
+
         sendMail = (mailOptions, callback) => {
             callback(operationError, operationResult);
-        }
+        };
 
         nodemailer = {
             createTestAccount(callback) {
@@ -33,32 +46,33 @@ describe('EmailHelper', () => {
             createTransport(config) {
                 return {
                     sendMail
-                }
+                };
             }
         };
 
         fs = {
             readFileSync: (path, options) => {
-                return `html_str`
+                return `html_str`;
             }
         };
 
         handlebars = {
             compile: (html) => {
-                return (templateVars) => '<div></div>'
+                return (templateVars) => '<div></div>';
             }
-        }
+        };
 
         emailHelper = proxyquire(`${appRoot}/api/helpers/emailHelper`, {
             'fs': fs,
             'nodemailer': nodemailer,
-            'handlebars': handlebars
+            'handlebars': handlebars,
+            [`${appRoot}/api/helpers/envHelper`]: envHelper
         });
     });
 
     afterEach(() => {
         sandbox.restore();
-    })
+    });
 
     it('createEmailTemplate finds html template using passed in template name', () => {
         fs.readFileSync = sandbox.stub();
@@ -104,12 +118,12 @@ describe('EmailHelper', () => {
         let templateVariables = {};
 
         let config = {
-            host: process.env.EMAIL_HOST,
+            host: env.EMAIL_HOST,
             port: 587,
             secureConnection: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: env.EMAIL_USER,
+                pass: env.EMAIL_PASS
             },
             tls: {
                 // do not fail on invalid certs
@@ -162,12 +176,12 @@ describe('EmailHelper', () => {
         let templateVariables = {};
 
         let config = {
-            host: process.env.EMAIL_HOST,
+            host: env.EMAIL_HOST,
             port: 587,
             secureConnection: false,
             auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
+                user: env.EMAIL_USER,
+                pass: env.EMAIL_PASS
             },
             tls: {
                 // do not fail on invalid certs

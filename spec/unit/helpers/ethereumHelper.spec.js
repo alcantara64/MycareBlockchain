@@ -18,7 +18,7 @@ describe('ethereumHelper', () => {
     let jsonObj = {
         abi: [],
         networks: {}
-    }
+    };
 
     beforeEach(() => {
         httpProviderStub = sandbox.stub();
@@ -30,7 +30,7 @@ describe('ethereumHelper', () => {
 
         cryptoStub = {
             randomBytes: randomBytesStub
-        }
+        };
 
 
         web3js = function web3js() {
@@ -38,27 +38,25 @@ describe('ethereumHelper', () => {
                 accounts: {
                     privateKeyToAccount: privateKeyTextStub
                 }
-            }
+            };
 
             this.currentProvider = {};
             web3js.providers = {
                 HttpProvider: httpProviderStub
-            }
-        }
+            };
+        };
 
         ethereumHelper = proxyquire(`${appRoot}/api/helpers/ethereumHelper`, {
             'web3': web3js,
             'crypto': cryptoStub
-        })
+        });
     });
 
     afterEach(() => {
-        // restore all stubs created through the sandbox
         sandbox.restore();
     });
 
     it('can get account', () => {
-
         let privatekeyText = 'private_key_text';
         ethereumHelper.getAccount(privatekeyText);
         sandbox.assert.calledWith(privateKeyTextStub, privatekeyText);
@@ -69,6 +67,6 @@ describe('ethereumHelper', () => {
 
         sandbox.assert.calledWith(toStringStub, 'hex');
         sandbox.assert.calledWith(randomBytesStub, 32);
-        chai.expect(result).to.eql(`0x${randombytes}`)
+        chai.expect(result).to.eql(`0x${randombytes}`);
     });
 });

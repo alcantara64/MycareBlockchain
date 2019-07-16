@@ -11,39 +11,32 @@ describe('azureStorageHelper', () => {
     let azureStorageHelper;
     let azureStorage;
     let queueSvc;
-    let keyvault;
+    let envHelper;
 
-    const queueName = 'tx-pool-str';
-    const connectionString = 'keyvault=+connection-=string';
+    const env = {
+        AZURE_STORAGE_CONNECTION_STRING: 'connet/valut-ds/dsdsniudidsunsio=+3wns',
+        AZURE_STORAGE_QUEUE_NAME: 'helloQueue'
+    };
 
-    beforeEach((done) => {
+    beforeEach(() => {
         queueSvc = {};
-        keyvault = {
-            getSecret: sandbox.stub()
-        };
 
-        keyvault.getSecret.withArgs(process.env.AZURE_STORAGE_QUEUE_NAME).resolves({ value: queueName });
-        keyvault.getSecret.withArgs(process.env.AZURE_STORAGE_CONNECTION_STRING).resolves({ value: connectionString });
+        envHelper = {
+            getConstants() {
+                return { ...env };
+            }
+        };
 
         azureStorage = {
             createQueueService: sandbox.stub().returns(queueSvc)
         };
 
         const imports = {
-            'azure-storage': azureStorage
+            'azure-storage': azureStorage,
+            [`${appRoot}/api/helpers/envHelper`]: envHelper
         };
-
-        imports[`${appRoot}/api/middlewares/authentication/azureKeyVault`] = keyvault;
-
-        const azureStorageHelperModule = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
-
-        azureStorageHelperModule((storageHelper) => {
-            assert.calledWith(keyvault.getSecret, process.env.AZURE_STORAGE_CONNECTION_STRING);
-            assert.calledWith(keyvault.getSecret, process.env.AZURE_STORAGE_QUEUE_NAME);
-            assert.calledWith(azureStorage.createQueueService, connectionString);
-            azureStorageHelper = storageHelper;
-            done();
-        });
+    
+        azureStorageHelper = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
     });
 
     afterEach(() => {
@@ -63,7 +56,7 @@ describe('azureStorageHelper', () => {
 
         const response = await azureStorageHelper.createMessage(messageText);
 
-        assert.calledWith(queueSvc.createMessage, queueName, messageText);
+        assert.calledWith(queueSvc.createMessage, env.AZURE_STORAGE_QUEUE_NAME, messageText);
         assert.match(response, results);
     });
 
@@ -86,7 +79,7 @@ describe('azureStorageHelper', () => {
 
         const response = await azureStorageHelper.deleteMessage(message);
 
-        assert.calledWith(queueSvc.deleteMessage, queueName, message.messageId, message.popReceipt);
+        assert.calledWith(queueSvc.deleteMessage, env.AZURE_STORAGE_QUEUE_NAME, message.messageId, message.popReceipt);
         assert.match(response, results);
     });
 
@@ -110,7 +103,7 @@ describe('azureStorageHelper', () => {
 
         const response = await azureStorageHelper.getMessages(message);
 
-        assert.calledWith(queueSvc.getMessages, queueName, options);
+        assert.calledWith(queueSvc.getMessages, env.AZURE_STORAGE_QUEUE_NAME, options);
         assert.match(response, results);
     });
 
@@ -122,7 +115,7 @@ describe('azureStorageHelper', () => {
 
         const response = await azureStorageHelper.getQueueLength();
 
-        assert.calledWith(queueSvc.getQueueMetadata, queueName);
+        assert.calledWith(queueSvc.getQueueMetadata, env.AZURE_STORAGE_QUEUE_NAME);
         assert.match(response, results.approximateMessageCount);
     });
 
@@ -134,7 +127,7 @@ describe('azureStorageHelper', () => {
 
         const response = await azureStorageHelper.createQueue();
 
-        assert.calledWith(queueSvc.createQueueIfNotExists, queueName);
+        assert.calledWith(queueSvc.createQueueIfNotExists, env.AZURE_STORAGE_QUEUE_NAME);
         assert.match(response, results);
     });
 });
