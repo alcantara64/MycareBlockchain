@@ -12,10 +12,17 @@ describe('azureStorageHelper', () => {
     let azureStorage;
     let queueSvc;
     let envHelper;
+    let winstonAzuretable;
+    let logger;
+
+    const accountName = 'cwest-app';
+    const accountKey = '93e3HYRtaN2ILXf2Q8dreacb99E8nK3LXDIJqHisnr86cGUVXQXgdUwZeojdeur9/YK8ohkeudhu383mJdw8sg==';
 
     const env = {
-        AZURE_STORAGE_CONNECTION_STRING: 'connet/valut-ds/dsdsniudidsunsio=+3wns',
-        AZURE_STORAGE_QUEUE_NAME: 'helloQueue'
+        AZURE_STORAGE_CONNECTION_STRING: `DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net`,
+        AZURE_STORAGE_QUEUE_NAME: 'helloQueue',
+        APP_LOGS_STORAGE_TABLE: 'MyAppLogs',
+        PROFILE: 'dev'
     };
 
     beforeEach(() => {
@@ -27,20 +34,46 @@ describe('azureStorageHelper', () => {
             }
         };
 
+        winstonAzuretable = {
+            AzureLogger: {
+                log: () => { },
+                debug: () => { }
+            }
+        };
+
+        logger = {
+            info: () => { },
+            error: () => { },
+            add: sandbox.stub()
+        };
+
         azureStorage = {
             createQueueService: sandbox.stub().returns(queueSvc)
         };
 
         const imports = {
             'azure-storage': azureStorage,
-            [`${appRoot}/api/helpers/envHelper`]: envHelper
+            'winston-azuretable': winstonAzuretable,
+            [`${appRoot}/api/helpers/envHelper`]: envHelper,
+            [`${appRoot}/config/winston`]: logger
         };
-    
+
         azureStorageHelper = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
     });
 
     afterEach(() => {
         sandbox.restore();
+    });
+
+    it('adds azure table storage transport on initialization', () => {
+        const tableStorageOptions = {
+            account: accountName,
+            tableName: env.APP_LOGS_STORAGE_TABLE,
+            key: accountKey,
+            partitionKey: env.PROFILE
+        };
+
+        assert.calledWith(logger.add, winstonAzuretable.AzureLogger, tableStorageOptions);
     });
 
     it('initializes azure storage client on load', () => {

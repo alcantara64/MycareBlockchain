@@ -73,7 +73,8 @@
     "ursa": "^0.9.4",
     "uuid": "^3.3.2",
     "web3": "1.0.0-beta.34",
-    "winston": "^2.4.2"
+    "winston": "^2.4.2",
+    "winston-azuretable": "^1.1.0"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-babel": "^1.2.3",

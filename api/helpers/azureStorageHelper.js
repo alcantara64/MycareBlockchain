@@ -1,11 +1,32 @@
 const appRoot = require('app-root-path');
 const azure = require('azure-storage');
+const azureLogger = require('winston-azuretable').AzureLogger;
+const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
 const envConstants = envHelper.getConstants();
 
 let queueSvc = azure.createQueueService(envConstants.AZURE_STORAGE_CONNECTION_STRING);
 let queueName = envConstants.AZURE_STORAGE_QUEUE_NAME;
+
+const tableStorageOptions = {
+    account: getStorageAccountName(),
+    tableName: envConstants.APP_LOGS_STORAGE_TABLE,
+    key: getStorageAccountKey(),
+    partitionKey: envConstants.PROFILE
+};
+
+logger.add(azureLogger, tableStorageOptions);
+
+function getStorageAccountName() {
+    const matches = /AccountName=(.*?);/.exec(envConstants.AZURE_STORAGE_CONNECTION_STRING);
+    return matches[1];
+}
+
+function getStorageAccountKey() {
+    const matches = /AccountKey=(.*?);/.exec(envConstants.AZURE_STORAGE_CONNECTION_STRING);
+    return matches[1];
+}
 
 /**
  * send message to queue
