@@ -12,8 +12,9 @@ describe('azureStorageHelper', () => {
     let azureStorage;
     let queueSvc;
     let envHelper;
-    let winstonAzuretable;
+    let winstonAzureBlobTransport;
     let logger;
+    let winston;
 
     const accountName = 'cwest-app';
     const accountKey = '93e3HYRtaN2ILXf2Q8dreacb99E8nK3LXDIJqHisnr86cGUVXQXgdUwZeojdeur9/YK8ohkeudhu383mJdw8sg==';
@@ -22,7 +23,8 @@ describe('azureStorageHelper', () => {
         AZURE_STORAGE_CONNECTION_STRING: `DefaultEndpointsProtocol=https;AccountName=${accountName};AccountKey=${accountKey};EndpointSuffix=core.windows.net`,
         AZURE_STORAGE_QUEUE_NAME: 'helloQueue',
         APP_LOGS_STORAGE_TABLE: 'MyAppLogs',
-        PROFILE: 'dev'
+        PROFILE: 'dev',
+        APP_LOGS_BLOB_CONTAINER: 'myapp-blob-logs'
     };
 
     beforeEach(() => {
@@ -34,12 +36,13 @@ describe('azureStorageHelper', () => {
             }
         };
 
-        winstonAzuretable = {
-            AzureLogger: {
-                log: () => { },
-                debug: () => { }
+        winston = {
+            transports: {
+                AzureBlob: sandbox.stub()
             }
         };
+
+        winstonAzureBlobTransport = {};
 
         logger = {
             info: () => { },
@@ -53,7 +56,8 @@ describe('azureStorageHelper', () => {
 
         const imports = {
             'azure-storage': azureStorage,
-            'winston-azuretable': winstonAzuretable,
+            'winston-azure-blob-transport': winstonAzureBlobTransport,
+            winston,
             [`${appRoot}/api/helpers/envHelper`]: envHelper,
             [`${appRoot}/config/winston`]: logger
         };
@@ -66,14 +70,18 @@ describe('azureStorageHelper', () => {
     });
 
     it('adds azure table storage transport on initialization', () => {
-        const tableStorageOptions = {
-            account: accountName,
-            tableName: env.APP_LOGS_STORAGE_TABLE,
-            key: accountKey,
-            partitionKey: env.PROFILE
+        const blobTransportConfig = {
+            account: {
+                name: accountName,
+                key: accountKey
+            },
+            containerName: env.APP_LOGS_BLOB_CONTAINER,
+            blobName: 'info.log',
+            level: 'info'
         };
 
-        assert.calledWith(logger.add, winstonAzuretable.AzureLogger, tableStorageOptions);
+        assert.calledWith(winston.transports.AzureBlob, blobTransportConfig);
+        winston.transports.AzureBlob.calledWithNew();
     });
 
     it('initializes azure storage client on load', () => {

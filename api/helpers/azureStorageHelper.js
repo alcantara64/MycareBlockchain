@@ -1,22 +1,26 @@
 const appRoot = require('app-root-path');
 const azure = require('azure-storage');
-const azureLogger = require('winston-azuretable').AzureLogger;
 const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
+const winston = require('winston');
+require('winston-azure-blob-transport');
 
 const envConstants = envHelper.getConstants();
 
 let queueSvc = azure.createQueueService(envConstants.AZURE_STORAGE_CONNECTION_STRING);
 let queueName = envConstants.AZURE_STORAGE_QUEUE_NAME;
 
-const tableStorageOptions = {
-    account: getStorageAccountName(),
-    tableName: envConstants.APP_LOGS_STORAGE_TABLE,
-    key: getStorageAccountKey(),
-    partitionKey: envConstants.PROFILE
-};
+const blobTransport = new (winston.transports.AzureBlob)({
+    account: {
+        name: getStorageAccountName(),
+        key: getStorageAccountKey()
+    },
+    containerName: envConstants.APP_LOGS_BLOB_CONTAINER,
+    blobName: 'info.log',
+    level: 'info'
+});
 
-logger.add(azureLogger, tableStorageOptions);
+logger.add(blobTransport);
 
 function getStorageAccountName() {
     const matches = /AccountName=(.*?);/.exec(envConstants.AZURE_STORAGE_CONNECTION_STRING);
