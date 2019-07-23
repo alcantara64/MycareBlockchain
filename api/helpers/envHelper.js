@@ -15,7 +15,8 @@ module.exports.initialize = async function initialize() {
 };
 
 const envConstants = {
-    PORT: process.env.PORT
+    PORT: process.env.PORT,
+    PROFILE: process.env.PROFILE || 'dev'
 };
 
 module.exports.getConstants = function getConstants() {
