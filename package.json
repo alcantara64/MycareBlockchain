@@ -63,6 +63,7 @@
     "moment": "^2.22.2",
     "mongoose": "^5.4.3",
     "morgan": "^1.9.1",
+    "mozenge-winston-azure-transport": "^1.0.0",
     "niceware": "^1.0.5",
     "nodemailer": "^5.1.1",
     "passport": "^0.4.0",
@@ -73,9 +74,7 @@
     "ursa": "^0.9.4",
     "uuid": "^3.3.2",
     "web3": "1.0.0-beta.34",
-    "winston": "^3.1.0",
-    "winston-azure-blob-transport": "^0.3.2",
-    "winston-azuretable": "^1.1.0"
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-babel": "^1.2.3",

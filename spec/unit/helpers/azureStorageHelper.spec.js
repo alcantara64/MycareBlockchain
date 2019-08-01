@@ -12,9 +12,9 @@ describe('azureStorageHelper', () => {
     let azureStorage;
     let queueSvc;
     let envHelper;
-    let winstonAzureBlobTransport;
     let logger;
-    let winston;
+    let AzureBlobTransport;
+    let blobTransport;
 
     const accountName = 'cwest-app';
     const accountKey = '93e3HYRtaN2ILXf2Q8dreacb99E8nK3LXDIJqHisnr86cGUVXQXgdUwZeojdeur9/YK8ohkeudhu383mJdw8sg==';
@@ -24,7 +24,7 @@ describe('azureStorageHelper', () => {
         AZURE_STORAGE_QUEUE_NAME: 'helloQueue',
         APP_LOGS_STORAGE_TABLE: 'MyAppLogs',
         PROFILE: 'dev',
-        APP_LOGS_BLOB_CONTAINER: 'myapp-blob-logs'
+        APP_LOGS_BLOB_CONTAINER: 'https://mystorage.blob.core.windows.net/errors?sv=2018-03-28&sr=c&sig=x&st=2019-01-01T00:00:00Z&se=2219-01-01T00:00:00Z&sp=rwdl',
     };
 
     beforeEach(() => {
@@ -36,18 +36,24 @@ describe('azureStorageHelper', () => {
             }
         };
 
-        winston = {
-            transports: {
-                AzureBlob: sandbox.stub()
-            }
+        blobTransport = {
+            log: () => { }
         };
 
-        winstonAzureBlobTransport = {};
+        AzureBlobTransport = function AzureBlobTransportConstructor(args) {
+            Object.assign(AzureBlobTransport, {
+                instance: sandbox.stub()
+            });
+
+            AzureBlobTransport.instance(args);
+            return blobTransport;
+        };
 
         logger = {
             info: () => { },
             error: () => { },
-            add: sandbox.stub()
+            add: sandbox.stub(),
+            '@noCallThru': true
         };
 
         azureStorage = {
@@ -56,8 +62,7 @@ describe('azureStorageHelper', () => {
 
         const imports = {
             'azure-storage': azureStorage,
-            'winston-azure-blob-transport': winstonAzureBlobTransport,
-            winston,
+            'mozenge-winston-azure-transport': { AzureBlobTransport },
             [`${appRoot}/api/helpers/envHelper`]: envHelper,
             [`${appRoot}/config/winston`]: logger
         };
@@ -71,17 +76,12 @@ describe('azureStorageHelper', () => {
 
     it('adds azure table storage transport on initialization', () => {
         const blobTransportConfig = {
-            account: {
-                name: accountName,
-                key: accountKey
-            },
-            containerName: env.APP_LOGS_BLOB_CONTAINER,
-            blobName: 'info.log',
-            level: 'info'
+            containerUrl: env.APP_LOGS_BLOB_CONTAINER,
+            nameFormat: 'blockchainApi-logs/{yyyy}/{MM}/{dd}/info.log',
+            retention: 365
         };
-
-        assert.calledWith(winston.transports.AzureBlob, blobTransportConfig);
-        winston.transports.AzureBlob.calledWithNew();
+        assert.calledWith(AzureBlobTransport.instance, blobTransportConfig);
+        assert.calledWith(logger.add, blobTransport);
     });
 
     it('initializes azure storage client on load', () => {
