@@ -1,11 +1,21 @@
 const appRoot = require('app-root-path');
 const azure = require('azure-storage');
+const { AzureBlobTransport } = require('mozenge-winston-azure-transport');
+const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
 const envConstants = envHelper.getConstants();
 
 let queueSvc = azure.createQueueService(envConstants.AZURE_STORAGE_CONNECTION_STRING);
 let queueName = envConstants.AZURE_STORAGE_QUEUE_NAME;
+
+const blobTransport = new AzureBlobTransport({
+    containerUrl: envConstants.APP_LOGS_BLOB_CONTAINER,
+    nameFormat: 'blockchainApi-logs/{yyyy}/{MM}/{dd}/info.log',
+    retention: 365
+});
+
+logger.add(blobTransport);
 
 /**
  * send message to queue
