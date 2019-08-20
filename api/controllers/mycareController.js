@@ -9,14 +9,55 @@ const {
 } = require(`${appRoot}/api/constants/Common`);
 
 exports.addAccount = async function (req, res) {
+    const methodName = 'mycareController.addAccount';
     try {
         logger.info('Add account');
+
+        const accountTypeIsValid = await mycareService.AccountTypeExists(req.body.accountType);
+        if (!accountTypeIsValid) {
+            logger.error(`${methodName} - invalid account type`, { userId: req.user._id });
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'invalid account type'
+            });
+        }
+
         const transactionReceipt = await mycareService.AddAccount(req.body);
         logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(`error occured while adding account - ${err.message}`);
+        return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
+            message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
+        });
+    }
+};
+
+exports.addAccountType = async function (req, res) {
+    const methodName = 'mycareController.addAccountType';
+    try {
+        if (!req.body.accountType) {
+            logger.error(`${methodName} - accountType is missing`);
+            return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
+                message: 'accountType is required'
+            });
+        }
+        const accountTypeExists = await mycareService.AccountTypeExists(req.body.accountType);
+        if (accountTypeExists) {
+            logger.error(`${methodName} - accountType ${req.body.accountType} already exists`);
+            return res.status(HTTP_STATUS.CONFLICT.CODE).json({
+                message: 'accountType already exists'
+            });
+        }
+
+        await mycareService.AddAccountType(req.body.accountType);
+
+        logger.error(`${methodName} - accountType was added successfully`);
+        return res.status(HTTP_STATUS.OK.CODE).json({
+            message: HTTP_STATUS.OK.MESSAGE
+        });
+    } catch (err) {
+        logger.error(`error occured while adding account type - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -126,7 +167,7 @@ exports.validateDeactivateAccountParams = function (req, res, next) {
 };
 
 exports.validateAddAccountParams = function (req, res, next) {
-    const expectedParams = ['walletAddress', 'profileHash', 'timestamp'];
+    const expectedParams = ['walletAddress', 'profileHash', 'timestamp', 'accountType'];
 
     exports.validateAccountParams(req, res, next, expectedParams);
 };
