@@ -18,7 +18,6 @@ contract('Mycare', function (accounts) {
         assert.notEqual(owner, undefined, 'No Owner!');
     });
 
-
     it('can add account', async function () {
         let h1 = fromAscii(profile1);
         let myCare = await MyCare.new();

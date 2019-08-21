@@ -1,4 +1,5 @@
 const appRoot = require('app-root-path');
+const web3 = require('web3');
 const helperMethods = require(`${appRoot}/api/helpers/helperMethods`);
 const { contractNames, ContractHelper } = require(`${appRoot}/api/helpers/contractHelper`);
 const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
@@ -8,15 +9,16 @@ const api = contractHelper.contractMethods();
 
 exports.AddAccount = async function AddAccount (payload) {
     const { walletAddress, profileHash } = payload;
-    const accountTypeValue = await api.GetAccountTypeValueFromName(payload.accountType).call();
+    const accountTypeHex = web3.utils.asciiToHex(payload.accountType);
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
-    let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountTypeValue).encodeABI();
+    let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountTypeHex).encodeABI();
 
     return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
 };
 
-exports.AddAccountType = async function AddAccountType(accountTypeName) {
-    let data = await api.AddAccountType(accountTypeName).encodeABI();
+exports.AddAccountType = async function AddAccountType(accountType) {
+    const accountTypeHex = web3.utils.asciiToHex(accountType);
+    let data = await api.AddAccountType(accountTypeHex).encodeABI();
     return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE);
 };
 
@@ -43,8 +45,7 @@ exports.GetAccount = async function (param, isWalletAddress = true) {
     account.created = helperMethods.timeStampToISOstring(account.created);
     account.updated = helperMethods.timeStampToISOstring(account.updated);
 
-    const accountTypeName = await api.GetAccountTypeNameFromValue(account.accountType).call();
-    account.accountType = accountTypeName;
+    account.accountType = web3.utils.hexToUtf8(account.accountType);
 
     return account;
 };
@@ -53,7 +54,8 @@ exports.GetAccountCount = function () {
     return api.GetAccountCount().call();
 };
 
-exports.AccountTypeExists = async function (accountTypeName) {
-    const accountTypeExists = await api.AccountTypeExists(accountTypeName).call();
+exports.AccountTypeExists = async function (accountType) {
+    const accountTypeHex = web3.utils.asciiToHex(accountType);
+    const accountTypeExists = await api.AccountTypeExists(accountTypeHex).call();
     return accountTypeExists;
 };
