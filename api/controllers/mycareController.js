@@ -15,7 +15,7 @@ exports.addAccount = async function (req, res) {
 
         const accountTypeIsValid = await mycareService.AccountTypeExists(req.body.accountType);
         if (!accountTypeIsValid) {
-            logger.error(`${methodName} - invalid account type`, { userId: req.user._id });
+            logger.error(`${methodName} - invalid account type`, { userId: req.user._id.toString() });
             return res.status(HTTP_STATUS.BAD_REQUEST.CODE).json({
                 message: 'invalid account type'
             });
@@ -50,12 +50,10 @@ exports.addAccountType = async function (req, res) {
             });
         }
 
-        await mycareService.AddAccountType(req.body.accountType);
+        const transactionReceipt = await mycareService.AddAccountType(req.body.accountType);
 
         logger.error(`${methodName} - accountType was added successfully`);
-        return res.status(HTTP_STATUS.OK.CODE).json({
-            message: HTTP_STATUS.OK.MESSAGE
-        });
+        return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
         logger.error(`error occured while adding account type - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({

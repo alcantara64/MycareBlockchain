@@ -8,16 +8,16 @@ const api = contractHelper.contractMethods();
 
 exports.AddAccount = async function AddAccount (payload) {
     const { walletAddress, profileHash } = payload;
-    const accountType = await api.GetAccountTypeFromName(payload.accountType);
+    const accountTypeValue = await api.GetAccountTypeValueFromName(payload.accountType).call();
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
-    let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountType.value).encodeABI();
+    let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountTypeValue).encodeABI();
 
     return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
 };
 
 exports.AddAccountType = async function AddAccountType(accountTypeName) {
-    const accountTypeValues = await api.GetAccountTypeValues();
-    return api.AddAccountType(accountTypeValues.length + 1, accountTypeName);
+    let data = await api.AddAccountType(accountTypeName).encodeABI();
+    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE);
 };
 
 exports.DeactivateAccount = function (ownerAddress, _timestamp) {
@@ -43,6 +43,9 @@ exports.GetAccount = async function (param, isWalletAddress = true) {
     account.created = helperMethods.timeStampToISOstring(account.created);
     account.updated = helperMethods.timeStampToISOstring(account.updated);
 
+    const accountTypeName = await api.GetAccountTypeNameFromValue(account.accountType).call();
+    account.accountType = accountTypeName;
+
     return account;
 };
 
@@ -51,6 +54,6 @@ exports.GetAccountCount = function () {
 };
 
 exports.AccountTypeExists = async function (accountTypeName) {
-    const accountType = await api.GetAccountTypeFromName(accountTypeName);
-    return accountType.isEntity;
+    const accountTypeExists = await api.AccountTypeExists(accountTypeName).call();
+    return accountTypeExists;
 };

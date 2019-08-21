@@ -28,7 +28,8 @@ contract MyCare {
     address[] public accountList;
     
     uint[] accountTypeValues;
-    mapping(uint => AccountType) accountTypes;
+    mapping(uint => string) accountTypeValueMap;
+    mapping(string => uint) accountTypeNameMap;
 
     constructor() public {
         contractOwner = msg.sender;
@@ -36,8 +37,11 @@ contract MyCare {
 
     //  Accounts
     function AddAccount( address ownerAddress, string profile, uint timestamp, uint accountTypeVal ) public returns (bool success ) {
-        AccountType storage accountType = accountTypes[accountTypeVal];
-        if ( !accountStructs[ownerAddress].isEntity && accountType.isEntity) {
+        string storage accountTypeName = accountTypeValueMap[accountTypeVal];
+        bytes storage accountTypeNameBytes = bytes(accountTypeName);
+        
+        // if user does not exist and account type exists
+        if ( !accountStructs[ownerAddress].isEntity && accountTypeNameBytes.length > 0) {
             accountStructs[ownerAddress].chainAddress = ownerAddress;
             accountStructs[ownerAddress].profile = profile;
             accountStructs[ownerAddress].isEntity = true;
@@ -51,41 +55,34 @@ contract MyCare {
         return true;
     }
     
-    function AddAccountType(uint accountTypeVal, string memory accountTypeName) public returns (bool success) {
-        AccountType storage existingType = accountTypes[accountTypeVal];
+    function AddAccountType(string memory accountTypeName) public returns (bool success) {
+        uint accountTypeValue = accountTypeNameMap[accountTypeName];
         
-        if (existingType.isEntity) {
+        if (accountTypeValue > 0) { // if accountType already exists
             return false;
         }
         
-        accountTypeValues.push(accountTypeVal);
-        accountTypes[accountTypeVal] = AccountType({ name: accountTypeName, isEntity: true });
+        uint newAccountTypeValue = accountTypeValues.length + 1;
+        accountTypeValues.push(newAccountTypeValue);
+        accountTypeValueMap[newAccountTypeValue] = accountTypeName;
+        accountTypeNameMap[accountTypeName] = newAccountTypeValue;
         return true;
     }
     
-    function GetAccountTypeFromName(string memory _name) public view returns(string name, uint value, bool isEntity) {
-        uint _value;
-        bool _isEntity;
-        for (uint i = 0; i < accountTypeValues.length; i++) {
-            uint accountTypeVal = accountTypeValues[i];
-            AccountType memory accountType = accountTypes[accountTypeVal];
-            
-            if (CompareStrings(accountType.name, _name)) {
-                _value = accountTypeVal;
-                _isEntity = accountType.isEntity;
-            }
-        }
-        
-        return (_name, _value, _isEntity);
+    function GetAccountTypeValueFromName(string memory _name) public view returns(uint accountTypeValue) {
+        return accountTypeNameMap[_name];
     }
     
-    function GetAccountTypeFromValue(uint _value) public view returns(string name, uint value, bool isEntity) {
-        AccountType memory accountType = accountTypes[_value];
-        return (accountType.name, _value, accountType.isEntity);
+    function GetAccountTypeNameFromValue(uint _value) public view returns(string accountTypeName) {
+        return accountTypeValueMap[_value];
     }
     
     function GetAccountTypeValues() public view returns (uint[]) {
         return accountTypeValues;
+    }
+    
+    function AccountTypeExists(string memory _name) public view returns (bool) {
+        return accountTypeNameMap[_name] > 0;
     }
     
     function DeactivateAccount(address ownerAddress, uint timestamp) public returns (bool success) {
@@ -103,7 +100,8 @@ contract MyCare {
             bool isEntity,
             bool active,
             uint created,
-            uint updated
+            uint updated,
+            uint accountType
         )
     {
         address ownerAddress = accountAddressesByProfile[_profile];
@@ -113,7 +111,8 @@ contract MyCare {
             accountStructs[ownerAddress].isEntity,
             accountStructs[ownerAddress].active,
             accountStructs[ownerAddress].created,
-            accountStructs[ownerAddress].updated
+            accountStructs[ownerAddress].updated,
+            accountStructs[ownerAddress].accountType
         );
     }
 
