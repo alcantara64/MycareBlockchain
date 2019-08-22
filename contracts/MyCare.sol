@@ -12,11 +12,6 @@ contract MyCare {
         bytes16 accountType;
     }
 
-    struct AccountType {
-        bool isEntity;
-        string name;
-    }
-
     // Storage
     address contractOwner;
 

@@ -56,6 +56,5 @@ exports.GetAccountCount = function () {
 
 exports.AccountTypeExists = async function (accountType) {
     const accountTypeHex = web3.utils.asciiToHex(accountType);
-    const accountTypeExists = await api.AccountTypeExists(accountTypeHex).call();
-    return accountTypeExists;
+    return api.AccountTypeExists(accountTypeHex).call();
 };
