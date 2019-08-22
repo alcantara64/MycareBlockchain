@@ -2,7 +2,7 @@
 const appRoot = require('app-root-path');
 
 const logger = require(`${appRoot}/config/winston`);
-const MyCare = artifacts.require("../../contracts/MyCare.sol");
+const MyCare = artifacts.require('../../contracts/MyCare.sol');
 
 contract('Mycare', function (accounts) {
     const owner = accounts[0];
@@ -18,12 +18,77 @@ contract('Mycare', function (accounts) {
         assert.notEqual(owner, undefined, 'No Owner!');
     });
 
+    it('Should set some default account types on contract initialisation', async function () {
+        const myCare = await MyCare.new();
+        const accountTypesHex = await myCare.GetAccountTypes();
+
+        assert.equal(accountTypesHex.length, 5);
+
+        const accountTypes = accountTypesHex.map(x => toAscii(x));
+        assert.equal(accountTypes.includes('PAYER'), true);
+        assert.equal(accountTypes.includes('PROVIDER'), true);
+        assert.equal(accountTypes.includes('RESEARCH'), true);
+        assert.equal(accountTypes.includes('NETWORK'), true);
+        assert.equal(accountTypes.includes('Patient'), true);
+    });
+
+    it('should not save new account type if it already exists', async function() {
+        const myCare = await MyCare.new();
+        const accountTypesHex = await myCare.GetAccountTypes();
+
+        assert.equal(accountTypesHex.length, 5);
+
+        const accountType = 'PAYER';
+        const accountTypeHex = fromAscii(accountType);
+        const accountTypeExists = await myCare.AccountTypeExists(accountTypeHex);
+
+        assert.equal(accountTypeExists, true);
+
+        await myCare.AddAccountType(accountTypeHex);
+
+        const accountTypesHex2 = await myCare.GetAccountTypes();
+        assert.equal(accountTypesHex2.length, 5);
+    });
+
+    it('can add new account type successfully', async function() {
+        const myCare = await MyCare.new();
+        const accountTypesHex = await myCare.GetAccountTypes();
+
+        assert.equal(accountTypesHex.length, 5);
+
+        const accountType = 'Avenger';
+        const accountTypeHex = fromAscii(accountType);
+        const accountTypeExists = await myCare.AccountTypeExists(accountTypeHex);
+
+        assert.equal(accountTypeExists, false);
+        await myCare.AddAccountType(accountTypeHex);
+
+        const accountTypesHex2 = await myCare.GetAccountTypes();
+        assert.equal(accountTypesHex2.length, 6);
+
+        const accountTypeExists1 = await myCare.AccountTypeExists(accountTypeHex);
+        assert.equal(accountTypeExists1, true);
+    });
+
     it('can add account', async function () {
         let h1 = fromAscii(profile1);
         let myCare = await MyCare.new();
+
         const timestamp = Math.floor(Date.now() / 1000);
-        await myCare.AddAccount(owner, h1, timestamp);
+
+        const accountCount = await myCare.GetAccountCount();
+
+        assert.equal(accountCount, 0);
+
+        const accountType = 'Patient';
+        const accountTypeHex = fromAscii(accountType);
+
+        await myCare.AddAccount(owner, h1, timestamp, accountTypeHex);
         let results = await myCare.GetAccount(owner);
+
+        const accountCount2 = await myCare.GetAccountCount();
+        assert.equal(accountCount2, 1);
+
         logger.info("Results=", results);
         assert.equal(results[2], true);
         assert.equal(toAscii(results[1]), profile1, "Profile match failed");
@@ -31,6 +96,36 @@ contract('Mycare', function (accounts) {
         assert.equal(results[3], true);
         assert.equal(results[4], timestamp);
         assert.equal(results[5], timestamp);
+    });
+
+    it('should not add account if accountType does not exist', async function () {
+        let h1 = fromAscii(profile1);
+        let myCare = await MyCare.new();
+
+        const timestamp = Math.floor(Date.now() / 1000);
+
+        const accountCount = await myCare.GetAccountCount();
+
+        assert.equal(accountCount, 0);
+
+        const accountType = 'Avenger';
+        const accountTypeHex = fromAscii(accountType);
+
+        await myCare.AddAccount(owner, h1, timestamp, accountTypeHex);
+        let results = await myCare.GetAccount(owner);
+
+        const accountCount2 = await myCare.GetAccountCount();
+        assert.equal(accountCount2, 0);
+
+        logger.info("Results=", results);
+        assert.equal(results[2], false);
+        assert.notEqual(toAscii(results[1]), profile1);
+
+        assert.equal(results[3], false);
+        assert.equal(results[4].toString(), '0');
+        assert.equal(results[5].toString(), '0');
+
+        assert.equal(results[6], '0x00000000000000000000000000000000');
     });
 
     it('can add multiple accounts', async function () {
@@ -42,8 +137,11 @@ contract('Mycare', function (accounts) {
         const timestamp = Math.floor(Date.now() / 1000);
         const timestamp2 = Math.floor(Date.now() / 1000) + 4;
 
-        await myCare.AddAccount(owner, profileHash, timestamp);
-        await myCare.AddAccount(account2, profileHash2, timestamp2);
+        const accountType = 'Patient';
+        const accountTypeHex = fromAscii(accountType);
+
+        await myCare.AddAccount(owner, profileHash, timestamp, accountTypeHex);
+        await myCare.AddAccount(account2, profileHash2, timestamp2, accountTypeHex);
         let r1 = await myCare.GetAccount(owner);
         let r2 = await myCare.GetAccount(account2);
         assert.equal(r1[2], true);
@@ -67,7 +165,10 @@ contract('Mycare', function (accounts) {
 
         const timestamp = Math.floor(Date.now() / 1000);
 
-        await myCare.AddAccount(owner, profileBytes32, timestamp);
+        const accountType = 'Patient';
+        const accountTypeHex = fromAscii(accountType);
+
+        await myCare.AddAccount(owner, profileBytes32, timestamp, accountTypeHex);
 
         const result = await myCare.GetAccountByProfile(profileBytes32);
 
@@ -86,7 +187,10 @@ contract('Mycare', function (accounts) {
 
         let account3User = 'user_id_3';
 
-        await myCare.AddAccount(account3, account3User, timestamp1);
+        const accountType = 'Patient';
+        const accountTypeHex = fromAscii(accountType);
+
+        await myCare.AddAccount(account3, account3User, timestamp1, accountTypeHex);
 
         let result = await myCare.GetAccount(account3);
 
@@ -105,14 +209,6 @@ contract('Mycare', function (accounts) {
         assert.equal(result[4], timestamp1);
         assert.equal(result[5], timestamp2);
     });
-
-    const logData = function (label, v) {
-        logger.info(label,
-            ' Requested: ', v[0],
-            ' Profile: ', v[1],
-            ' Owner: ', v[2],
-            ' IsEntity: ', v[3]);
-    };
 
 
     // function toAscii(hex) {
