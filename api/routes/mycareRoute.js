@@ -7,6 +7,9 @@ module.exports = function mycareRoute(router) {
     router.route('/mycare/add_account')
         .post(commonController.authorize(ROLES.CLIENT), mycareController.validateAddAccountParams, mycareController.addAccount);
 
+    router.route('/mycare/add_account_type')
+        .post(commonController.authorize(ROLES.ADMIN), mycareController.addAccountType);
+
     router.route('/mycare/account')
         .get(commonController.authorize(ROLES.CLIENT), mycareController.getAccount);
 

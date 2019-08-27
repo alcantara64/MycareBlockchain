@@ -775,6 +775,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseMessage'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+  '/mycare/add_account_type':
+    post:
+      tags:
+        - MyCareContract
+      summary: Create new account type on the blockchain
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            format: uuid
+            description: access token
+      requestBody:
+        description: Required data to save new account
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountType:
+                  type: string
+                  example: Patient
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
         '500':
           description: Server Error
           content:
@@ -1061,32 +1111,6 @@ components:
         ipfsHash:
           type: string
           description: ipfs hash of document
-    NewDocument:
-      type: object
-      properties:
-        owner:
-          type: string
-          description: wallet address
-        ipfsHash:
-          type: string
-          description: ipfs hash of document
-        password:
-          type: string
-          description: ipfs password
-    Document:
-      type: object
-      properties:
-        found: 
-          type: boolean
-          example: true
-        password:
-          type: string
-          description: password to retrieve document on ipfs
-          example: "39edj03jieundk39dd39dmdk39endi3ndi3ndi3n3"
-        inserted:
-          type: number
-          description: timestamp of when document was inserted in the chain
-          example: 1542802867055
     Account:
       type: object
       properties:
@@ -1166,4 +1190,8 @@ components:
         timestamp:
           type: string
           description: timestamp showing when account was created
-          example: "2018-11-21T11:26:34.142Z" 
+          example: "2018-11-21T11:26:34.142Z"
+        accountType:
+          type: string
+          description: type of account
+          example: Patient
