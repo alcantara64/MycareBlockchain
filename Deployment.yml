@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blockchainapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blockchainapi
+  template:
+    metadata:
+      labels:
+        app: blockchainapi
+    spec:
+      containers:
+      - name: blockchainapi
+        image: mycaredev.azurecr.io/blockchainapi:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1Gi
+          limits:
+            cpu: 250m
+            memory: 1Gi
+        ports:
+        - containerPort: 4000
+      imagePullSecrets:
+      - name: imagesecret-name
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blockchainapi
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 4000
+  selector:
+    app: blockchainapi
