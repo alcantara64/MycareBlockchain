@@ -1,4 +1,5 @@
 const appRoot = require('app-root-path');
+const web3 = require('web3');
 const chai = require('chai');
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
@@ -66,8 +67,7 @@ describe('MycareService', () => {
         sandbox.restore();
     });
 
-    it('can add account', () => {
-
+    it('can add account', async () => {
         contractMethods.AddAccount = sandbox.stub().returns({
             encodeABI
         });
@@ -75,10 +75,11 @@ describe('MycareService', () => {
         const payload = {
             timestamp: '2018-11-28T13:01:04.956Z',
             profileHash: '5CEF18be6e742c63AA2Dab7F52C1B699040875808',
-            walletAddress: '0xd9Ef690a2836b5e50098A391Ebd490A96a416EEc'
+            walletAddress: '0xd9Ef690a2836b5e50098A391Ebd490A96a416EEc',
+            accountType: 'Patient'
         };
 
-        mycareService.AddAccount(payload);
+        await mycareService.AddAccount(payload);
 
         sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
 
@@ -86,11 +87,11 @@ describe('MycareService', () => {
             contractMethods.AddAccount,
             payload.walletAddress,
             payload.profileHash,
-            timestamp
+            timestamp,
+            web3.utils.asciiToHex(payload.accountType)
         );
 
         sandbox.assert.calledWith(helperMethods.ISOstringToTimestamp, payload.timestamp);
-
 
         sandbox.assert.called(encodeABI);
     });
@@ -113,10 +114,14 @@ describe('MycareService', () => {
     });
 
     it('can get account by wallet address', async () => {
+        const accountType = 'Patient';
+        const accountTypeHex = web3.utils.asciiToHex(accountType);
+
         const account = {
             isEntity: true,
             created: 1546974004821,
-            updated: 1346974004824
+            updated: 1346974004824,
+            accountType: accountTypeHex
         };
 
         const dateString = '2018-11-28T13:01:04.956Z';
@@ -124,7 +129,8 @@ describe('MycareService', () => {
         const returnedData = {
             isEntity: true,
             created: dateString,
-            updated: dateString
+            updated: dateString,
+            accountType
         };
 
         helperMethods.timeStampToISOstring = sandbox.stub().returns(dateString);
@@ -142,16 +148,21 @@ describe('MycareService', () => {
         chai.expect(result.isEntity).to.be.equal(returnedData.isEntity);
         chai.expect(result.created).to.be.equal(returnedData.created);
         chai.expect(result.updated).to.be.equal(returnedData.updated);
+        sandbox.assert.match(result.accountType, accountType);
 
         sandbox.assert.notCalled(contractMethods.GetAccountByProfile);
         sandbox.assert.calledWith(contractMethods.GetAccount, param);
     });
 
     it('can get account by profile hash', async () => {
+        const accountType = 'Patient';
+        const accountTypeHex = web3.utils.asciiToHex(accountType);
+        
         const account = {
             isEntity: true,
             created: 1546974004821,
-            updated: 1346974004824
+            updated: 1346974004824,
+            accountType: accountTypeHex
         };
 
         const dateString = '2018-11-28T13:01:04.956Z';
@@ -159,7 +170,8 @@ describe('MycareService', () => {
         const returnedData = {
             isEntity: true,
             created: dateString,
-            updated: dateString
+            updated: dateString,
+            accountType
         };
 
         helperMethods.timeStampToISOstring = sandbox.stub().returns(dateString);
@@ -177,6 +189,7 @@ describe('MycareService', () => {
         chai.expect(result.isEntity).to.be.equal(returnedData.isEntity);
         chai.expect(result.created).to.be.equal(returnedData.created);
         chai.expect(result.updated).to.be.equal(returnedData.updated);
+        sandbox.assert.match(result.accountType, accountType);
 
         sandbox.assert.notCalled(contractMethods.GetAccount);
         sandbox.assert.calledWith(contractMethods.GetAccountByProfile, param);
@@ -208,5 +221,51 @@ describe('MycareService', () => {
         sandbox.assert.notCalled(contractMethods.GetAccount);
         
         sandbox.assert.calledWith(contractMethods.GetAccountByProfile, param);
+    });
+
+    it('can add account type', async () => {
+        const accountType = 'Patient';
+        const accountTypeHex = web3.utils.asciiToHex(accountType);
+
+        contractMethods.AddAccountType = sandbox.stub().returns({
+            encodeABI
+        });
+
+        await mycareService.AddAccountType(accountType);
+
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE);
+
+        sandbox.assert.calledWith(
+            contractMethods.AddAccountType,
+            accountTypeHex
+        );
+
+        sandbox.assert.called(encodeABI);
+    });
+
+    it('can check if account type exists', async () => {
+        const accountType = 'Patient';
+        const accountTypeHex = web3.utils.asciiToHex(accountType);
+
+        call.resolves(true);
+
+        contractMethods.AccountTypeExists = sandbox.stub().returns({
+            call
+        });
+
+        const result = await mycareService.AccountTypeExists(accountType);
+
+        sandbox.assert.calledWith(contractMethods.AccountTypeExists, accountTypeHex);
+        sandbox.assert.match(result, true);
+    });
+
+    it('can get account count', () => {
+        contractMethods.GetAccountCount = sandbox.stub().returns({
+            call
+        });
+
+        mycareService.GetAccountCount();
+
+        sandbox.assert.called(contractMethods.GetAccountCount);
     });
 });

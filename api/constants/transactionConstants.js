@@ -6,8 +6,9 @@ function computeGasLimit(limit) {
 
 exports.GAS_LIMIT = {
     MYCARE: {
-        ADD_ACCOUNT: computeGasLimit(250959),
-        DEACTIVATE_ACCOUNT: computeGasLimit(18891)
+        ADD_ACCOUNT: computeGasLimit(3000000),
+        DEACTIVATE_ACCOUNT: computeGasLimit(18891),
+        ADD_ACCOUNT_TYPE: computeGasLimit(89747)
     },
     SHARED_ACCESS: {
         ADD_CONNECTION_ATTEMPT: computeGasLimit(133603),
