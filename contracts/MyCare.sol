@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.11;
 
 contract MyCare {
 
@@ -43,7 +43,7 @@ contract MyCare {
     }
 
     //  Accounts
-    function AddAccount( address ownerAddress, string profile, uint timestamp, bytes16 accountType ) public returns (bool success ) {
+    function AddAccount( address ownerAddress, string memory profile, uint timestamp, bytes16 accountType ) public returns (bool success ) {
         // if user does not exist and account type exists
         if ( !accountStructs[ownerAddress].isEntity && accountTypesMap[accountType]) {
             accountStructs[ownerAddress].chainAddress = ownerAddress;
@@ -74,7 +74,7 @@ contract MyCare {
         return accountTypesMap[accountType];
     }
 
-    function GetAccountTypes() public view returns (bytes16[]) {
+    function GetAccountTypes() public view returns (bytes16[] memory) {
         return accountTypes;
     }
 
@@ -84,12 +84,12 @@ contract MyCare {
         return true;
     }
 
-    function GetAccountByProfile( string _profile )
+    function GetAccountByProfile( string memory _profile )
         public
         view
         returns (
             address walletAddress,
-            string profile,
+            string memory profile,
             bool isEntity,
             bool active,
             uint created,
@@ -114,7 +114,7 @@ contract MyCare {
         view
         returns (
             address walletAddress,
-            string profile,
+            string memory profile,
             bool isEntity,
             bool active,
             uint created,

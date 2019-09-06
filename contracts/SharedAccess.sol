@@ -1,4 +1,4 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.5.11;
 
 contract SharedAccess {
     struct Consent {
@@ -12,7 +12,7 @@ contract SharedAccess {
         bool revoked;
         bool isEntity;
     }
-    
+
     struct ConnectionAttempt {
         address from;
         address to;
@@ -21,24 +21,24 @@ contract SharedAccess {
         bool accepted;
         bool isEntity;
     }
-    
+
     mapping(string => Consent) allConsents;
     mapping(string => ConnectionAttempt) allConnections;
     mapping(address => string[]) userConnectionAttempts;
     mapping(address => string[]) userConsents;
-    
+
     function addConsent(
-        string consentId,
+        string memory consentId,
         uint timestamp,
         bytes16 scope,
-        address[] dataSource,
+        address[] memory dataSource,
         uint startDate,
         uint endDate,
-        string connectionId
+        string memory connectionId
     ) public returns(bool) {
-        
+
         ConnectionAttempt memory connection = allConnections[connectionId];
-        
+
         if (connection.isEntity && !allConsents[consentId].isEntity) {
             allConsents[consentId] = Consent({
                 created: timestamp,
@@ -51,20 +51,20 @@ contract SharedAccess {
                 revoked: false,
                 isEntity: true
             });
-            
+
             return true;
         }
-        
+
         return false;
     }
-    
-    function getConsent(string _consentId) public view returns(
-        string consentId,
-        string connectionId,
+
+    function getConsent(string memory _consentId) public view returns(
+        string memory consentId,
+        string memory connectionId,
         uint created,
         uint updated,
         bytes16 scope,
-        address[] dataSource,
+        address[] memory dataSource,
         uint startDate,
         uint endDate,
         bool revoked,
@@ -85,24 +85,24 @@ contract SharedAccess {
             consent.isEntity
         );
     }
-    
-    function canAccess(string _consentId) public view returns(bool) {
+
+    function canAccess(string memory _consentId) public view returns(bool) {
         Consent memory consent = allConsents[_consentId];
-        
+
         return (consent.isEntity && !consent.revoked);
     }
-    
+
     function addConnectionAttempt(
-        string connectionId,
+        string memory connectionId,
         address from,
         address to,
         uint created
         ) public returns(bool) {
-            
+
         if (allConnections[connectionId].isEntity) {
             return false;
         }
-        
+
         ConnectionAttempt memory connection = ConnectionAttempt({
             from: from,
             to: to,
@@ -111,14 +111,14 @@ contract SharedAccess {
             accepted: false,
             isEntity: true
         });
-        
+
         allConnections[connectionId] = connection;
-        
+
         return true;
     }
-    
-    function getConnectionAttempt(string _connectionId) public view returns(
-        string connectionId,
+
+    function getConnectionAttempt(string memory _connectionId) public view returns(
+        string memory connectionId,
         address from,
         address to,
         uint created,
@@ -127,7 +127,7 @@ contract SharedAccess {
         bool isEntity
         ) {
         ConnectionAttempt memory connection = allConnections[_connectionId];
-        
+
         return (
             _connectionId,
             connection.from,
@@ -138,20 +138,20 @@ contract SharedAccess {
             connection.isEntity
         );
     }
-    
-    function updateConnectionAttempt(string _connectionId, bool accepted, uint timestamp) public returns(bool) {
+
+    function updateConnectionAttempt(string memory _connectionId, bool accepted, uint timestamp) public returns(bool) {
         ConnectionAttempt storage connection = allConnections[_connectionId];
-        
+
         connection.accepted = accepted;
         connection.updated = timestamp;
-        
+
         return true;
     }
-    
-    function revokeConsent(string _consentId, uint timestamp) public returns(bool success) {
+
+    function revokeConsent(string memory _consentId, uint timestamp) public returns(bool success) {
         Consent storage consent = allConsents[_consentId];
         consent.revoked = true;
         consent.updated = timestamp;
         return true;
-    } 
+    }
 }
