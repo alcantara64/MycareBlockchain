@@ -229,18 +229,18 @@ describe('contractHelper', () => {
 
     describe('checkIfTxInQueue', () => {
         it('emits event ADDED_TX_TO_QUEUE if there are transactions in queue', async () => {
-            azureStorageHelper.getQueueLength = sandbox.stub().resolves(2);
+            azureStorageHelper.queueHasNewMessages = sandbox.stub().resolves(true);
             await contractHelper.checkIfTxInQueue();
 
-            sandbox.assert.called(azureStorageHelper.getQueueLength);
+            sandbox.assert.called(azureStorageHelper.queueHasNewMessages);
             sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.ADDED_TX_TO_QUEUE);
         });
 
         it('does not emit event when there is no transaction in queue', async () => {
-            azureStorageHelper.getQueueLength = sandbox.stub().resolves(0);
+            azureStorageHelper.queueHasNewMessages = sandbox.stub().resolves(false);
             await contractHelper.checkIfTxInQueue();
 
-            sandbox.assert.called(azureStorageHelper.getQueueLength);
+            sandbox.assert.called(azureStorageHelper.queueHasNewMessages);
             sandbox.assert.neverCalledWith(emit, contractHelper.TX_EVENTS.ADDED_TX_TO_QUEUE);
         });
     });
