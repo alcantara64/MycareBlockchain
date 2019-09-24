@@ -70,11 +70,9 @@ async function handleNewTxInQueue() {
 }
 
 async function checkIfTxInQueue() {
-    // const messageCount = await azureStorageHelper.getQueueLength();
     const queueHasNewMessages = await azureStorageHelper.queueHasNewMessages();
 
     if (queueHasNewMessages) {
-    // if (messageCount > 0) {
         eventEmitter.emit(TX_EVENTS.ADDED_TX_TO_QUEUE);
     } else {
         messageHandlerBusy = false;
