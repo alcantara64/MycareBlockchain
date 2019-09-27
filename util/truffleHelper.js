@@ -32,8 +32,9 @@ if (program.migrate) {
 function getBlockchainCredentials(callback) {
     const secretNames = [
         'RPC_ENDPOINT',
-        'METAMASK_ACCOUNT_MNEMONIC',
-        'NETWORK_ID'
+        'NETWORK_ID',
+        'ACCOUNT_ADDRESS',
+        'ACCOUNT_PRIVATE_KEY'
     ];
 
     const getSecretsPromiseArr = secretNames.map(secret => azureKeyVault.getSecret(process.env[secret], ''));
@@ -52,8 +53,9 @@ function getBlockchainCredentials(callback) {
 function runTruffleCommand() {
     getBlockchainCredentials((secrets) => {
         shell.exec(`RPC_ENDPOINT="${secrets.RPC_ENDPOINT}" 
-        METAMASK_ACCOUNT_MNEMONIC=${secrets.METAMASK_ACCOUNT_MNEMONIC}
         NETWORK_ID=${secrets.NETWORK_ID}
+        ACCOUNT_ADDRESS=${secrets.ACCOUNT_ADDRESS}
+        ACCOUNT_PRIVATE_KEY=${secrets.ACCOUNT_PRIVATE_KEY}
         ${truffleCommand}`);
     });
 }

@@ -3,7 +3,6 @@ module.exports = [
     'ACCOUNT_ADDRESS',
     'ACCOUNT_PRIVATE_KEY',
     'NETWORK_ID',
-    'METAMASK_ACCOUNT_MNEMONIC',
     'ADMIN_EMAIL',
     'ADMIN_PASSWORD',
     'EMAIL_HOST',

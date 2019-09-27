@@ -29,6 +29,7 @@
     "deploy:contracts:prod": "export PROFILE='prod'; node ./util/truffleHelper.js --migrate",
     "deploy:contracts:test": "export PROFILE='test'; node ./util/truffleHelper.js --migrate",
     "deploy:contracts:uat": "export PROFILE='uat'; node ./util/truffleHelper.js --migrate",
+    "compile": "truffle compile",
     "lint:api": "eslint api/**",
     "lint:contracts": "solium -d contracts/",
     "coverage": "nyc --reporter=lcov mocha --recursive --exit ./spec/**/**/*.js --timeout 90000",
@@ -69,8 +70,7 @@
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "save": "^2.3.3",
-    "solium": "^1.1.8",
-    "truffle-hdwallet-provider": "0.0.6",
+    "truffle-hdwallet-provider": "^1.0.17",
     "ursa": "^0.9.4",
     "uuid": "^3.3.2",
     "web3": "1.0.0-beta.34",
@@ -102,6 +102,7 @@
     "shelljs": "^0.8.3",
     "sinon": "^7.1.1",
     "solidity-coverage": "^0.5.11",
-    "truffle": "^4.1.14"
+    "solium": "^1.2.4",
+    "truffle": "^5.0.5"
   }
 }

@@ -149,6 +149,19 @@ function getQueueLength() {
     });
 };
 
+/**
+ * Check if there are new messages in queue
+ * @returns {boolean}
+ */
+function queueHasNewMessages() {
+    return new Promise((resolve, reject) => {
+        queueSvc.peekMessages(queueName, function (error, results, response) {
+            if (error) reject(error);
+            else resolve(results.length > 0);
+        });
+    });
+}
+
 function createQueue() {
     return new Promise((resolve, reject) => {
         queueSvc.createQueueIfNotExists(queueName, (error, results, response) => {
@@ -164,5 +177,6 @@ module.exports = {
     getMessages,
     getQueueLength,
     createQueue,
-    onAzureStorageError
+    onAzureStorageError,
+    queueHasNewMessages
 };
