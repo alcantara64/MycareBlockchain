@@ -12,9 +12,11 @@ describe('azureStorageHelper', () => {
     let azureStorage;
     let queueSvc;
     let envHelper;
+    let blobService;
     let logger;
     let AzureBlobTransport;
     let blobTransport;
+    let azureKeyVault;
 
     const accountName = 'cwest-app';
     const accountKey = '93e3HYRtaN2ILXf2Q8dreacb99E8nK3LXDIJqHisnr86cGUVXQXgdUwZeojdeur9/YK8ohkeudhu383mJdw8sg==';
@@ -24,10 +26,14 @@ describe('azureStorageHelper', () => {
         AZURE_STORAGE_QUEUE_NAME: 'helloQueue',
         APP_LOGS_STORAGE_TABLE: 'MyAppLogs',
         PROFILE: 'dev',
-        APP_LOGS_BLOB_CONTAINER: 'https://mystorage.blob.core.windows.net/errors?sv=2018-03-28&sr=c&sig=x&st=2019-01-01T00:00:00Z&se=2219-01-01T00:00:00Z&sp=rwdl',
+        APP_LOGS_SHARED_ACCESS_SIGNATURE: 'https://mystorage.blob.core.windows.net/errors?sv=2018-03-28&sr=c&sig=x&st=2019-01-01T00:00:00Z&se=2219-01-01T00:00:00Z&sp=rwdl',
+        APP_LOGS_BLOB_CONTAINER: 'app-logs',
+        SHARED_ACCESS_SIGNATURE_URL_VALIDITY_DAYS: '365',
+        LOGS_RETENTION_DAYS: '365'
     };
 
     beforeEach(() => {
+        azureKeyVault = {};
         queueSvc = {};
 
         envHelper = {
@@ -39,6 +45,8 @@ describe('azureStorageHelper', () => {
         blobTransport = {
             log: () => { }
         };
+
+        blobService = {};
 
         AzureBlobTransport = function AzureBlobTransportConstructor(args) {
             Object.assign(AzureBlobTransport, {
@@ -52,19 +60,22 @@ describe('azureStorageHelper', () => {
         logger = {
             info: () => { },
             error: () => { },
+            remove: sandbox.stub(),
             add: sandbox.stub(),
             '@noCallThru': true
         };
 
         azureStorage = {
-            createQueueService: sandbox.stub().returns(queueSvc)
+            createQueueService: sandbox.stub().returns(queueSvc),
+            createBlobService: sandbox.stub().returns(blobService)
         };
 
         const imports = {
             'azure-storage': azureStorage,
             'mozenge-winston-azure-transport': { AzureBlobTransport },
             [`${appRoot}/api/helpers/envHelper`]: envHelper,
-            [`${appRoot}/config/winston`]: logger
+            [`${appRoot}/config/winston`]: logger,
+            [`${appRoot}/api/middlewares/authentication/azureKeyVault`]: azureKeyVault
         };
 
         azureStorageHelper = proxyquire(`${appRoot}/api/helpers/azureStorageHelper`, imports);
@@ -76,9 +87,10 @@ describe('azureStorageHelper', () => {
 
     it('adds azure table storage transport on initialization', () => {
         const blobTransportConfig = {
-            containerUrl: env.APP_LOGS_BLOB_CONTAINER,
-            nameFormat: 'blockchainApi-logs/{yyyy}/{MM}/{dd}/info.log',
-            retention: 365
+            containerUrl: env.APP_LOGS_SHARED_ACCESS_SIGNATURE,
+            nameFormat: 'mycareapi-logs/{yyyy}/{MM}/{dd}/info.log',
+            retention: +env.LOGS_RETENTION_DAYS,
+            onAzureStorageError: azureStorageHelper.onAzureStorageError
         };
         assert.calledWith(AzureBlobTransport.instance, blobTransportConfig);
         assert.calledWith(logger.add, blobTransport);
@@ -170,5 +182,82 @@ describe('azureStorageHelper', () => {
 
         assert.calledWith(queueSvc.createQueueIfNotExists, env.AZURE_STORAGE_QUEUE_NAME);
         assert.match(response, results);
+    });
+
+    describe('onAzureStorageError', () => {
+        it('does not generate shared access signature statusCode is not 403', async () => {
+            const error = {
+                name: 'StorageError',
+                message: 'Server failed to authenticate the request. Make sure the value of Authorization header is formed correctly including the signature.\nRequestId:0c5f4a2e-601e-0150-5624-5dbfee000000\nTime:2019-08-27T22:09:37.8862339Z',
+                code: 'AuthenticationFailed',
+                authenticationerrordetail: 'Signature fields not well formed.',
+                statusCode: 400,
+                requestId: '0c5f4a2e-601e-0150-5624-5dbfee044000',
+            };
+
+            azureKeyVault.createSecret = sandbox.stub();
+            blobService.generateSharedAccessSignature = sandbox.stub();
+
+            azureStorage.BlobUtilities = {
+                SharedAccessPermissions: {
+                    READ: 'r',
+                    WRITE: 'w',
+                    DELETE: 'd',
+                    LIST: 'l',
+                    CREATE: 'c',
+                    ADD: 'a',
+                },
+            };
+
+            await azureStorageHelper.onAzureStorageError(error);
+
+            assert.notCalled(azureKeyVault.createSecret);
+            assert.notCalled(blobService.generateSharedAccessSignature);
+        });
+
+        it('generates shared access signature statusCode is 403', async () => {
+            const error = {
+                name: 'StorageError',
+                message: 'Server failed to authenticate the request. Make sure the value of Authorization header is formed correctly including the signature.\nRequestId:0c5f4a2e-601e-0150-5624-5dbfee000000\nTime:2019-08-27T22:09:37.8862339Z',
+                code: 'AuthenticationFailed',
+                authenticationerrordetail: 'Signature fields not well formed.',
+                statusCode: 403,
+                requestId: '0c5f4a2e-601e-0150-5624-5dbfee044000',
+            };
+
+            azureKeyVault.createSecret = sandbox.stub();
+
+            const sharedAccessSig = '?st=2019-08-28T12%3A32%3A58Z&se=2019-08-29T12%3A32%3A58Z&sp=rl&sv=2018-03-28&sr=c&sig=u5zMXr0ptOz7lb%2FwunU4zgjRRKSCQ0H8agwhcxJoF6k%3D';
+            const sasUrl = `https://mystorage.blob.core.windows.net/logs${sharedAccessSig}`
+            blobService.generateSharedAccessSignature = sandbox.stub().returns(sharedAccessSig);
+            blobService.getUrl = sandbox.stub().returns(sasUrl);
+
+            azureStorage.BlobUtilities = {
+                SharedAccessPermissions: {
+                    READ: 'r',
+                    WRITE: 'w',
+                    DELETE: 'd',
+                    LIST: 'l',
+                    CREATE: 'c',
+                    ADD: 'a'
+                }
+            };
+
+            const blobTransportConfig = {
+                containerUrl: sasUrl,
+                nameFormat: 'mycareapi-logs/{yyyy}/{MM}/{dd}/info.log',
+                retention: +env.LOGS_RETENTION_DAYS,
+                onAzureStorageError: azureStorageHelper.onAzureStorageError
+            };
+
+            await azureStorageHelper.onAzureStorageError(error);
+
+            assert.calledWith(azureKeyVault.createSecret, process.env.APP_LOGS_SHARED_ACCESS_SIGNATURE, sasUrl);
+            assert.calledWith(blobService.generateSharedAccessSignature, env.APP_LOGS_BLOB_CONTAINER, null);
+            assert.calledWith(blobService.getUrl, env.APP_LOGS_BLOB_CONTAINER, null);
+            assert.calledWith(AzureBlobTransport.instance, blobTransportConfig);
+            assert.calledWith(logger.add, blobTransport);
+            assert.calledWith(logger.remove, blobTransport);
+        });
     });
 });

@@ -1,8 +1,8 @@
 const axios = require('axios');
 const crypto = require('crypto');
 
-// const baseUrl = 'http://127.0.0.1:4000/api/v1';
-const baseUrl = 'http://mycare-build.eastus.cloudapp.azure.com:4049/api/v1';
+const baseUrl = 'http://127.0.0.1:4000/api/v1';
+// const baseUrl = 'http://mycare-build.eastus.cloudapp.azure.com:4049/api/v1';
 
 async function getAccessToken() {
     const BLOCKCHAIN_API_CLIENT_ID = 'a86695261cc35ea2c79f89cbe974a8ddad70c61724b1b6eafde45e406f67ea39889f0fd10a3739b37402d29e30a445f4cd136c3248e39e9785b276f85bd88052c534255afe451235491927f1df2e5a44';
@@ -41,7 +41,8 @@ function generateAddAccountRequestData(size) {
         const payload = {
             walletAddress,
             timestamp,
-            profileHash
+            profileHash,
+            accountType: 'Patient'
         };
 
         requestData.push(payload);
