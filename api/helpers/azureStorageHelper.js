@@ -73,7 +73,7 @@ function generateSharedAccessSignatureUrl() {
     const token = blobService.generateSharedAccessSignature(logsContainerName, null, sharedAccessPolicy);
     return blobService.getUrl(logsContainerName, null, token, true);
 }
-
+queueSvc.updateMessage
 /**
  * send message to queue
  * @param {String} messageText blockchain transaction details
@@ -89,6 +89,12 @@ function createMessage(messageText) {
         });
     });
 };
+
+function updateMessage(message) {
+    return new Promise((resolve, reject) => {
+        queueSvc.updateMessage('', message.);
+    });
+}
 
 /**
  * Delete message from queue. This should be called only after message has been processed successfully

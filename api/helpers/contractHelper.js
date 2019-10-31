@@ -45,13 +45,19 @@ async function handleNewTxInQueue() {
             const {
                 data,
                 gasLimit,
-                contractAddress
+                contractAddress,
+                txMetaData
             } = txObj;
 
             try {
                 await exports.sendSignedTransaction(data, gasLimit, contractAddress);
             } catch (sendErr) {
-                logger.error(`sendSignedTransaction failed for message: ${message.messageId} with ERROR: ${sendErr.message}`);
+                // set number of times transaction has been processed
+                txObj.txProcessedCount = txObj.txProcessedCount + 1;
+                logger.error(`sendSignedTransaction failed for message: ${message.messageId} 
+                    with ERROR: ${sendErr.message}. transaction metaData: ${JSON.stringify(txMetaData)}`);
+
+                // update message
                 continue;
             }
 
@@ -146,11 +152,23 @@ exports.sendSignedTransaction = async function (data, gasLimit, contractAddress)
     logger.info(`TxReceipt for Tx Number ${nonce}: ${JSON.stringify(txReceipt)}`);
 };
 
-ContractHelper.prototype.sendTransaction = async function (data, gasLimit) {
+/**
+ * saves new transaction in storage queue
+ * @param {string} data abi encoded string
+ * @param {Number} gasLimit
+ * @param {{
+ * parameters: {},
+ * methodName: string
+ * }} txMetaData contains the raw information that is being saved to blockchain
+ * as well as the name of the contract method being executed
+ */
+ContractHelper.prototype.sendTransaction = async function (data, gasLimit, txMetaData) {
     const txObj = {
         data,
         gasLimit,
-        contractAddress: this._contract._address
+        contractAddress: this._contract._address,
+        txMetaData,
+        txProcessedCount: 0
     };
 
     const messageText = JSON.stringify(txObj);

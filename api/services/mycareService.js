@@ -13,7 +13,16 @@ exports.AddAccount = async function AddAccount (payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
     let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountTypeHex).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
+    const metaData = {
+        parameters: {
+            walletAddress,
+            profileHash,
+            timestamp: payload.timestamp,
+            methodName: 'AddAccount'
+        }
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT, metaData);
 };
 
 exports.AddAccountType = async function AddAccountType(accountType) {
