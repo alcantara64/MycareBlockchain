@@ -17,9 +17,9 @@ exports.AddAccount = async function AddAccount (payload) {
         parameters: {
             walletAddress,
             profileHash,
-            timestamp: payload.timestamp,
-            methodName: 'AddAccount'
-        }
+            timestamp: payload.timestamp
+        },
+        methodName: `${contractNames.MYCARE}.AddAccount`
     };
 
     return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT, metaData);

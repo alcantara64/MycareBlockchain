@@ -53,11 +53,17 @@ async function handleNewTxInQueue() {
                 await exports.sendSignedTransaction(data, gasLimit, contractAddress);
             } catch (sendErr) {
                 // set number of times transaction has been processed
-                txObj.txProcessedCount = txObj.txProcessedCount + 1;
+                txObj.txMetaData.txProcessedCount = txObj.txMetaData.txProcessedCount + 1;
+                txObj.txMetaData.lastErrorLogged = sendErr.message;
                 logger.error(`sendSignedTransaction failed for message: ${message.messageId} 
                     with ERROR: ${sendErr.message}. transaction metaData: ${JSON.stringify(txMetaData)}`);
 
                 // update message
+                logger.info(`updating txObject for message: ${message.messageId}`);
+                const messageText = JSON.stringify(txObj);
+                await azureStorageHelper.updateMessage(message, messageText);
+                logger.info(`Updated message ${message.messageId} successfully`);
+
                 continue;
             }
 
@@ -163,12 +169,17 @@ exports.sendSignedTransaction = async function (data, gasLimit, contractAddress)
  * as well as the name of the contract method being executed
  */
 ContractHelper.prototype.sendTransaction = async function (data, gasLimit, txMetaData) {
+    const txCreatedDate = (new Date()).toISOString();
+
+    txMetaData.txCreatedDate = txCreatedDate;
+    txMetaData.txProcessedCount = 0;
+    txMetaData.lastErrorLogged = '';
+
     const txObj = {
         data,
         gasLimit,
         contractAddress: this._contract._address,
-        txMetaData,
-        txProcessedCount: 0
+        txMetaData
     };
 
     const messageText = JSON.stringify(txObj);

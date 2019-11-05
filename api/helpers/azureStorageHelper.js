@@ -73,7 +73,7 @@ function generateSharedAccessSignatureUrl() {
     const token = blobService.generateSharedAccessSignature(logsContainerName, null, sharedAccessPolicy);
     return blobService.getUrl(logsContainerName, null, token, true);
 }
-queueSvc.updateMessage
+
 /**
  * send message to queue
  * @param {String} messageText blockchain transaction details
@@ -90,9 +90,14 @@ function createMessage(messageText) {
     });
 };
 
-function updateMessage(message) {
+function updateMessage(message, messageText) {
     return new Promise((resolve, reject) => {
-        queueSvc.updateMessage('', message.);
+        queueSvc.updateMessage(queueName, message.messageId, message.popReceipt, 0, {
+            messageText
+        }, (error, response) => {
+            if (error) reject(new Error(error));
+            else resolve(response);
+        });
     });
 }
 
@@ -184,5 +189,6 @@ module.exports = {
     getQueueLength,
     createQueue,
     onAzureStorageError,
-    queueHasNewMessages
+    queueHasNewMessages,
+    updateMessage
 };
