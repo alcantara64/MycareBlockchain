@@ -85,9 +85,17 @@ describe('PoliciesAndTermsService', () => {
             ipfsHash: '5CEF18be6e742c63AA2Dab7F52C1B699040875808'
         };
 
+        const metaData = {
+            parameters: {
+                ipfsHash: payload.ipfsHash,
+                timestamp: helperMethods.createTimeStamp()
+            },
+            methodName: `${contractHelper.contractNames.POLICIES_AND_TERMS}.addNewDocument`
+        };
+
         policiesAndTermsService.addNewDocument(payload);
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.POLICIES_AND_TERMS.ADD_NEW_DOCUMENT);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.POLICIES_AND_TERMS.ADD_NEW_DOCUMENT, metaData);
 
         sandbox.assert.calledWith(
             contractMethods.addNewDocument,
@@ -111,9 +119,18 @@ describe('PoliciesAndTermsService', () => {
             encodeABI
         });
 
+        const metaData = {
+            parameters: {
+                walletAddress: payload.walletAddress,
+                documentHash: payload.documentHash,
+                timestamp
+            },
+            methodName: `${contractHelper.contractNames.POLICIES_AND_TERMS}.saveAcceptance`
+        };
+
         policiesAndTermsService.saveAcceptance(payload);
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.POLICIES_AND_TERMS.SAVE_ACCEPTANCE);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.POLICIES_AND_TERMS.SAVE_ACCEPTANCE, metaData);
 
         sandbox.assert.calledWith(
             contractMethods.saveAcceptance,
