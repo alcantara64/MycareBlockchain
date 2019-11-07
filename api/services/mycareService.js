@@ -13,20 +13,46 @@ exports.AddAccount = async function AddAccount (payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
     let data = await api.AddAccount(walletAddress, profileHash, timestamp, accountTypeHex).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
+    const metaData = {
+        parameters: {
+            walletAddress,
+            profileHash,
+            timestamp,
+            accountType: payload.accountType
+        },
+        methodName: `${contractNames.MYCARE}.AddAccount`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT, metaData);
 };
 
 exports.AddAccountType = async function AddAccountType(accountType) {
     const accountTypeHex = web3.utils.asciiToHex(accountType);
     let data = await api.AddAccountType(accountTypeHex).encodeABI();
-    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE);
+
+    const metaData = {
+        parameters: {
+            accountType
+        },
+        methodName: `${contractNames.MYCARE}.AddAccountType`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE, metaData);
 };
 
 exports.DeactivateAccount = function (ownerAddress, _timestamp) {
     const timestamp = helperMethods.ISOstringToTimestamp(_timestamp);
     let data = api.DeactivateAccount(ownerAddress, timestamp).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.DEACTIVATE_ACCOUNT);
+    const metaData = {
+        parameters: {
+            ownerAddress,
+            timestamp
+        },
+        methodName: `${contractNames.MYCARE}.DeactivateAccount`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.MYCARE.DEACTIVATE_ACCOUNT, metaData);
 };
 
 exports.GetAccount = async function (param, isWalletAddress = true) {

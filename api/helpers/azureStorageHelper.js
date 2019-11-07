@@ -90,6 +90,20 @@ function createMessage(messageText) {
     });
 };
 
+function updateMessage(message, messageText) {
+    return new Promise((resolve, reject) => {
+        queueSvc.updateMessage(queueName, message.messageId, message.popReceipt, 0, {
+            messageText
+        }, (error, response) => {
+            if (error) {
+                reject(new Error(error));
+            } else {
+                resolve(response);
+            }
+        });
+    });
+}
+
 /**
  * Delete message from queue. This should be called only after message has been processed successfully
  * @param {{ messageId: String, insertionTime: String, messageText: String, popReceipt: String }} message
@@ -99,8 +113,11 @@ function createMessage(messageText) {
 function deleteMessage(message) {
     return new Promise((resolve, reject) => {
         queueSvc.deleteMessage(queueName, message.messageId, message.popReceipt, function (error, response) {
-            if (error) reject(error);
-            else resolve(response);
+            if (error) {
+                reject(error);
+            } else {
+                resolve(response);
+            }
         });
     });
 };
@@ -178,5 +195,6 @@ module.exports = {
     getQueueLength,
     createQueue,
     onAzureStorageError,
-    queueHasNewMessages
+    queueHasNewMessages,
+    updateMessage
 };

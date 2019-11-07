@@ -79,16 +79,28 @@ describe('MycareService', () => {
             accountType: 'Patient'
         };
 
+        const accountTypeHex = web3.utils.asciiToHex(payload.accountType);
+
+        const metaData = {
+            parameters: {
+                walletAddress: payload.walletAddress,
+                profileHash: payload.profileHash,
+                timestamp,
+                accountType: payload.accountType
+            },
+            methodName: `${contractHelper.contractNames.MYCARE}.AddAccount`
+        };
+
         await mycareService.AddAccount(payload);
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT, metaData);
 
         sandbox.assert.calledWith(
             contractMethods.AddAccount,
             payload.walletAddress,
             payload.profileHash,
             timestamp,
-            web3.utils.asciiToHex(payload.accountType)
+            accountTypeHex
         );
 
         sandbox.assert.calledWith(helperMethods.ISOstringToTimestamp, payload.timestamp);
@@ -96,7 +108,7 @@ describe('MycareService', () => {
         sandbox.assert.called(encodeABI);
     });
 
-    it('can deactivate account', () => {
+    it('can deactivate account', async () => {
         const ownerAddress = '0xd9Ef690a2836b5e50098A391Ebd490A96a416EEc';
         const _timestamp = '2018-11-28T13:01:04.956Z';
 
@@ -104,9 +116,17 @@ describe('MycareService', () => {
             encodeABI
         });
 
-        mycareService.DeactivateAccount(ownerAddress, _timestamp);
+        const metaData = {
+            parameters: {
+                ownerAddress,
+                timestamp
+            },
+            methodName: `${contractHelper.contractNames.MYCARE}.DeactivateAccount`
+        };
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.DEACTIVATE_ACCOUNT);
+        await mycareService.DeactivateAccount(ownerAddress, _timestamp);
+
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.DEACTIVATE_ACCOUNT, metaData);
 
         sandbox.assert.calledWith(contractMethods.DeactivateAccount, ownerAddress, timestamp);
 
@@ -231,9 +251,16 @@ describe('MycareService', () => {
             encodeABI
         });
 
+        const metaData = {
+            parameters: {
+                accountType
+            },
+            methodName: `${contractHelper.contractNames.MYCARE}.AddAccountType`
+        };
+
         await mycareService.AddAccountType(accountType);
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.MYCARE.ADD_ACCOUNT_TYPE, metaData);
 
         sandbox.assert.calledWith(
             contractMethods.AddAccountType,

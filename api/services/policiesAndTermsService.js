@@ -16,7 +16,16 @@ exports.addNewDocument = function (payload) {
     const timestamp = helperMethods.createTimeStamp();
 
     const data = api.addNewDocument(ipfsHash, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.ADD_NEW_DOCUMENT);
+
+    const metaData = {
+        parameters: {
+            ipfsHash,
+            timestamp
+        },
+        methodName: `${contractNames.POLICIES_AND_TERMS}.addNewDocument`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.ADD_NEW_DOCUMENT, metaData);
 };
 
 exports.saveAcceptance = function (payload) {
@@ -27,7 +36,17 @@ exports.saveAcceptance = function (payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
 
     const data = api.saveAcceptance(walletAddress, documentHash, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.SAVE_ACCEPTANCE);
+
+    const metaData = {
+        parameters: {
+            walletAddress,
+            documentHash,
+            timestamp
+        },
+        methodName: `${contractNames.POLICIES_AND_TERMS}.saveAcceptance`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.POLICIES_AND_TERMS.SAVE_ACCEPTANCE, metaData);
 };
 
 exports.getDocument = async function getDocument(documentHash) {
