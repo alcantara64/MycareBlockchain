@@ -95,8 +95,11 @@ function updateMessage(message, messageText) {
         queueSvc.updateMessage(queueName, message.messageId, message.popReceipt, 0, {
             messageText
         }, (error, response) => {
-            if (error) reject(new Error(error));
-            else resolve(response);
+            if (error) {
+                reject(new Error(error));
+            } else {
+                resolve(response);
+            }
         });
     });
 }
@@ -110,8 +113,11 @@ function updateMessage(message, messageText) {
 function deleteMessage(message) {
     return new Promise((resolve, reject) => {
         queueSvc.deleteMessage(queueName, message.messageId, message.popReceipt, function (error, response) {
-            if (error) reject(error);
-            else resolve(response);
+            if (error) {
+                reject(error);
+            } else {
+                resolve(response);
+            }
         });
     });
 };

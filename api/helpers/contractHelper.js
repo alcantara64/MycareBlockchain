@@ -55,7 +55,7 @@ async function handleNewTxInQueue() {
                 // set number of times transaction has been processed
                 txObj.txMetaData.txProcessedCount = txObj.txMetaData.txProcessedCount + 1;
                 txObj.txMetaData.lastErrorLogged = sendErr.message;
-                logger.error(`sendSignedTransaction failed for message: ${message.messageId} 
+                logger.error(`sendSignedTransaction failed for message: ${message.messageId}
                     with ERROR: ${sendErr.message}. transaction metaData: ${JSON.stringify(txMetaData)}`);
 
                 // update message
