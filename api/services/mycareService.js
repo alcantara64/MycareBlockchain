@@ -17,7 +17,8 @@ exports.AddAccount = async function AddAccount (payload) {
         parameters: {
             walletAddress,
             profileHash,
-            timestamp
+            timestamp,
+            accountType: payload.accountType
         },
         methodName: `${contractNames.MYCARE}.AddAccount`
     };

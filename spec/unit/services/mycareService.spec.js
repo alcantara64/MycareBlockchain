@@ -79,11 +79,14 @@ describe('MycareService', () => {
             accountType: 'Patient'
         };
 
+        const accountTypeHex = web3.utils.asciiToHex(payload.accountType);
+
         const metaData = {
             parameters: {
                 walletAddress: payload.walletAddress,
                 profileHash: payload.profileHash,
-                timestamp
+                timestamp,
+                accountType: payload.accountType
             },
             methodName: `${contractHelper.contractNames.MYCARE}.AddAccount`
         };
@@ -97,7 +100,7 @@ describe('MycareService', () => {
             payload.walletAddress,
             payload.profileHash,
             timestamp,
-            web3.utils.asciiToHex(payload.accountType)
+            accountTypeHex
         );
 
         sandbox.assert.calledWith(helperMethods.ISOstringToTimestamp, payload.timestamp);
