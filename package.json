@@ -46,6 +46,7 @@
   "dependencies": {
     "adal-node": "^0.1.28",
     "app-root-path": "^2.0.1",
+    "applicationinsights": "^1.4.2",
     "atob": "^2.1.2",
     "axios": "^0.18.0",
     "azure-keyvault": "^3.0.4",
