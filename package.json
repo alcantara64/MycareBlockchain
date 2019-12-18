@@ -23,7 +23,7 @@
     "start-dev": "export PROFILE='dev'; nodemon server.js",
     "start-test": "export PROFILE='test'; nodemon server.js",
     "start-prod": "export PROFILE='prod'; nodemon server.js",
-    "start-uat": "export PROFILE='prod'; nodemon server.js",
+    "start-uat": "export PROFILE='uat'; nodemon server.js",
     "deploy:contracts": "node ./util/truffleHelper.js --migrate",
     "deploy:contracts:dev": "export PROFILE='dev'; node ./util/truffleHelper.js --migrate",
     "deploy:contracts:prod": "export PROFILE='prod'; node ./util/truffleHelper.js --migrate",
