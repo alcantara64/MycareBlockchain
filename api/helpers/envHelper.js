@@ -1,7 +1,6 @@
 const appRoot = require('app-root-path');
 const azureKeyVault = require(`${appRoot}/api/middlewares/authentication/azureKeyVault`);
 const secretNames = require(`${appRoot}/api/constants/envSecretNames`);
-const logger = require(`${appRoot}/config/winston`);
 
 const secrets = {};
 
@@ -12,7 +11,6 @@ module.exports.initialize = async function initialize() {
 
     result.forEach((secret, index) => {
         secrets[secretNames[index]] = secret.value;
-        // logger.debug(`SecretName: ${secretNames[index]} - Value:${secret.value}`);
     });
 };
 
