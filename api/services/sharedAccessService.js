@@ -56,7 +56,20 @@ exports.addConsent = function addConsent(consent) {
         consent.connectionId
     ).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONSENT);
+    const metaData = {
+        parameters: {
+            consentId: consent.consentId,
+            scope,
+            startDate,
+            dataSource: consent.dataSource,
+            endDate,
+            timestamp,
+            connectionId: consent.connectionId
+        },
+        methodName: `${contractNames.SHARED_ACCESS}.addConsent`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONSENT, metaData);
 };
 
 exports.revokeConsent = function revokeConsent(payload) {
@@ -65,7 +78,15 @@ exports.revokeConsent = function revokeConsent(payload) {
     const timestamp = helperMethods.ISOstringToTimestamp(payload.timestamp);
 
     const data = api.revokeConsent(consentId, timestamp).encodeABI();
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.REVOKE_CONSENT);
+
+    const metaData = {
+        parameters: {
+            consentId,
+            timestamp
+        },
+        methodName: `${contractNames.SHARED_ACCESS}.revokeConsent`
+    };
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.REVOKE_CONSENT, metaData);
 };
 
 exports.canAccess = function (consentId) {
@@ -109,7 +130,17 @@ exports.addConnectionAttempt = function addConnectionAttempt(connection) {
         timestamp
     ).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT);
+    const metaData = {
+        parameters: {
+            connectionId: connection.connectionId,
+            timestamp,
+            from: connection.from,
+            to: connection.to
+        },
+        methodName: `${contractNames.SHARED_ACCESS}.addConnectionAttempt`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT, metaData);
 };
 
 exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
@@ -120,7 +151,16 @@ exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
     } = payload;
     const data = api.updateConnectionAttempt(connectionId, accepted, timestamp).encodeABI();
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT);
+    const metaData = {
+        parameters: {
+            connectionId,
+            accepted,
+            timestamp
+        },
+        methodName: `${contractNames.SHARED_ACCESS}.updateConnectionAttempt`
+    };
+
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT, metaData);
 };
 
 exports.getConnectionAttempt = async function getConnectionAttempt(connectionId) {

@@ -71,7 +71,8 @@ describe('contractHelper', () => {
 
         azureStorageHelper = {
             '@noCallThru': true,
-            getQueueLength: sandbox.stub()
+            getQueueLength: sandbox.stub(),
+            queueHasNewMessages: sandbox.stub()
         };
 
         helperMethods = {
@@ -160,18 +161,28 @@ describe('contractHelper', () => {
 
         azureStorageHelper.createMessage = sandbox.stub().resolves(true);
 
+        azureStorageHelper.queueHasNewMessages = sandbox.stub().resolves(true);
+
         const ContractHelper = new contractHelper.ContractHelper(contractName);
 
-        const result = await ContractHelper.sendTransaction(data, gasLimit);
+        const txMetaData = {
+            parameters: {
+                walletAddress: '0x3838ef37c3b38a7efe73c39c3b37e63f37a0c9',
+                profileHash: 'QSJ3ndshdi39NNnhuvbiTTKU99HGhsubjubshdgbbdudHgsdgg'
+            },
+            methodName: 'Mycare.AddAccount'
+        };
 
-        const messageText = JSON.stringify({
-            data,
-            gasLimit,
-            contractAddress
-        });
+        const messageText = await ContractHelper.sendTransaction(data, gasLimit, txMetaData);
+
+        const result = JSON.parse(messageText);
 
         sandbox.assert.calledWith(azureStorageHelper.createMessage, messageText);
-        sandbox.assert.match(result, messageText);
+        sandbox.assert.match(result.txMetaData.parameters.walletAddress, txMetaData.parameters.walletAddress);
+        sandbox.assert.match(result.txMetaData.parameters.profileHash, txMetaData.parameters.profileHash);
+        sandbox.assert.match(result.txMetaData.parameters.methodName, txMetaData.parameters.methodName);
+        sandbox.assert.match(result.txMetaData.parameters.methodName, txMetaData.parameters.methodName);
+        sandbox.assert.match(Object.keys(result.txMetaData).includes('txCreatedDate'), true);
         sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.ADDED_TX_TO_QUEUE);
 
         sandbox.assert.calledWith(readFileSyncStub, compiledFilePath);
@@ -279,12 +290,24 @@ describe('contractHelper', () => {
             sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
         });
 
-        it('does not delete message from queue if sendSignedTransactionn fails', async () => {
+        it('does not delete message from queue if sendSignedTransaction fails', async () => {
             const gasLimit = 11235600;
+            const txMetaData = {
+                parameters: {
+                    walletAddress: '0x3838ef37c3b38a7efe73c39c3b37e63f37a0c9',
+                    profileHash: 'QSJ3ndshdi39NNnhuvbiTTKU99HGhsubjubshdgbbdudHgsdgg'
+                },
+                methodName: 'Mycare.AddAccount',
+                txProcessedCount: 1,
+                txCreatedDate: '2019-11-05T08:32:13.703Z',
+                lastErrorLogged: ''
+            };
+
             const txObj = {
                 data,
                 gasLimit,
-                contractAddress
+                contractAddress,
+                txMetaData
             };
             const messages = [
                 {
@@ -298,9 +321,11 @@ describe('contractHelper', () => {
                 }
             ];
 
-            contractHelper.sendSignedTransaction = sandbox.stub().rejects(new Error('Transaction out of gas'));
+            const errMsg = 'Transaction out of gas';
+            contractHelper.sendSignedTransaction = sandbox.stub().rejects(new Error(errMsg));
 
             azureStorageHelper.deleteMessage = sandbox.stub().resolves(true);
+            azureStorageHelper.updateMessage = sandbox.stub().resolves(true);
 
             azureStorageHelper.getMessages = sandbox.stub().resolves(messages);
             await contractHelper.handleNewTxInQueue();
@@ -308,6 +333,10 @@ describe('contractHelper', () => {
             sandbox.assert.called(azureStorageHelper.getMessages);
             sandbox.assert.calledWith(contractHelper.sendSignedTransaction, data, gasLimit, contractAddress);
             sandbox.assert.notCalled(azureStorageHelper.deleteMessage);
+
+            txMetaData.txProcessedCount = txMetaData.txProcessedCount + 1; // increment to reflect change invalue
+            txMetaData.lastErrorLogged = errMsg; // increment to reflect change invalue
+            sandbox.assert.calledWith(azureStorageHelper.updateMessage, messages[0], JSON.stringify(txObj));
             sandbox.assert.calledWith(emit, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
         });
     });

@@ -3,6 +3,7 @@ const chai = require('chai');
 const proxyquire = require('proxyquire').noCallThru();
 const sinon = require('sinon');
 const sandbox = sinon.createSandbox();
+const { GAS_LIMIT } = require(`${appRoot}/api/constants/transactionConstants`);
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -76,7 +77,6 @@ describe('SharedAccessService', () => {
     });
 
     it('can add consent', () => {
-
         contractMethods.addConsent = sandbox.stub().returns({
             encodeABI
         });
@@ -84,10 +84,6 @@ describe('SharedAccessService', () => {
         const bytes = '0xdf20c003e02b933ffccbfcadfeeecc54a000cd5ecf';
 
         sharedAccessService.integersToBytes = sandbox.stub().returns(bytes);
-
-        sharedAccessService.addConsent(consent);
-
-        sandbox.assert.calledWith(sendTransactionStub, data);
 
         const args = [
             consent.consentId,
@@ -98,6 +94,24 @@ describe('SharedAccessService', () => {
             timestamp,
             consent.connectionId
         ];
+
+        const metaData = {
+            parameters: {
+                consentId: consent.consentId,
+                scope: bytes,
+                startDate: timestamp,
+                dataSource: consent.dataSource,
+                endDate: timestamp,
+                timestamp,
+                connectionId: consent.connectionId
+            },
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.addConsent`
+        };
+
+        sharedAccessService.addConsent(consent);
+
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.ADD_CONSENT, metaData);
+
         sandbox.assert.calledWith(contractMethods.addConsent, ...args);
 
         sandbox.assert.called(encodeABI);
@@ -105,17 +119,28 @@ describe('SharedAccessService', () => {
 
     it('can revoke consent', () => {
         const payload = {
-            timestamp: '2018-12-11T14:21:00.404Z'
+            timestamp: '2018-12-11T14:21:00.404Z',
+            consentId: 'shdjnssbdjsbdsdjdsbwdsjdsdsdww'
         };
 
         contractMethods.revokeConsent = sandbox.stub().returns({
             encodeABI
         });
 
+        const metaData = {
+            parameters: {
+                consentId: payload.consentId,
+                timestamp
+            },
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.revokeConsent`
+        };
+
         sharedAccessService.revokeConsent(payload);
 
+        sandbox.assert.calledWith(contractMethods.revokeConsent, payload.consentId, timestamp);
+
         sandbox.assert.calledWith(helperMethods.ISOstringToTimestamp, payload.timestamp);
-        sandbox.assert.calledWith(sendTransactionStub, data);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.REVOKE_CONSENT, metaData);
     });
 
     it('can check access permission', () => {
@@ -209,6 +234,16 @@ describe('SharedAccessService', () => {
             encodeABI
         });
 
+        const metaData = {
+            parameters: {
+                connectionId: connection.connectionId,
+                timestamp,
+                from: connection.from,
+                to: connection.to
+            },
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.addConnectionAttempt`
+        };
+
         sharedAccessService.addConnectionAttempt(connection);
         sandbox.assert.calledWith(contractMethods.addConnectionAttempt,
             connection.connectionId.toString(),
@@ -217,7 +252,7 @@ describe('SharedAccessService', () => {
             timestamp
         );
 
-        sandbox.assert.calledWith(sendTransactionStub, data);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT, metaData);
     });
 
     it('can update connection attempt', () => {
@@ -233,6 +268,15 @@ describe('SharedAccessService', () => {
             encodeABI
         });
 
+        const metaData = {
+            parameters: {
+                connectionId: payload.connectionId,
+                accepted: payload.accepted,
+                timestamp
+            },
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.updateConnectionAttempt`
+        };
+
         sharedAccessService.updateConnectionAttempt(payload);
         sandbox.assert.calledWith(contractMethods.updateConnectionAttempt,
             payload.connectionId,
@@ -240,7 +284,7 @@ describe('SharedAccessService', () => {
             timestamp
         );
 
-        sandbox.assert.calledWith(sendTransactionStub, data);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT, metaData);
     });
 
     it('returns null if connection attempt is not found', async () => {

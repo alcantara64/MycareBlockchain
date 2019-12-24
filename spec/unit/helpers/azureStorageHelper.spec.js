@@ -136,6 +136,39 @@ describe('azureStorageHelper', () => {
         assert.match(response, results);
     });
 
+    it('can update a message', async () => {
+        const message = {
+            messageId: 'cf9b8ff8-8072-43d8-bcfe-5efc0e007e60',
+            insertionTime: 'Wed, 03 Apr 2019 18:04:20 GMT',
+            expirationTime: 'Wed, 10 Apr 2019 18:04:20 GMT',
+            popReceipt: 'AgAAAAMAAAAAAAAAcsh0/Ujq1AE=',
+            timeNextVisible: 'Wed, 03 Apr 2019 18:13:51 GMT',
+            dequeueCount: 2,
+            messageText: 'Hello updated world!'
+        };
+
+        const messageTextUpdated = 'Lycans snyle world';
+
+        const results = {
+            messageId: 'AAVVVBD72HJS92Shs2w228'
+        };
+
+        queueSvc.updateMessage = sandbox.stub().yields(null, results);
+
+        const response = await azureStorageHelper.updateMessage(message, messageTextUpdated);
+
+        assert.calledWith(
+            queueSvc.updateMessage,
+            env.AZURE_STORAGE_QUEUE_NAME,
+            message.messageId, message.popReceipt,
+            0,
+            {
+                messageText: messageTextUpdated
+            }
+        );
+        assert.match(response, results);
+    });
+
     it('can get messages from queue', async () => {
         const options = {
             numOfMessages: 10
