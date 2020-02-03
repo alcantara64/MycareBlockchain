@@ -121,9 +121,9 @@ exports.getConsent = async function getConsent(consentId, scopeArray) {
     return consent;
 };
 
-exports.addConnectionAttempt = function addConnectionAttempt(connection) {
+exports.addConnection = function addConnection(connection) {
     const timestamp = Math.floor((new Date(connection.created)).getTime() / 1000);
-    const data = api.addConnectionAttempt(
+    const data = api.addConnection(
         connection.connectionId.toString(),
         connection.from,
         connection.to,
@@ -137,46 +137,46 @@ exports.addConnectionAttempt = function addConnectionAttempt(connection) {
             from: connection.from,
             to: connection.to
         },
-        methodName: `${contractNames.SHARED_ACCESS}.addConnectionAttempt`
+        methodName: `${contractNames.SHARED_ACCESS}.addConnection`
     };
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT, metaData);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION, metaData);
 };
 
-exports.updateConnectionAttempt = function updateConnectionAttempt(payload) {
+exports.updateConnection = function updateConnection(payload) {
     const timestamp = Math.floor((new Date(payload.timestamp)).getTime() / 1000);
     const {
         connectionId,
-        accepted
+        deleted
     } = payload;
-    const data = api.updateConnectionAttempt(connectionId, accepted, timestamp).encodeABI();
+    const data = api.updateConnection(connectionId, deleted, timestamp).encodeABI();
 
     const metaData = {
         parameters: {
             connectionId,
-            accepted,
+            deleted,
             timestamp
         },
-        methodName: `${contractNames.SHARED_ACCESS}.updateConnectionAttempt`
+        methodName: `${contractNames.SHARED_ACCESS}.updateConnection`
     };
 
-    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT, metaData);
+    return contractHelper.sendTransaction(data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION, metaData);
 };
 
-exports.getConnectionAttempt = async function getConnectionAttempt(connectionId) {
-    const connectionAttempt = await api.getConnectionAttempt(connectionId).call();
+exports.getConnection = async function getConnection(connectionId) {
+    const connection = await api.getConnection(connectionId).call();
 
-    if (!connectionAttempt.isEntity) {
+    if (!connection.isEntity) {
         return null;
     }
 
     const {
         created,
         updated
-    } = connectionAttempt;
+    } = connection;
 
-    connectionAttempt.created = helperMethods.timeStampToISOstring(created);
-    connectionAttempt.updated = helperMethods.timeStampToISOstring(updated);
+    connection.created = helperMethods.timeStampToISOstring(created);
+    connection.updated = helperMethods.timeStampToISOstring(updated);
 
-    return connectionAttempt;
+    return connection;
 };
