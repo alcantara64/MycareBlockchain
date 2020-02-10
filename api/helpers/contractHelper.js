@@ -1,7 +1,7 @@
 const appRoot = require('app-root-path');
 const Web3 = require('web3');
 const fs = require('fs');
-const ethereumjs = require('ethereumjs-tx');
+const Ethereumjs = require('ethereumjs-tx');
 const events = require('events');
 const azureStorageHelper = require(`${appRoot}/api/helpers/azureStorageHelper`);
 const axios = require('axios');
@@ -92,15 +92,18 @@ async function checkIfTxInQueue() {
 }
 
 function getContractInstance(contractName, options = {}) {
-    const compiledFilePath = `${buildDir}/${contractName}.json`;
+    try {
+        const compiledFilePath = `${buildDir}/${contractName}.json`;
 
-    const contractJson = fs.readFileSync(compiledFilePath);
-    const jsonInterface = JSON.parse(contractJson);
+        const contractJson = fs.readFileSync(compiledFilePath);
+        const jsonInterface = JSON.parse(contractJson);
 
-    const networkId = envConstants.NETWORK_ID;
-
-    const deployedContractAddress = jsonInterface.networks[networkId].address;
-    return new web3.eth.Contract(jsonInterface.abi, deployedContractAddress, options);
+        const networkId = envConstants.NETWORK_ID;
+        const deployedContractAddress = jsonInterface.networks[networkId].address;
+        return new web3.eth.Contract(jsonInterface.abi, deployedContractAddress, options);
+    } catch (err) {
+        logger.error(`Error occured while getting contract instance : ${err}. Check to confirm if your networkId is correct `);
+    }
 };
 
 function ContractHelper(contractName) {
@@ -148,7 +151,7 @@ exports.sendSignedTransaction = async function (data, gasLimit, contractAddress)
         data
     };
 
-    let tx = new ethereumjs(rawTx);
+    let tx = new Ethereumjs(rawTx);
 
     tx.sign(privateKey);
 

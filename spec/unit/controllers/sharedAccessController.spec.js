@@ -237,8 +237,8 @@ describe('sharedAccessController', () => {
         });
     });
 
-    it('can save connection attempt', async () => {
-        sharedAccessService.addConnectionAttempt = sandbox.stub().resolves(transactionReceipt);
+    it('can save connection', async () => {
+        sharedAccessService.addConnection = sandbox.stub().resolves(transactionReceipt);
 
         const req = {
             body: {
@@ -249,16 +249,16 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.saveConnectionAttempt(req, res);
+        await sharedAccessController.saveConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.addConnectionAttempt, req.body);
+        sandbox.assert.calledWith(sharedAccessService.addConnection, req.body);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.OK.CODE);
         sandbox.assert.calledWith(resJSON, transactionReceipt);
     });
 
-    it('add connection attempt returns status 500 when error occurs', async () => {
-        sharedAccessService.addConnectionAttempt = sandbox.stub().rejects('Invalid jsonRPC response');
+    it('add connection returns status 500 when error occurs', async () => {
+        sharedAccessService.addConnection = sandbox.stub().rejects('Invalid jsonRPC response');
 
         const req = {
             body: {
@@ -269,9 +269,9 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.saveConnectionAttempt(req, res);
+        await sharedAccessController.saveConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.addConnectionAttempt, req.body);
+        sandbox.assert.calledWith(sharedAccessService.addConnection, req.body);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
         sandbox.assert.calledWith(resJSON, {
@@ -279,8 +279,8 @@ describe('sharedAccessController', () => {
         });
     });
 
-    it('can update connection attempt', async () => {
-        sharedAccessService.updateConnectionAttempt = sandbox.stub().resolves(transactionReceipt);
+    it('can update connection ', async () => {
+        sharedAccessService.updateConnection = sandbox.stub().resolves(transactionReceipt);
 
         const req = {
             body: {
@@ -291,16 +291,16 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.updateConnectionAttempt(req, res);
+        await sharedAccessController.updateConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.updateConnectionAttempt, req.body);
+        sandbox.assert.calledWith(sharedAccessService.updateConnection, req.body);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.OK.CODE);
         sandbox.assert.calledWith(resJSON, transactionReceipt);
     });
 
-    it('update connection attempt returns status 500 when error occurs', async () => {
-        sharedAccessService.updateConnectionAttempt = sandbox.stub().rejects('Invalid jsonRPC response');
+    it('update connection returns status 500 when error occurs', async () => {
+        sharedAccessService.updateConnection = sandbox.stub().rejects('Invalid jsonRPC response');
 
         const req = {
             body: {
@@ -311,9 +311,9 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.updateConnectionAttempt(req, res);
+        await sharedAccessController.updateConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.updateConnectionAttempt, req.body);
+        sandbox.assert.calledWith(sharedAccessService.updateConnection, req.body);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
         sandbox.assert.calledWith(resJSON, {
@@ -322,15 +322,15 @@ describe('sharedAccessController', () => {
     });
 
     it('get consent returns 400 status when connectionId is missing', async () => {
-        sharedAccessService.getConnectionAttempt = sandbox.stub().resolves(consent);
+        sharedAccessService.getConnection = sandbox.stub().resolves(consent);
 
         const req = {
             params: {}
         };
 
-        await sharedAccessController.getConnectionAttempt(req, res);
+        await sharedAccessController.getConnection(req, res);
 
-        sandbox.assert.notCalled(sharedAccessService.getConnectionAttempt);
+        sandbox.assert.notCalled(sharedAccessService.getConnection);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.BAD_REQUEST.CODE);
         sandbox.assert.calledWith(resJSON, {
@@ -338,8 +338,8 @@ describe('sharedAccessController', () => {
         });
     });
 
-    it('get consent returns 200 status when connection attempt is found', async () => {
-        sharedAccessService.getConnectionAttempt = sandbox.stub().resolves(consent);
+    it('get consent returns 200 status when connection is found', async () => {
+        sharedAccessService.getConnection = sandbox.stub().resolves(consent);
 
         const req = {
             params: {
@@ -347,16 +347,16 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.getConnectionAttempt(req, res);
+        await sharedAccessController.getConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.getConnectionAttempt, req.params.connectionId);
+        sandbox.assert.calledWith(sharedAccessService.getConnection, req.params.connectionId);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.OK.CODE);
         sandbox.assert.calledWith(resJSON, consent);
     });
 
-    it('get consent returns 404 status when connection attempt is not found', async () => {
-        sharedAccessService.getConnectionAttempt = sandbox.stub().resolves(null);
+    it('get consent returns 404 status when connection is not found', async () => {
+        sharedAccessService.getConnection = sandbox.stub().resolves(null);
 
         const req = {
             params: {
@@ -364,18 +364,18 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.getConnectionAttempt(req, res);
+        await sharedAccessController.getConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.getConnectionAttempt, req.params.connectionId);
+        sandbox.assert.calledWith(sharedAccessService.getConnection, req.params.connectionId);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.NOT_FOUND.CODE);
         sandbox.assert.calledWith(resJSON, {
-            message: 'Connection attempt not found'
+            message: 'Connection not found'
         });
     });
 
-    it('get consent returns 500 status if error occurs while fetching connection attempt', async () => {
-        sharedAccessService.getConnectionAttempt = sandbox.stub().rejects('Invalid jsonRPC response');
+    it('get consent returns 500 status if error occurs while fetching connection', async () => {
+        sharedAccessService.getConnection = sandbox.stub().rejects('Invalid jsonRPC response');
 
         const req = {
             params: {
@@ -383,9 +383,9 @@ describe('sharedAccessController', () => {
             }
         };
 
-        await sharedAccessController.getConnectionAttempt(req, res);
+        await sharedAccessController.getConnection(req, res);
 
-        sandbox.assert.calledWith(sharedAccessService.getConnectionAttempt, req.params.connectionId);
+        sandbox.assert.calledWith(sharedAccessService.getConnection, req.params.connectionId);
 
         sandbox.assert.calledWith(res.status, HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE);
         sandbox.assert.calledWith(resJSON, {
@@ -680,13 +680,13 @@ describe('sharedAccessController', () => {
         };
 
         const result = {
-            message: 'accepted is required',
+            message: 'deleted is required',
             missingParam: true
         };
 
         validators.validateRequiredParams = sandbox.stub().returns(result);
 
-        const requiredFields = ['accepted', 'timestamp', 'connectionId'];
+        const requiredFields = ['timestamp', 'deleted', 'connectionId'];
 
         sharedAccessController.validateUpdateConnectionPayload(req, res, () => {});
 
@@ -702,7 +702,7 @@ describe('sharedAccessController', () => {
             body: {
                 timestamp: consent.timestamp,
                 connectionId: 'ch233d83ndd93d9dn3',
-                accepted: true
+                deleted: true,
             }
         };
 
@@ -713,7 +713,7 @@ describe('sharedAccessController', () => {
 
         validators.validateRequiredParams = sandbox.stub().returns(result);
 
-        const requiredFields = ['accepted', 'timestamp', 'connectionId'];
+        const requiredFields = ['timestamp', 'deleted', 'connectionId',];
         const next = sandbox.spy();
 
         sharedAccessController.validateUpdateConnectionPayload(req, res, next);
@@ -726,7 +726,7 @@ describe('sharedAccessController', () => {
             body: {
                 timestamp: 'invalid_time_stamp',
                 connectionId: 'ch233d83ndd93d9dn3',
-                accepted: true
+                deleted: true
             }
         };
 
@@ -737,7 +737,7 @@ describe('sharedAccessController', () => {
 
         validators.validateRequiredParams = sandbox.stub().returns(result);
 
-        const requiredFields = ['accepted', 'timestamp', 'connectionId'];
+        const requiredFields = ['timestamp', 'deleted', 'connectionId'];
 
         const next = sandbox.spy();
 
@@ -759,7 +759,7 @@ describe('sharedAccessController', () => {
         const next = sandbox.spy();
         validators.validateRequiredParams = sandbox.stub();
 
-        const requiredFields = ['accepted', 'timestamp', 'connectionId'];
+        const requiredFields = ['timestamp', 'deleted', 'connectionId'];
 
         sharedAccessController.validateUpdateConnectionPayload(req, res, next);
 
