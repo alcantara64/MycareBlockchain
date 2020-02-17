@@ -26,8 +26,6 @@ contract SharedAccess {
 
     mapping(string => Consent) allConsents;
     mapping(string => Connection) allConnections;
-    mapping(address => string[]) userConnections;
-    mapping(address => string[]) userConsents;
 
     function addConsent(
         string memory consentId,
