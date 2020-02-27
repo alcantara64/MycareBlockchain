@@ -18,6 +18,7 @@ exports.GAS_LIMIT = {
     },
     POLICIES_AND_TERMS: {
         ADD_NEW_DOCUMENT: computeGasLimit(295149),
-        SAVE_ACCEPTANCE: computeGasLimit(193401)
+        SAVE_ACCEPTANCE: computeGasLimit(3000000)
     }
+    
 };
