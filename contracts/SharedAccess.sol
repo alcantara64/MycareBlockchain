@@ -11,21 +11,21 @@ contract SharedAccess {
         string connectionId;
         bool revoked;
         bool isEntity;
+        
     }
 
-    struct ConnectionAttempt {
+    struct Connection {
         address from;
         address to;
         uint created;
         uint updated;
         bool accepted;
         bool isEntity;
+        bool isDeleted;
     }
 
     mapping(string => Consent) allConsents;
-    mapping(string => ConnectionAttempt) allConnections;
-    mapping(address => string[]) userConnectionAttempts;
-    mapping(address => string[]) userConsents;
+    mapping(string => Connection) allConnections;
 
     function addConsent(
         string memory consentId,
@@ -37,7 +37,7 @@ contract SharedAccess {
         string memory connectionId
     ) public returns(bool) {
 
-        ConnectionAttempt memory connection = allConnections[connectionId];
+        Connection memory connection = allConnections[connectionId];
 
         if (connection.isEntity && !allConsents[consentId].isEntity) {
             allConsents[consentId] = Consent({
@@ -92,7 +92,7 @@ contract SharedAccess {
         return (consent.isEntity && !consent.revoked);
     }
 
-    function addConnectionAttempt(
+    function addConnection(
         string memory connectionId,
         address from,
         address to,
@@ -103,13 +103,14 @@ contract SharedAccess {
             return false;
         }
 
-        ConnectionAttempt memory connection = ConnectionAttempt({
+        Connection memory connection = Connection({
             from: from,
             to: to,
             created: created,
             updated: created,
-            accepted: false,
-            isEntity: true
+            accepted: true,
+            isEntity: true,
+            isDeleted: false
         });
 
         allConnections[connectionId] = connection;
@@ -117,16 +118,17 @@ contract SharedAccess {
         return true;
     }
 
-    function getConnectionAttempt(string memory _connectionId) public view returns(
+    function getConnection(string memory _connectionId) public view returns(
         string memory connectionId,
         address from,
         address to,
         uint created,
         uint updated,
         bool accepted,
-        bool isEntity
+        bool isEntity,
+        bool isDeleted
         ) {
-        ConnectionAttempt memory connection = allConnections[_connectionId];
+        Connection memory connection = allConnections[_connectionId];
 
         return (
             _connectionId,
@@ -135,15 +137,16 @@ contract SharedAccess {
             connection.created,
             connection.updated,
             connection.accepted,
-            connection.isEntity
+            connection.isEntity,
+            connection.isDeleted
         );
     }
 
-    function updateConnectionAttempt(string memory _connectionId, bool accepted, uint timestamp) public returns(bool) {
-        ConnectionAttempt storage connection = allConnections[_connectionId];
+    function updateConnection(string memory _connectionId, bool isDeleted, uint timestamp) public returns(bool) {
+        Connection storage connection = allConnections[_connectionId];
 
-        connection.accepted = accepted;
         connection.updated = timestamp;
+        connection.isDeleted = isDeleted;
 
         return true;
     }

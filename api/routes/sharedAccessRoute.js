@@ -5,11 +5,11 @@ const { ROLES } = require(`${appRoot}/api/constants/authConstants`);
 
 module.exports = function sharedAccessRoute(router) {
     router.route('/share/connection')
-        .post(commonController.authorize(ROLES.CLIENT), sharedAccessController.validateSaveConnectionPayload, sharedAccessController.saveConnectionAttempt)
-        .put(commonController.authorize(ROLES.CLIENT), sharedAccessController.validateUpdateConnectionPayload, sharedAccessController.updateConnectionAttempt);
+        .post(commonController.authorize(ROLES.CLIENT), sharedAccessController.validateSaveConnectionPayload, sharedAccessController.saveConnection)
+        .put(commonController.authorize(ROLES.CLIENT), sharedAccessController.validateUpdateConnectionPayload, sharedAccessController.updateConnection);
 
     router.route('/share/connection/:connectionId')
-        .get(commonController.authorize(ROLES.CLIENT), sharedAccessController.getConnectionAttempt);
+        .get(commonController.authorize(ROLES.CLIENT), sharedAccessController.getConnection);
 
     router.route('/share/add_consent')
         .post(commonController.authorize(ROLES.CLIENT), sharedAccessController.validateAddConsentParams, sharedAccessController.addConsent);

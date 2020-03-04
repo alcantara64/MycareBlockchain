@@ -95,41 +95,41 @@ exports.getConsent = async function (req, res) {
     }
 };
 
-exports.saveConnectionAttempt = async function (req, res) {
+exports.saveConnection = async function (req, res) {
     try {
-        logger.info('Save connection attempt');
+        logger.info('Save connection ');
 
-        const transactionReceipt = await sharedAccessService.addConnectionAttempt(req.body);
+        const transactionReceipt = await sharedAccessService.addConnection(req.body);
         logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while saving connection attempt - ${err.message}`);
+        logger.error(`error occured while saving connection - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
-exports.updateConnectionAttempt = async function (req, res) {
+exports.updateConnection = async function (req, res) {
     try {
-        logger.info('Update connection attempt');
+        logger.info('Update connection');
 
-        const transactionReceipt = await sharedAccessService.updateConnectionAttempt(req.body);
+        const transactionReceipt = await sharedAccessService.updateConnection(req.body);
         logger.debug(transactionReceipt);
 
         return res.status(HTTP_STATUS.OK.CODE).json(transactionReceipt);
     } catch (err) {
-        logger.error(`error occured while updating connection attempt - ${err.message}`);
+        logger.error(`error occured while updating connection - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
     }
 };
 
-exports.getConnectionAttempt = async function (req, res) {
+exports.getConnection = async function (req, res) {
     try {
-        logger.info('Get connection attempt');
+        logger.info('Get connection ');
 
         const {
             connectionId
@@ -143,19 +143,19 @@ exports.getConnectionAttempt = async function (req, res) {
             });
         }
 
-        const connectionAttempt = await sharedAccessService.getConnectionAttempt(connectionId);
+        const connection = await sharedAccessService.getConnection(connectionId);
 
-        if (!connectionAttempt) {
-            logger.error(`Connection attempt not found for connectionId - ${connectionId}`);
+        if (!connection) {
+            logger.error(`Connection not found for connectionId - ${connectionId}`);
 
             return res.status(HTTP_STATUS.NOT_FOUND.CODE).json({
-                message: 'Connection attempt not found'
+                message: 'Connection not found'
             });
         }
 
-        return res.status(HTTP_STATUS.OK.CODE).json(connectionAttempt);
+        return res.status(HTTP_STATUS.OK.CODE).json(connection);
     } catch (err) {
-        logger.error(`error occured while fetching connection attempt - ${err.message}`);
+        logger.error(`error occured while fetching connection  - ${err.message}`);
         return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR.CODE).json({
             message: HTTP_STATUS.INTERNAL_SERVER_ERROR.MESSAGE
         });
@@ -274,7 +274,7 @@ exports.validateRevokeConsentParams = function (req, res, next) {
 exports.validateUpdateConnectionPayload = function (req, res, next) {
     try {
         const payload = req.body;
-        const requiredFields = ['accepted', 'timestamp', 'connectionId'];
+        const requiredFields = ['timestamp', 'deleted', 'connectionId'];
 
         const result = validators.validateRequiredParams(payload, requiredFields);
 

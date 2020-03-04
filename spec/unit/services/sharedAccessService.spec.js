@@ -220,7 +220,7 @@ describe('SharedAccessService', () => {
         sandbox.assert.calledWith(contractMethods.getConsent, consentId);
     });
 
-    it('can add connection attempt', () => {
+    it('can add connection ', () => {
         const connection = {
             created: '2018-12-11T14:21:00.404Z',
             connectionId: 'ddkd93jd8fir0d',
@@ -230,7 +230,7 @@ describe('SharedAccessService', () => {
 
         const timestamp = Math.floor((new Date(connection.created)).getTime() / 1000);
 
-        contractMethods.addConnectionAttempt = sandbox.stub().returns({
+        contractMethods.addConnection = sandbox.stub().returns({
             encodeABI
         });
 
@@ -241,53 +241,54 @@ describe('SharedAccessService', () => {
                 from: connection.from,
                 to: connection.to
             },
-            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.addConnectionAttempt`
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.addConnection`
         };
 
-        sharedAccessService.addConnectionAttempt(connection);
-        sandbox.assert.calledWith(contractMethods.addConnectionAttempt,
+        sharedAccessService.addConnection(connection);
+        sandbox.assert.calledWith(contractMethods.addConnection,
             connection.connectionId.toString(),
             connection.from,
             connection.to,
             timestamp
         );
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION_ATTEMPT, metaData);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.ADD_CONNECTION, metaData);
     });
 
-    it('can update connection attempt', () => {
+    it('can update connection', () => {
         const payload = {
             timestamp: '2018-12-11T14:21:00.404Z',
             connectionId: 'ddkd93jd8fir0d',
-            accepted: true
+            deleted: true
         };
 
         const timestamp = Math.floor((new Date(payload.timestamp)).getTime() / 1000);
 
-        contractMethods.updateConnectionAttempt = sandbox.stub().returns({
+        contractMethods.updateConnection = sandbox.stub().returns({
             encodeABI
         });
 
         const metaData = {
             parameters: {
                 connectionId: payload.connectionId,
-                accepted: payload.accepted,
+                deleted: payload.deleted,
                 timestamp
+
             },
-            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.updateConnectionAttempt`
+            methodName: `${contractHelper.contractNames.SHARED_ACCESS}.updateConnection`
         };
 
-        sharedAccessService.updateConnectionAttempt(payload);
-        sandbox.assert.calledWith(contractMethods.updateConnectionAttempt,
+        sharedAccessService.updateConnection(payload);
+        sandbox.assert.calledWith(contractMethods.updateConnection,
             payload.connectionId,
-            payload.accepted,
+            payload.deleted,
             timestamp
         );
 
-        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION_ATTEMPT, metaData);
+        sandbox.assert.calledWith(sendTransactionStub, data, GAS_LIMIT.SHARED_ACCESS.UPDATE_CONNECTION, metaData);
     });
 
-    it('returns null if connection attempt is not found', async () => {
+    it('returns null if connection is not found', async () => {
         const connectionId = 'ees38ddkd93dmdo3d93do3ud';
 
         const savedConnection = {
@@ -300,18 +301,18 @@ describe('SharedAccessService', () => {
 
         call.returns(savedConnection);
 
-        contractMethods.getConnectionAttempt = sandbox.stub().returns({
+        contractMethods.getConnection = sandbox.stub().returns({
             call
         });
 
-        const result = await sharedAccessService.getConnectionAttempt(connectionId);
+        const result = await sharedAccessService.getConnection(connectionId);
 
         chai.expect(result).to.equal(null);
 
-        sandbox.assert.calledWith(contractMethods.getConnectionAttempt, connectionId);
+        sandbox.assert.calledWith(contractMethods.getConnection, connectionId);
     });
 
-    it('can get saved connection attempt', async () => {
+    it('can get saved connection', async () => {
         const connectionId = 'ees38ddkd93dmdo3d93do3ud';
 
         const savedConnection = {
@@ -326,7 +327,7 @@ describe('SharedAccessService', () => {
 
         call.returns(savedConnection);
 
-        contractMethods.getConnectionAttempt = sandbox.stub().returns({
+        contractMethods.getConnection = sandbox.stub().returns({
             call
         });
 
@@ -336,13 +337,13 @@ describe('SharedAccessService', () => {
         helperMethods.timeStampToISOstring.withArgs(savedConnection.created).returns(created);
         helperMethods.timeStampToISOstring.withArgs(savedConnection.updated).returns(updated);
 
-        const result = await sharedAccessService.getConnectionAttempt(connectionId);
+        const result = await sharedAccessService.getConnection(connectionId);
 
         chai.expect(result).to.equal(savedConnection);
 
         chai.assert.equal(result.created, created);
         chai.assert.equal(result.updated, updated);
 
-        sandbox.assert.calledWith(contractMethods.getConnectionAttempt, connectionId);
+        sandbox.assert.calledWith(contractMethods.getConnection, connectionId);
     });
 });

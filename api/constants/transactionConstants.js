@@ -11,13 +11,14 @@ exports.GAS_LIMIT = {
         ADD_ACCOUNT_TYPE: computeGasLimit(89747)
     },
     SHARED_ACCESS: {
-        ADD_CONNECTION_ATTEMPT: computeGasLimit(133603),
-        UPDATE_CONNECTION_ATTEMPT: computeGasLimit(34046),
+        ADD_CONNECTION: computeGasLimit(136864),
+        UPDATE_CONNECTION: computeGasLimit(34046),
         ADD_CONSENT: computeGasLimit(241238),
         REVOKE_CONSENT: computeGasLimit(34077)
     },
     POLICIES_AND_TERMS: {
         ADD_NEW_DOCUMENT: computeGasLimit(295149),
-        SAVE_ACCEPTANCE: computeGasLimit(193401)
+        SAVE_ACCEPTANCE: computeGasLimit(3000000)
     }
+    
 };
