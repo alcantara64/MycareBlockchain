@@ -1,0 +1,542 @@
+trigger:
+- develop
+stages:
+- stage: DEVBuildAndTest
+  displayName: 'Build and Test pipeline DEV'
+  jobs: 
+    - job: 'Build'
+      displayName: 'Build job DEV'
+      pool: 
+        name: 'MyCare-Build'
+      variables:
+        - group: Mycare-KV-Dev
+        - group: BlockChainAPI-BuildandValidation-DEV 
+        - group: Mycare-KV-DEV-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+      steps:
+          - task: Npm@1
+            displayName: 'Install NPM Dependencies'
+            inputs:
+              verbose: true
+
+          - task: Bash@3
+            displayName: 'Set Base Directory'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                CD=`pwd`
+                echo ##vso[task.setvariable variable=MyCare.BaseDir;]${CD}
+
+          - task: Bash@3
+            displayName: 'Add keyvault.json for DEV environment'
+            inputs:
+              targetType: 'inline'
+              script: |
+                set -x
+                cd $(System.DefaultWorkingDirectory)/
+                FILE=keyvault.json
+                touch $FILE
+                cat > $FILE <<- EOM
+                {
+                  "RESOURCE_GROUP": "$(RESOURCEGROUP)",
+                  "VAULT_NAME": "$(VAULTNAME)",
+                  "APP_NAME": "$(APPNAME)",
+                  "CLIENT_ID": "$(CLIENTID)",
+                  "CLIENT_SECRET": "$(CLIENTSECRET)",
+                  "KEY_VAULT_NAME": "$(KEYVAULTNAME)",
+                  "VAULT_URI": "$(VAULTURI)",
+                  "SECRET_NAME": "$(SECRETNAME)"
+                }
+                EOM                  
+
+          - task: Bash@3
+            displayName: 'Add API PORT'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                echo PORT=$(ApiPort) >>profiles/dev.env
+
+          - task: Bash@3
+            displayName: 'Update Truffle Config'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                sed -i "s/8545/$(EthereumPort)/" truffle-config.js
+
+          - task: Bash@3
+            displayName: 'Replace BASEDIR'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                export BASEDIR=`pwd | sed -i 's/\//\\\//'`
+                sed -i "s/^BASEDIR=.*$/^WEB3_HTTP='http:\/\/127.0.0.1:${BASEDIR}'/g" profiles/dev.env
+                                      
+          - task: Bash@3
+            displayName: 'Deploy Contracts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #set -v
+                #####
+                # Import VSTS Variables
+                export BASEDIR=$(BASEDIR)
+                #
+                #####
+                cd ${BASEDIR}
+                npm run deploy:contracts
+
+          - task: Bash@3
+            displayName: 'Test Contracts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #set -v
+                #####
+                # Import VSTS Variables
+                export BASEDIR=$(BASEDIR)
+                #
+                #####
+                cd ${BASEDIR}
+                npm run test:contracts:dev
+
+          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+            displayName: 'Prepare analysis on SonarCloud'
+            inputs:
+              SonarCloud: mynewSonarNW19
+              organization: $(sonarorg)
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: $(sonarclikey)
+              cliProjectName: $(sonarprojectname)
+              cliSources: api
+              extraProperties: |
+                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+          - task: Bash@3
+            displayName: 'Run API Tests'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                #set -v
+                export BASEDIR=`pwd`
+                echo BASEDIR=${BASEDIR}
+                npm run test:api
+
+          - task: Bash@3
+            displayName: 'Run Junit'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                #set -v
+                PORT=$(DbPort)
+                export BASEDIR=`pwd`
+                echo DB_PORT=`grep DB_PORT profiles/dev.env`
+                echo BASEDIR=${BASEDIR} DB_PORT=${PORT}
+                npm run test:junit
+
+          - task: Bash@3
+            displayName: 'Run LCOV'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                #set -v
+                PORT=$(DbPort)
+                export BASEDIR=`pwd`
+                echo DB_PORT=`grep DB_PORT profiles/dev.env`
+                echo BASEDIR=${BASEDIR} DB_PORT=${PORT}
+                npm run coverage
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results **/test-*.xml'
+            inputs:
+              testResultsFiles: '**/test-*.xml'      
+          - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+            displayName: 'Run Code Analysis'
+
+          - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
+            displayName: 'Publish Quality Gate Result'
+            inputs:
+              pollingTimeoutSec: 3000  
+          - task: Bash@3
+            displayName: 'Create Artifact'
+            inputs:
+              targetType: 'inline'
+              script: |
+                tar zcvf /tmp/BlockchainAPI.gzip .
+                mv /tmp/BlockchainAPI.gzip .
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact: drop'
+            inputs:
+              PathtoPublish: BlockchainAPI.gzip      
+          - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
+            displayName: 'Clean Agent Directories copy'    
+ #######################  build container DEV  #################################                     
+- stage: 'DEVBuild'
+  displayName: 'Build container DEV' 
+  dependsOn: DEVBuildAndTest
+  jobs: 
+    - job: 'Build'
+      displayName: 'Docker Image DEV'
+      pool: 
+        vmImage: 'ubuntu-latest'
+      variables:
+        - group: Mycare-KV-Dev
+        - group: BlockChainAPI-BuildandValidation-DEV 
+        - group: Mycare-KV-DEV-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+      steps:
+          - task: DockerInstaller@0
+            displayName: 'Install Docker 17.09.0-ce'
+          - task: Bash@3
+            displayName: 'Inject keyvault details'
+            inputs:
+              targetType: 'inline'
+              script: |
+                set -x
+                          FILE=keyvault.json
+                          echo $(RESOURCEGROUP)
+                          touch $FILE
+                          cat > $FILE <<- EOM
+                          {
+                              "RESOURCE_GROUP": "$(RESOURCEGROUP)",
+                              "VAULT_NAME": "$(VAULTNAME)",
+                              "APP_NAME": "$(APPNAME)",
+                              "CLIENT_ID": "$(CLIENTID)",
+                              "CLIENT_SECRET": "$(CLIENTSECRET)",
+                              "KEY_VAULT_NAME": "$(KEYVAULTNAME)",
+                              "VAULT_URI": "$(VAULTURI)",
+                              "SECRET_NAME": "$(SECRETNAME)"
+                          }
+                EOM
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+          - task: Bash@3
+            displayName: 'cat keyvault.json file from System.DefaultWorkingDirectory'
+            inputs:
+              targetType: 'inline'
+              script: |
+                          cat $(System.DefaultWorkingDirectory)/keyvault.json
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: 'Replace tokens in Dockerfile'
+            inputs:
+              targetFiles: Dockerfile
+              tokenPrefix: '__'
+              tokenSuffix: '__'
+
+          - task: Docker@2
+            displayName: buildAndPush
+            inputs:
+              containerRegistry: mycareacr
+              repository: $(acrrepo)
+              Dockerfile: Dockerfile
+              buildContext: .
+              tags: 'BlockchainApi-$(MYENV)-$(Build.BuildNumber)'
+
+          - task: Bash@3
+            displayName: echo Docker Image tag
+            inputs:
+              targetType: 'inline'
+              script: 'echo "Docker image ready for deployment is Blockchainapi-$(MYENV)-$(Build.BuildNumber)"'
+
+#####################  DEPLOYMENT  To DEV AKS  #####################
+
+- stage: 'DEVDeploy'
+  displayName: 'Deploy to DEV AKS'
+  dependsOn: DEVBuild
+  jobs: 
+    - deployment: deployaksdev
+      environment: DEV
+    - job: 'Deploy'
+      displayName: 'Deploy Job DEV'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        - name: image_tag
+          value: 'BlockchainApi-$(MYENV)-$(Build.BuildNumber)'
+        - group: Mycare-KV-Dev
+        - group: BlockChainAPI-BuildandValidation-DEV 
+        - group: Mycare-KV-DEV-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+      
+      steps:
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: 'Replace tokens in Deployment.yml'
+            inputs:
+              rootDirectory: '$(System.DefaultWorkingDirectory)'
+              targetFiles: Deployment.yml
+              escapeType: none
+              verbosity: detailed
+              tokenPrefix: '__'
+              tokenSuffix: '__'
+
+          - task: Kubernetes@1
+            displayName: 'kubectl apply'
+            inputs:
+              kubernetesServiceEndpoint: 'Mycare-EastUS-DEV'
+              command: apply
+              useConfigurationFile: true
+              configuration: '$(System.DefaultWorkingDirectory)/Deployment.yml'
+              outputFormat: yaml
+
+#################### UAT Environment  #################
+
+- stage: BuildAndTestUAT
+  displayName: 'Build and Test pipeline UAT'
+  dependsOn: DEVDeploy
+  jobs: 
+    - job: 'Build'
+      displayName: 'Build job UAT'
+      pool: 
+        name: 'MyCare-Build'
+      variables:
+        - group: Mycare-KV-UAT   #this group can be uncommented after creating the infra and adding values after connecting to the keyvault.
+        - group: BlockChainAPI-BuildandValidation-UAT
+        - group: Mycare-KV-UAT-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+
+      steps:
+          - task: Npm@1
+            displayName: 'Install NPM Dependencies'
+            inputs:
+              verbose: true
+
+          - task: Bash@3
+            displayName: 'Set Base Directory'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                CD=`pwd`
+                echo ##vso[task.setvariable variable=MyCare.BaseDir;]${CD}
+
+          - task: Bash@3
+            displayName: 'Add keyvault.json for UAT environment'
+            inputs:
+              targetType: 'inline'
+              script: |
+                set -x
+                cd $(System.DefaultWorkingDirectory)/
+                FILE=keyvault.json
+                touch $FILE
+                cat > $FILE <<- EOM
+                {
+                  "RESOURCE_GROUP": "$(RESOURCEGROUP)",
+                  "VAULT_NAME": "$(VAULTNAME)",
+                  "APP_NAME": "$(APPNAME)",
+                  "CLIENT_ID": "$(CLIENTID)",
+                  "CLIENT_SECRET": "$(CLIENTSECRET)",
+                  "KEY_VAULT_NAME": "$(KEYVAULTNAME)",
+                  "VAULT_URI": "$(VAULTURI)",
+                  "SECRET_NAME": "$(SECRETNAME)"
+                }
+                EOM                  
+
+          - task: Bash@3
+            displayName: 'Add API PORT'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                echo PORT=$(ApiPort) >>profiles/uat.env
+
+          - task: Bash@3
+            displayName: 'Update Truffle Config'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                sed -i "s/8540/$(EthereumPort)/" truffle-config.js
+
+          - task: Bash@3
+            displayName: 'Replace BASEDIR'
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Write your commands here
+                set -v
+                export BASEDIR=`pwd | sed -i 's/\//\\\//'`
+                sed -i "s/^BASEDIR=.*$/^WEB3_HTTP='http:\/\/127.0.0.1:${BASEDIR}'/g" profiles/uat.env
+                                      
+          - task: Bash@3
+            displayName: 'Deploy Contracts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #set -v
+                #####
+                # Import VSTS Variables
+                export BASEDIR=$(BASEDIR)
+                #
+                #####
+                cd ${BASEDIR}
+                npm run deploy:contracts
+
+          - task: Bash@3
+            displayName: 'Test Contracts'
+            inputs:
+              targetType: 'inline'
+              script: |
+                #set -v
+                #####
+                # Import VSTS Variables
+                export BASEDIR=$(BASEDIR)
+                #
+                #####
+                cd ${BASEDIR}
+                npm run test:contracts:uat
+
+          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+            displayName: 'Prepare analysis on SonarCloud'
+            inputs:
+              SonarCloud: mynewSonarNW19
+              organization: $(sonarorg)
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: $(sonarclikey)
+              cliProjectName: $(sonarprojectname)
+              cliSources: api
+              extraProperties: |
+                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+          - task: PublishTestResults@2
+            displayName: 'Publish Test Results **/test-*.xml'
+            inputs:
+              testResultsFiles: '**/test-*.xml'      
+          - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
+            displayName: 'Run Code Analysis'
+
+          - task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
+            displayName: 'Publish Quality Gate Result'
+            inputs:
+              pollingTimeoutSec: 3000  
+          - task: Bash@3
+            displayName: 'Create Artifact'
+            inputs:
+              targetType: 'inline'
+              script: |
+                tar zcvf /tmp/BlockchainAPI.gzip .
+                mv /tmp/BlockchainAPI.gzip .
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Artifact: drop'
+            inputs:
+              PathtoPublish: BlockchainAPI.gzip      
+          - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
+            displayName: 'Clean Agent Directories copy'    
+ #######################   build container UAT  #################################                     
+- stage: 'UATBuild'
+  displayName: 'Build container UAT'
+  dependsOn: BuildAndTestUAT
+  jobs: 
+    - job: 'Build'
+      displayName: 'Build UAT Docker Image '
+      pool: 
+        vmImage: 'ubuntu-latest'
+      variables:
+        - group: Mycare-KV-UAT   #this group can be uncommented after creating the infra and adding values after connecting to the keyvault.
+        - group: BlockChainAPI-BuildandValidation-UAT
+        - group: Mycare-KV-UAT-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+      steps:
+          - task: DockerInstaller@0
+            displayName: 'Install Docker 17.09.0-ce'
+          - task: Bash@3
+            displayName: 'Inject keyvault details'
+            inputs:
+              targetType: 'inline'
+              script: |
+                set -x
+                          FILE=keyvault.json
+                          echo $(RESOURCEGROUP)
+                          touch $FILE
+                          cat > $FILE <<- EOM
+                          {
+                              "RESOURCE_GROUP": "$(RESOURCEGROUP)",
+                              "VAULT_NAME": "$(VAULTNAME)",
+                              "APP_NAME": "$(APPNAME)",
+                              "CLIENT_ID": "$(CLIENTID)",
+                              "CLIENT_SECRET": "$(CLIENTSECRET)",
+                              "KEY_VAULT_NAME": "$(KEYVAULTNAME)",
+                              "VAULT_URI": "$(VAULTURI)",
+                              "SECRET_NAME": "$(SECRETNAME)"
+                          }
+                EOM
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+          - task: Bash@3
+            displayName: 'cat keyvault.json file from System.DefaultWorkingDirectory'
+            inputs:
+              targetType: 'inline'
+              script: |
+                          cat $(System.DefaultWorkingDirectory)/keyvault.json
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: 'Replace tokens in Dockerfile'
+            inputs:
+              targetFiles: Dockerfile
+              tokenPrefix: '__'
+              tokenSuffix: '__'
+
+          - task: Docker@2
+            displayName: buildAndPush
+            inputs:
+              containerRegistry: mycareacr   #acr service connection
+              repository: $(acrrepo)
+              Dockerfile: Dockerfile
+              buildContext: .
+              tags: 'BlockchainApi-$(MYENV)-$(Build.BuildNumber)'
+
+          - task: Bash@3
+            displayName: echo Docker Image tag
+            inputs:
+              targetType: 'inline'
+              script: 'echo "Docker image ready for deployment is Blockchainapi-$(MYENV)-$(Build.BuildNumber)"'
+
+#####################  DEPLOYMENT To UAT AKS #####################
+
+- stage: 'UATDeploy'
+  displayName: 'Deploy to UAT AKS'
+  dependsOn: UATBuild
+  jobs: 
+    - deployment: deployaksuat
+      environment: UAT
+    - job: 'Deploy'
+      displayName: 'Deploy Job UAT'
+      pool:
+        vmImage: 'ubuntu-latest'
+      variables:
+        - name: image_tag
+          value: 'BlockchainApi-$(MYENV)-$(Build.BuildNumber)'
+        - group: Mycare-KV-UAT   #this group can be uncommented after creating the infra and adding values after connecting to the keyvault.
+        - group: BlockChainAPI-BuildandValidation-UAT
+        - group: Mycare-KV-UAT-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
+      
+      steps:
+          - task: qetza.replacetokens.replacetokens-task.replacetokens@3
+            displayName: 'Replace tokens in Deployment.yml'
+            inputs:
+              rootDirectory: '$(System.DefaultWorkingDirectory)'
+              targetFiles: Deployment.yml
+              escapeType: none
+              verbosity: detailed
+              tokenPrefix: '__'
+              tokenSuffix: '__'
+
+          - task: Kubernetes@1
+            displayName: 'kubectl apply'
+            inputs:
+              kubernetesServiceEndpoint: 'MyCare-EastUS-UAT-AKS-APP'
+              command: apply
+              useConfigurationFile: true
+              configuration: '$(System.DefaultWorkingDirectory)/Deployment.yml'
+              outputFormat: yaml
