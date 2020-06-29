@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: blockchainapi
-        image: mycaredev.azurecr.io/blockchainapi:latest
+        image: mycaredev.azurecr.io/mycareblockchainapisep:__image_tag__
         resources:
           requests:
             cpu: 100m
@@ -25,7 +25,15 @@ spec:
         ports:
         - containerPort: 4000
       imagePullSecrets:
-      - name: imagesecret-name
+      - name: regcred1
+      readinessProbe:
+         httpGet:
+          path: /public
+          port: 4000
+      livenessProbe:
+        httpGet:
+          path: /public
+          port: 4000
 ---
 apiVersion: v1
 kind: Service
@@ -37,3 +45,22 @@ spec:
   - port: 4000
   selector:
     app: blockchainapi
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels: 
+    app: blockchainapi
+  name: blockchainapi
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: blockchainapi
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
