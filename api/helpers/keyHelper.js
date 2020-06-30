@@ -1,6 +1,6 @@
 const appRoot = require('app-root-path');
 const fs = require('fs');
-const ursa = require('ursa');
+const ursa = require('ursa-optional');
 const nw = require('niceware');
 const uuid = require('uuid');
 const encryptor = require('file-encryptor');
