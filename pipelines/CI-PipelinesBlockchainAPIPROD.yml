@@ -110,7 +110,7 @@ stages:
           - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
             displayName: 'Prepare analysis on SonarCloud'
             inputs:
-              SonarCloud: $(sonarcloud)
+              SonarCloud: mynewSonarNW19
               organization: $(sonarorg)
               scannerMode: CLI
               configMode: manual
@@ -237,7 +237,7 @@ stages:
           - task: Docker@2
             displayName: buildAndPush
             inputs:
-              containerRegistry: $(containerRegistry)  #acr service connection
+              containerRegistry: mycareacr  #acr service connection
               repository: $(acrrepo)
               Dockerfile: Dockerfile
               buildContext: .
@@ -283,7 +283,7 @@ stages:
                 - task: Kubernetes@1
                   displayName: 'kubectl apply'
                   inputs:
-                    kubernetesServiceEndpoint: 'MyCare-EastUS-$(AKSENV)-AKS-APP'
+                    kubernetesServiceEndpoint: 'MyCare-EastUS-PROD-AKS-APP'
                     command: apply
                     useConfigurationFile: true
                     configuration: '$(System.DefaultWorkingDirectory)/Deployment.yml'
