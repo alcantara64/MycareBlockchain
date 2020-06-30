@@ -72,7 +72,7 @@
     "passport-jwt": "^4.0.0",
     "save": "^2.3.3",
     "truffle-hdwallet-provider": "^1.0.17",
-    "ursa": "^0.9.4",
+    "ursa-optional": "^0.10.1",
     "uuid": "^3.3.2",
     "web3": "1.0.0-beta.34",
     "winston": "^3.2.1"
