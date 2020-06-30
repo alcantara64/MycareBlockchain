@@ -6,6 +6,8 @@ COPY . .
 RUN npm install
 
 RUN npm install nodemon -g
-RUN npm run deploy:contracts
-
-CMD npm start --host 0.0.0.0
+RUN npm uninstall truffle
+RUN npm install truffle@5.0.5
+RUN npm install
+RUN npm run deploy:contracts:__MYENV__
+CMD npm run start-__MYENV__
