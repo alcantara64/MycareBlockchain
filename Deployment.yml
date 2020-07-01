@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
       - name: regcred1
       readinessProbe:
-         httpGet:
+        httpGet:
           path: /public
           port: 4000
         initialDelaySeconds: 300
