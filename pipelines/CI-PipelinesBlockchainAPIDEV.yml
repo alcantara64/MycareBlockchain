@@ -508,7 +508,7 @@ stages:
 
 - stage: 'UATDeploy'
   displayName: 'Deploy to UAT AKS'
-  dependsOn: UATBuild
+#  dependsOn: UATBuild
   jobs: 
     - deployment: deployaksuat
       environment: UAT
@@ -526,6 +526,13 @@ stages:
          deploy:
               
            steps:
+              - task: Bash@3
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    pwd
+                    
+                    ls -l
               - task: qetza.replacetokens.replacetokens-task.replacetokens@3
                 displayName: 'Replace tokens in Deployment.yml'
                 inputs:
