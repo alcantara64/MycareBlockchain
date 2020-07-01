@@ -508,13 +508,14 @@ stages:
 
 - stage: 'UATDeploy'
   displayName: 'Deploy to UAT AKS'
-#  dependsOn: UATBuild
+  dependsOn: UATBuild
   jobs: 
     - deployment: deployaksuat
       environment: UAT
       displayName: 'Deploy Job UAT'
       pool:
         vmImage: 'ubuntu-latest'
+        
       variables:
         - name: image_tag
           value: 'BlockchainApi-$(MYENV)-$(Build.BuildNumber)'
@@ -526,6 +527,7 @@ stages:
          deploy:
               
            steps:
+              - checkout: self
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
