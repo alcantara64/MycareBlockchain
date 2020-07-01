@@ -536,7 +536,7 @@ stages:
               - task: qetza.replacetokens.replacetokens-task.replacetokens@3
                 displayName: 'Replace tokens in Deployment.yml'
                 inputs:
-                  rootDirectory: '$(System.DefaultWorkingDirectory)'
+                  rootDirectory: '$(Build.SourcesDirectory)'
                   targetFiles: Deployment.yml
                   escapeType: none
                   verbosity: detailed
@@ -549,5 +549,5 @@ stages:
                   kubernetesServiceEndpoint: 'MyCare-EastUS-UAT-AKS-APP'
                   command: apply
                   useConfigurationFile: true
-                  configuration: '$(System.DefaultWorkingDirectory)/Deployment.yml'
+                  configuration: '$(Build.SourcesDirectory)/Deployment.yml'
                   outputFormat: yaml
