@@ -25,7 +25,7 @@ spec:
         ports:
         - containerPort: 4000
       imagePullSecrets:
-      - name: regcred1
+      - name: regcred
         readinessProbe:
           httpGet:
             path: /public
