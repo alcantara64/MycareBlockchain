@@ -317,7 +317,7 @@ stages:
                 npm install truffle@5.0.5
           - task: NodeTool@0
             inputs:
-              versionSpec: '10.x'
+              versionSpec: '8.x'
             displayName: 'Install Node.js'
           - task: Npm@1
             displayName: 'Install NPM Dependencies'
