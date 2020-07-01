@@ -24,18 +24,6 @@ spec:
             memory: 1Gi
         ports:
         - containerPort: 4000
-        readinessProbe:
-          httpGet:
-            path: /public
-            port: 4000
-          periodSeconds: 300
-          timeoutSeconds: 180
-        livenessProbe:
-          httpGet:
-            path: /public
-            port: 4000
-          periodSeconds: 300
-          timeoutSeconds: 180
       imagePullSecrets:
         - name: regcred1
 ---
