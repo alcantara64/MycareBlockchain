@@ -30,7 +30,7 @@ describe('KeyHelper', () => {
         ethereumHelper = {};
 
         const imports = {
-            'ursa': ursa,
+            'ursa-optional': ursa,
             'fs': fs,
             'uuid': uuid,
             'niceware': niceware,
