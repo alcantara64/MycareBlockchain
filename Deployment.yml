@@ -25,19 +25,7 @@ spec:
         ports:
         - containerPort: 4000
       imagePullSecrets:
-      - name: regcred1
-      readinessProbe:
-         httpGet:
-          path: /public
-          port: 4000
-        initialDelaySeconds: 300
-        periodSeconds: 180
-      livenessProbe:
-        httpGet:
-          path: /public
-          port: 4000
-        initialDelaySeconds: 300
-        periodSeconds: 180
+        - name: regcred1
 ---
 apiVersion: v1
 kind: Service
