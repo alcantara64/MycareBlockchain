@@ -14,6 +14,17 @@ stages:
         - group: Mycare-KV-PROD-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
 
       steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              displayName: 'Install truffle'
+              script: |
+                npm uninstall truffle
+                npm install truffle@5.0.5
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '8.x'
+            displayName: 'Install Node.js'
           - task: Npm@1
             displayName: 'Install NPM Dependencies'
             inputs:
@@ -91,7 +102,7 @@ stages:
                 #
                 #####
                 cd ${BASEDIR}
-                npm run deploy:contracts
+                npm run deploy:contracts:prod
 
           - task: Bash@3
             displayName: 'Test Contracts'
@@ -270,10 +281,12 @@ stages:
        runOnce:
           deploy:
             steps:
+                - checkout: self
+                - download: none
                 - task: qetza.replacetokens.replacetokens-task.replacetokens@3
                   displayName: 'Replace tokens in Deployment.yml'
                   inputs:
-                    rootDirectory: '$(System.DefaultWorkingDirectory)'
+                    rootDirectory: '$(Build.SourcesDirectory)'
                     targetFiles: Deployment.yml
                     escapeType: none
                     verbosity: detailed
@@ -281,10 +294,9 @@ stages:
                     tokenSuffix: '__'
 
                 - task: Kubernetes@1
-                  displayName: 'kubectl apply'
                   inputs:
+                    connectionType: 'Kubernetes Service Connection'
                     kubernetesServiceEndpoint: 'MyCare-EastUS-PROD-AKS-APP'
-                    command: apply
+                    command: 'apply'
                     useConfigurationFile: true
-                    configuration: '$(System.DefaultWorkingDirectory)/Deployment.yml'
-                    outputFormat: yaml
+                    configuration: '$(Build.SourcesDirectory)/Deployment.yml'
