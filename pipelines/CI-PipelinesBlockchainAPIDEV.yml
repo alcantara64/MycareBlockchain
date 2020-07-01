@@ -309,9 +309,15 @@ stages:
         - group: Mycare-KV-UAT-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
 
       steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                RUN npm uninstall truffle
+                RUN npm install truffle@5.0.5
           - task: NodeTool@0
             inputs:
-              versionSpec: '10.x'
+              versionSpec: '8.x'
             displayName: 'Install Node.js'
           - task: Npm@1
             displayName: 'Install NPM Dependencies'
