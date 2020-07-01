@@ -294,6 +294,7 @@ stages:
                     tokenSuffix: '__'
 
                 - task: Kubernetes@1
+                  displayName: 'kubectl apply'
                   inputs:
                     connectionType: 'Kubernetes Service Connection'
                     kubernetesServiceEndpoint: 'Mycare-EastUS-DEV'
@@ -563,6 +564,7 @@ stages:
                   tokenPrefix: '__'
                   tokenSuffix: '__'
               - task: Kubernetes@1
+                displayName: 'kubectl apply'
                 inputs:
                   connectionType: 'Kubernetes Service Connection'
                   kubernetesServiceEndpoint: 'MyCare-EastUS-UAT-AKS-APP'
