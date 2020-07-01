@@ -319,9 +319,9 @@ stages:
 
       steps:
           - task: Bash@3
+            displayName: 'Install truffle'
             inputs:
               targetType: 'inline'
-              displayName: 'Install truffle'
               script: |
                 npm uninstall truffle
                 npm install truffle@5.0.5
