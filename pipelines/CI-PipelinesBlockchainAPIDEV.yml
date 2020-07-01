@@ -90,7 +90,7 @@ stages:
                 #
                 #####
                 cd ${BASEDIR}
-                npm run deploy:contracts
+                npm run deploy:contracts:uat
 
           - task: Bash@3
             displayName: 'Test Contracts'
