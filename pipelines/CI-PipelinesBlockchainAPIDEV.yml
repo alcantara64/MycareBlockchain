@@ -313,8 +313,8 @@ stages:
             inputs:
               targetType: 'inline'
               script: |
-                RUN npm uninstall truffle
-                RUN npm install truffle@5.0.5
+                npm uninstall truffle
+                npm install truffle@5.0.5
           - task: NodeTool@0
             inputs:
               versionSpec: '8.x'
