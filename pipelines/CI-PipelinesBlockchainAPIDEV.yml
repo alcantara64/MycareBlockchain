@@ -17,7 +17,10 @@ stages:
             displayName: 'Install NPM Dependencies'
             inputs:
               verbose: true
-
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: 'echo node -v'
           - task: Bash@3
             displayName: 'Set Base Directory'
             inputs:
