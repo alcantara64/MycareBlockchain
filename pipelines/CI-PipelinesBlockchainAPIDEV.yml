@@ -542,6 +542,7 @@ stages:
               
            steps:
               - checkout: self
+              - download: none
               - task: Bash@3
                 inputs:
                   targetType: 'inline'
