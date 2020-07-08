@@ -117,19 +117,6 @@ stages:
                 cd ${BASEDIR}
                 npm run test:contracts:dev
 
-          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-            displayName: 'Prepare analysis on SonarCloud'
-            inputs:
-              SonarCloud: mynewSonarNW19
-              organization: $(sonarorg)
-              scannerMode: CLI
-              configMode: manual
-              cliProjectKey: $(sonarclikey)
-              cliProjectName: $(sonarprojectname)
-              cliSources: api
-              extraProperties: |
-                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
-                sonar.javascript.lcov.reportPaths=coverage/lcov.info
 
           - task: Bash@3
             displayName: 'Run API Tests'
@@ -167,6 +154,20 @@ stages:
                 echo DB_PORT=`grep DB_PORT profiles/dev.env`
                 echo BASEDIR=${BASEDIR} DB_PORT=${PORT}
                 npm run coverage
+          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+            displayName: 'Prepare analysis on SonarCloud'
+            inputs:
+              SonarCloud: mynewSonarNW19
+              organization: $(sonarorg)
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: $(sonarclikey)
+              cliProjectName: $(sonarprojectname)
+              cliSources: api
+              extraProperties: |
+                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info
+
           - task: PublishTestResults@2
             displayName: 'Publish Test Results **/test-*.xml'
             inputs:
