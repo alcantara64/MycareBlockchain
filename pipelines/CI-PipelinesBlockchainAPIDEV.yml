@@ -169,7 +169,6 @@ stages:
               cliProjectKey: $(sonarclikey)
               cliProjectName: $(sonarprojectname)
               cliSources: api
-              #cliSources: '$(System.DefaultWorkingDirectory)'
               extraProperties: |
                 sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
                 sonar.javascript.lcov.reportPaths=coverage/lcov.info  
