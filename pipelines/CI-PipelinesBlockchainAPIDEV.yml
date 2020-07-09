@@ -168,7 +168,7 @@ stages:
               configMode: manual
               cliProjectKey: $(sonarclikey)
               cliProjectName: $(sonarprojectname)
-              cliSources: api
+              cliSources: $(Build.SourcesDirectory)/api
               extraProperties: |
                 sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
                 sonar.javascript.lcov.reportPaths=coverage/lcov.info  
