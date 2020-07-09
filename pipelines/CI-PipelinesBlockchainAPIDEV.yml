@@ -13,6 +13,10 @@ stages:
         - group: BlockChainAPI-BuildandValidation-DEV 
         - group: Mycare-KV-DEV-Values #this VG has all the secrets parameterized to the kV values similar to MycareAPI. All the values are already on the KV, so just added all the values to the Mycare-KV-Dev and this variable group will be used in the diff environments.
       steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '8.x'
+            displayName: 'Install Node.js'
           - task: Bash@3
             displayName: 'Install truffle'
             inputs:
@@ -20,10 +24,6 @@ stages:
               script: |
                 npm uninstall truffle
                 npm install truffle@5.0.5
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '8.x'
-            displayName: 'Install Node.js'
           - task: Npm@1
             displayName: 'Install NPM Dependencies'
             inputs:
@@ -117,19 +117,6 @@ stages:
                 cd ${BASEDIR}
                 npm run test:contracts:dev
 
-          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
-            displayName: 'Prepare analysis on SonarCloud'
-            inputs:
-              SonarCloud: mynewSonarNW19
-              organization: $(sonarorg)
-              scannerMode: CLI
-              configMode: manual
-              cliProjectKey: $(sonarclikey)
-              cliProjectName: $(sonarprojectname)
-              cliSources: api
-              extraProperties: |
-                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
-                sonar.javascript.lcov.reportPaths=coverage/lcov.info
 
           - task: Bash@3
             displayName: 'Run API Tests'
@@ -167,10 +154,26 @@ stages:
                 echo DB_PORT=`grep DB_PORT profiles/dev.env`
                 echo BASEDIR=${BASEDIR} DB_PORT=${PORT}
                 npm run coverage
+
           - task: PublishTestResults@2
             displayName: 'Publish Test Results **/test-*.xml'
             inputs:
-              testResultsFiles: '**/test-*.xml'      
+              testResultsFiles: '**/test-*.xml'    
+          - task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+            displayName: 'Prepare analysis on SonarCloud'
+            inputs:
+              SonarCloud: mynewSonarNW19
+              organization: $(sonarorg)
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: $(sonarclikey)
+              cliProjectName: $(sonarprojectname)
+              cliSources: api
+              extraProperties: |
+                sonar.exclusions=bower_components/**/*, node_modules/**/*, **/*test*/**, migrations/*, api/models/*
+                sonar.javascript.lcov.reportPaths=coverage/lcov.info  
+
+          
           - task: SonarSource.sonarcloud.ce096e50-6155-4de8-8800-4221aaeed4a1.SonarCloudAnalyze@1
             displayName: 'Run Code Analysis'
 
