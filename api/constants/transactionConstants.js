@@ -1,7 +1,7 @@
 const variance = 100000;
 
 function computeGasLimit(limit) {
-    return limit + variance;
+    return 0; //limit + variance;
 }
 
 exports.GAS_LIMIT = {
