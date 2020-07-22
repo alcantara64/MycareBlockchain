@@ -305,6 +305,7 @@ stages:
 #################### TEST Environment ##################
 - stage: TESTBuildAndTest
   displayName: 'Build and Test pipeline TEST'
+  dependsOn: DEVDeploy
   jobs: 
     - job: 'Build'
       displayName: 'Build job TEST'
@@ -609,7 +610,7 @@ stages:
 
 - stage: BuildAndTestUAT
   displayName: 'Build and Test pipeline UAT'
-  dependsOn: DEVDeploy
+  dependsOn: TESTDeploy
   jobs: 
     - job: 'Build'
       displayName: 'Build job UAT'
