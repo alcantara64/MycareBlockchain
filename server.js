@@ -32,7 +32,6 @@ envHelper.initialize()
 
         // load application insight
         require(`${appRoot}/config/appInsight`);
-
         const port = envConstants.PORT || 4000;
         const mycareRoute = require(`${appRoot}/api/routes/mycareRoute`);
         const sharedAccessRoute = require(`${appRoot}/api/routes/sharedAccessRoute`);
