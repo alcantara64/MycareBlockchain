@@ -1,7 +1,6 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
 const rpcEndpoint = process.env.RPC_ENDPOINT;
-const mainNetId = process.env.NETWORK_ID;
 module.exports = {
     networks: {
         development: {
@@ -11,7 +10,7 @@ module.exports = {
         },
         mainnet: {
             provider: new HDWalletProvider(process.env.ACCOUNT_PRIVATE_KEY, rpcEndpoint),
-            network_id: mainNetId,
+            network_id: '*',
             gasPrice: 0,
             from: process.env.ACCOUNT_ADDRESS
         }

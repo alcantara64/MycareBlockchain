@@ -4,15 +4,15 @@ const fs = require('fs');
 const Ethereumjs = require('ethereumjs-tx');
 const events = require('events');
 const azureStorageHelper = require(`${appRoot}/api/helpers/azureStorageHelper`);
-const axios = require('axios');
 const logger = require(`${appRoot}/config/winston`);
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 
 const envConstants = envHelper.getConstants();
 
 const buildDir = `${appRoot}/build/contracts`;
+const rpcEndpoint = envConstants.RPC_ENDPOINT;
 
-const web3 = new Web3(new Web3.providers.HttpProvider(envConstants.RPC_ENDPOINT));
+const web3 = new Web3(new Web3.providers.HttpProvider(rpcEndpoint));
 
 const accountAddress = envConstants.ACCOUNT_ADDRESS;
 const privateKey = Buffer.from(envConstants.ACCOUNT_PRIVATE_KEY, 'hex');
@@ -114,32 +114,8 @@ function ContractHelper(contractName) {
     this._contract = getContractInstance(contractName);
 }
 
-/**
- * @description calls parity_nextNonce api. The returned value gives the next available nonce
- * for a transaction taking all pending transactions into consideration.
- * This is meant to be an rpc call, see more here `https://wiki.parity.io/JSONRPC-parity-module#parity_nextnonce`
- * Note that is is only available if connection is established to a parity node.
- * This means this call wont work if connecton is establlished to a geth node
- */
-async function getTransactionCount() {
-    const response = await axios({
-        method: 'post',
-        url: envConstants.RPC_ENDPOINT,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: {
-            method: 'parity_nextNonce',
-            params: [accountAddress],
-            id: 1, // https://ethereum.stackexchange.com/questions/50647/json-rpc-api-id
-            jsonrpc: '2.0'
-        }
-    });
-    return Number(response.data.result);
-}
-
 exports.sendSignedTransaction = async function (data, gasLimit, contractAddress) {
-    const nonce = await getTransactionCount();
+    const nonce = await web3.eth.getTransactionCount(accountAddress);
     logger.info(`Transaction Number: ${nonce}`);
 
     const rawTx = {
