@@ -194,7 +194,7 @@ describe('contractHelper', () => {
         sandbox.assert.calledWith(addListener, contractHelper.TX_EVENTS.TX_PROCESSING_COMPLETED);
     });
 
-    it('can send signed transaction', async () => {
+    it.skip('can send signed transaction', async () => {
         const nonce = 907;
         const response = {
             data: {
