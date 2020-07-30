@@ -16,19 +16,21 @@ const dotenv = require('dotenv').config({ path: configPath });
 
 const envHelper = require(`${appRoot}/api/helpers/envHelper`);
 const logger = require(`${appRoot}/config/winston`);
+const emailHelper = require('./api/helpers/emailHelper');
 
 if (dotenv.error) {
     throw dotenv.error;
 }
 
 const app = express();
+let envConstants = null;
 
 logger.info('Initializing env constants and secrets...');
 envHelper.initialize()
     .then(async function envHelperInitilised() {
         logger.info('env constants and secrets initialised successfully');
 
-        const envConstants = envHelper.getConstants();
+        envConstants = envHelper.getConstants();
 
         // load application insight
         require(`${appRoot}/config/appInsight`);
@@ -70,5 +72,8 @@ envHelper.initialize()
 
         app.listen(port);
     }).catch(err => console.error(err));
-
+process.on('uncaughtException', (exception) => {
+    logger.info(`Unhandle exception occured ${exception}`);
+    emailHelper.sendMail(envConstants.ADMIN_EMAIL, 'Fatal Error on the blockchain', 'fatalError', { errorMessage: exception });
+});
 module.exports = app;
