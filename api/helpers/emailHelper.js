@@ -21,7 +21,7 @@ exports.sendMail = function sendEmail(to, subject, templateName, templateVariabl
     return new Promise((resolve, reject) => {
         nodemailer.createTestAccount((err, account) => {
             if (err) {
-                reject('error occured creating test account');
+                reject('error occurred creating test account');
             }
 
             const transporter = nodemailer.createTransport({
